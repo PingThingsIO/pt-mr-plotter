@@ -983,7 +983,8 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .attr("class", "legend_box")
 
 
-            var legend_first = legend_item.append("text")
+/*            
+	    var legend_first = legend_item.append("text")
                 .attr("font-size", "12px")
                 .attr("class", function () { return "legend_item legendcolor-" + legend_array[0].uuid; })
                 .attr("text-anchor", "end")
@@ -994,6 +995,24 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
                         };
                      })())
                 .text( function () { return legend_array[0].Path + " —"; } );
+*/
+
+// Edit to make the em dash bold as per Bob's request. By Gabriel Gaona
+            var legend_first = legend_item.append("text")
+                .attr("font-size", "12px")
+                .attr("class", function () { return "legend_item legendcolor-" + legend_array[0].uuid; })
+                .attr("fill", self.idata.streamSettings[legend_array[0].uuid].color)
+                .attr("transform", (function () {
+                        return function () {
+                            return "translate(" + 0 + ", " + ( 0 ) + ")rotate(0)";
+                        };
+                     })())
+                .text( function () { return legend_array[0].Path; } )
+		.append("tspan")
+		.attr("font-size", "12px")
+		.attr("fill", self.idata.streamSettings[legend_array[0].uuid].color)
+		.attr("font-weight", "bold")
+		.text(" —");
 
         // console.log(legend_item);
 
