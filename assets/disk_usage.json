@@ -3,12 +3,17 @@
     {
       "mount": "/dev/sda1", 
       "spacetotal": "140207016", 
-      "spaceavail": "126137896"
+      "spaceavail": "127243216"
     }, 
     {
       "mount": "/dev/sdb1", 
-      "spacetotal": "0", 
-      "spaceavail": "0"
+      "spacetotal": "1824128064", 
+      "spaceavail": "1798727392"
+    }, 
+    {
+      "mount": "//172.17.6.247/PSL_Fileserver", 
+      "spacetotal": "4216189948", 
+      "spaceavail": "1979974312"
     }
   ]
 }
