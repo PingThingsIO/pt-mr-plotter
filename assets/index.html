@@ -19,14 +19,17 @@
     </div>
     <div class="navbar-collapse collapse" style='height: 50px;'>
 
-      <ul class="nav navbar-nav">
-          <li>
+      <ul class="nav navbar-nav" style="height:50px;">
+          <li style="margin:15px;">
+<!--
             <a href="http://micro-pmu.com/first_steps" target="_blank" data-localize='help'>Help</a>
+-->
+            <button type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>Refer to the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%207.pdf' target='_blank'>First Steps</a> manual for information on the basic MicroPMU setup and using the MicroPMU Plotter interface.</p><p>Refer to the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%209.pdf' target='_blank'>Administrator</a> manual for information on managing the Quick Start Kit server and MicroPMU data.</p><p>For additional assistance, contact <a href='#'>PSL support</a>.</p>">Help</button>
           </li>
       </ul>
-      <ul class="nav navbar-nav">
+      <ul class="nav navbar-nav" style="height:50px;">
           <li>
-                <select id='language-picker' onchange="updateLanguage(this.value)" style='margin: 15px;'>
+                <select id='language-picker' onchange="updateLanguage(this.value)" style='margin: 18px;'>
                     <option value='en'>English</option>
                     <!-- <option value='es'>Español</option> //-->
                     <option value='fr'>Français</option> <!--
@@ -206,6 +209,11 @@
             <script src="mr-plotter/js/control.js"></script>
             <script src="mr-plotter/js/cursors.js"></script>
             <script src="mr-plotter/js/requester.js"></script>
+            <script>
+                $(function () {
+                    $('[data-toggle="popover"]').popover();
+                });
+            </script>
             <script>
                 $(function () {
                         var plotterelem = document.getElementById("plotter");
