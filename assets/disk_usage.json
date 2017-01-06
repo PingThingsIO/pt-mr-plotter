@@ -3,17 +3,30 @@
     {
       "mount": "/dev/sda1", 
       "spacetotal": "140207016", 
+<<<<<<< HEAD
       "spaceavail": "126523724"
     }, 
     {
       "mount": "/dev/sdb1", 
       "spacetotal": "1824128064", 
       "spaceavail": "1745539424"
+=======
+      "spaceavail": "123570060"
+    }, 
+    {
+      "mount": "/dev/sdb1", 
+      "spacetotal": "2000152064", 
+      "spaceavail": "219160384"
+>>>>>>> psl-modify-csv
     }, 
     {
       "mount": "//172.17.6.247/PSL_Fileserver", 
       "spacetotal": "4216189948", 
+<<<<<<< HEAD
       "spaceavail": "1973791472"
+=======
+      "spaceavail": "1974011512"
+>>>>>>> psl-modify-csv
     }
   ]
 }
