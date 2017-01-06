@@ -847,6 +847,7 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 
 	var csvJSON []byte
 	csvJSON, err = json.Marshal(&jsonCSVReq)
+	fmt.Printf("forwarded json: %s\n",string(csvJSON))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("Could not forward request: %v", err)))

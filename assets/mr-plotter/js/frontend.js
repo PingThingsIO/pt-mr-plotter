@@ -465,13 +465,13 @@ function buildCSVMenu(self) {
                 m1.nextSibling.nextSibling.innerHTML = statusString;
             };
 
-        pwselector.value = self.idata.oldData[streams[0].uuid][2];
-        pwselectbox.value = self.idata.oldData[streams[0].uuid][2];
-        pwselector.onchange();
+        //pwselector.value = self.idata.oldData[streams[0].uuid][2];
+        //pwselectbox.value = self.idata.oldData[streams[0].uuid][2];
+        //pwselector.onchange();
         pwselectbox.onchange();
 
         submitButton.onclick = function () {
-                createCSVDownload(self, streams, settingsObj, domain, widthlists[parseInt(pwselector.value)], graphExport);
+                createCSVDownload(self, streams, settingsObj, domain, widthlists[parseInt(pwselectbox.value)], graphExport);
             };
     } else {
         $(pwselector).css("display", "none");
