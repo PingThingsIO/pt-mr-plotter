@@ -91,22 +91,6 @@
                 console.log("language changed to" + " " + l);
             };
 
-            $( document ).ready(function() {
-                $( "div#all_scale" ).click(function() {
-                    $('div[class^="autoscalebutton"]').click()
-                    // $( ".autoscalebutton" ).click();
-                    // console.log("autoscale!");
-                });
-
-            $( "div#all_scale1" ).click(function() {
-                    $('div[class^="autoscalebutton"]').click()
-                    // $( ".autoscalebutton" ).click();
-                    // console.log("autoscale!");
-                });
-
-
-            });
-
 
             function copyToClipboard(elementId) {
 
@@ -207,9 +191,21 @@
             <script src="mr-plotter/js/cursors.js"></script>
             <script src="mr-plotter/js/requester.js"></script>
             <script>
-                $(function () {
-                    $('[data-toggle="popover"]').popover();
+              $(document).ready(function () {
+                $('[data-toggle="popover"]').popover();
+                $( "div#all_scale" ).click(function() {
+                  $('div[class^="autoscalebutton"]').click()
+                  // $( ".autoscalebutton" ).click();
+                  // console.log("autoscale!");
                 });
+
+                $( "div#all_scale1" ).click(function() {
+                  $('div[class^="autoscalebutton"]').click()
+                    // $( ".autoscalebutton" ).click();
+                    // console.log("autoscale!");
+                });
+              });
+
             </script>
             <script>
                 $(function () {
