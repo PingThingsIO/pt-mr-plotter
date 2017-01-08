@@ -79,7 +79,19 @@
                   e.style.visibility = 'visible';
                   }
             };
-
+            function changeResolutionFreq() {
+              var freq = $('input[name=frequency]:checked').val();
+              if (freq) createCookie('frequency', freq, 365);
+              if (freq == '60') {
+                $('#half-cycle-resolution').val(0);
+                $('#full-cycle-resolution').val(2);
+              }
+              else if (freq == '50') {
+                $('#half-cycle-resolution').val(1);
+                $('#full-cycle-resolution').val(3);
+              }
+              updateInput($('.resolutions').val());
+            };
             function updateInput(p){
                 // $("#resolutions").val(p);
                 document.getElementById("resolutions").value = p;
@@ -114,6 +126,31 @@
 
                 }
 
+                function createCookie(name,value,days) {
+                    if (days) {
+                        var date = new Date();
+                        date.setTime(date.getTime() + (days*24*60*60*1000));
+                        var expires = "; expires=" + date.toUTCString();
+                    }
+                    else var expires = "";
+                    document.cookie = name + "=" + value + expires + "; path=/";
+                }
+
+                function readCookie(name) {
+                    var nameEQ = name + "=";
+                    var ca = document.cookie.split(';');
+                    for(var i=0;i < ca.length;i++) {
+                        var c = ca[i];
+                        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+                    }
+                    return null;
+                }
+
+                function eraseCookie(name) {
+                    createCookie(name,"",-1);
+                }
+                //http://stackoverflow.com/a/4825695
         //-->
 
 
@@ -193,6 +230,7 @@
             <script>
               $(document).ready(function () {
                 $('[data-toggle="popover"]').popover();
+
                 $( "div#all_scale" ).click(function() {
                   $('div[class^="autoscalebutton"]').click()
                   // $( ".autoscalebutton" ).click();
@@ -208,13 +246,23 @@
 
             </script>
             <script>
-                $(function () {
-                        var plotterelem = document.getElementById("plotter");
-                        plotterelem.innerHTML = ""; // Remove "Loading..." text
+              $(function () {
+                var plotterelem = document.getElementById("plotter");
+                plotterelem.innerHTML = ""; // Remove "Loading..." text
 
+                mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
 
-                        mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
-                    });
+                //set default frequency from cookie
+                var defaultFreq = readCookie('frequency');
+
+                if (!defaultFreq) {
+                  defaultFreq = 60;
+                  createCookie('frequency', defaultFreq, 365);
+                }
+
+                var freqOpt = $('#freq-'+defaultFreq+'hz');
+                if (freqOpt) freqOpt.click();
+              });
 
                 $.getJSON( "disk_usage.json", function( data_usage ) {
                   var items = [];
@@ -586,22 +634,24 @@
                                                         <h4>Export to CSV File</h4>
 
                                                         <div class="csv-pointwidth">
+                                                          <p>
+                                                            Data frequency:<br>
+                                                            <input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();"> 50Hz</input><br>
+                                                            <input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();"> 60Hz</input>
+                                                          </p>
+                                                          Time per row in your CSV file:
+                                                          <select class="resolutions" oninput="updateInput(this.value)" onchange="updateInput(this.value)">
+                                                            <option id="half-cycle-resolution">1/2 cycle</option>
+                                                            <option id="full-cycle-resolution">1 cycle</option>
+                                                            <option value="4">1 second</option>
+                                                            <option value="5">1 minute</option>
+                                                            <option value="6">5 minutes</option>
+                                                            <option selected="selected" value="7">30 minutes</option>
+                                                            <option value="8">1 hour</option>
+                                                            <option value="9">1 day</option>
+                                                          </select>
 
-                                                        Time per row in your CSV file:
-                                                        <select class="resolutions" oninput="updateInput(this.value)" onchange="updateInput(this.value)">
-                                                          <option value="0">1/2 60Hz cycle (8333333 ns)</option>
-                                                          <option value="1">1/2 50hz cycle (10000000 ns)</option>
-                                                          <option value="2">1 60Hz cycle (16666666 ns)</option>
-                                                          <option value="3">1 50Hz cycle (20000000 ns)</option>
-                                                          <option value="4">1 second</option>
-                                                          <option value="5">1 minute</option>
-                                                          <option value="6">5 minutes</option>
-                                                          <option selected="selected" value="7">30 minutes</option>
-                                                          <option value="8">1 hour</option>
-                                                          <option value="9">1 day</option>
-                                                        </select>
-
-                                                        <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector"/>
+                                                        <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
                                                             <div class="selected-windowwidth"></div>
                                                             <div class="selected-window-desc"></div>
                                                         </div>
