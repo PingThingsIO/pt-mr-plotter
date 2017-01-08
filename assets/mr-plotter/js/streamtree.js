@@ -91,10 +91,10 @@ function updateStreamList(self) {
                 streamTree.checkbox_select_node(node);
 
                 // ONLY AUTOSCALE ALL CLICK IF 1ST STREAM SELECTED
-                if ( self.idata.counter == 0 ) {
+//                if ( self.idata.counter == 0 ) {
                     setTimeout( function() { $( ".showAll" ).click(); }, 500);
                     self.idata.counter += 1;
-                };
+//                }
 
             }
             return false;
