@@ -264,13 +264,11 @@ function initPlot(self) {
         .text("End Time")
       .node();
 
-
     var xlegendcover = chart.append("g")
         .attr("class", "x-legend-cover")
         .attr("id", "legend-container")
         .attr("style", "display: block;")
-        .attr("style", "visibility: visible;")
-        .attr("transform", "translate(" + (self.idata.margin.left + self.idata.WIDTH + 40 ) + ", 50)");
+        .attr("style", "visibility: visible;");
 
     self.idata.xLegend = xlegendcover.append("g")
         .attr("text-anchor", "end")
@@ -970,12 +968,6 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
 
     if (legend_array.length == 1) {
 
-        // ADDED IN CASE USER WANTS TO ALWAYS DEFAULT FIRST STREAM TO HAVE LEGEND ENABLED
-        var e = document.getElementById("legend-container");
-        if( e.style.display == 'none' ) {
-          $("#legend_toggler").html( "Hide Legend" );
-          e.style.display = 'block';
-          }
 
 
         legend_item = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
@@ -1000,16 +992,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
 
         // console.log(legend_item);
 
-    } else if (legend_array.length == 0) {
-
-        // BASE CASE IF USER DESELECTS ALL STREAMS TO REMOVE LEGEND BOX
-        var e = document.getElementById("legend-container");
-        if( e.style.display == 'block' ) {
-          $("#legend_toggler").html( "Show Legend" );
-          e.style.display = 'none';
-          }
-
-    } else {
+    }  else {
 
 
         legend_item = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
@@ -1057,6 +1040,9 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
     .attr("width", lb_width + 40 ) // Move 1 to the left and increase width by 2 to cover boundaries when zooming
     .attr("transform", "translate(" + ( -lb_width -20 ) + ", " + -30 + ")")
     .attr("height", lb_height + 35 );
+    var legendLeft = lb_width + 40 + self.idata.margin.left + self.idata.WIDTH + self.idata.margin.right;
+    var legend_container = d3.select(self.find("#legend-container")).
+      attr('transform', 'translate('+legendLeft+', 50)');
 
 
 

@@ -270,12 +270,15 @@ function getSelectedTimezone(self) {
 
 function createPlotDownload(self) {
     var chartElem = self.find(".chart");
+    var legend = self.find("#legend-container");
     var chartData = chartElem.innerHTML.replace(/[\d.]+em/g, function (match) {
             return (parseFloat(match.slice(0, match.length - 2)) * 16) + "px";
         });
     var chartData = chartData.replace(">\n</tspan>", " font-color=\"white\"></tspan>"); // So it renders correctly in Inkview
     var graphStyle = self.find(".plotStyles").innerHTML;
-    var xmlData = '<svg xmlns="http://www.w3.org/2000/svg" width="' + chartElem.getAttribute("width") + '" height="' + chartElem.getAttribute("height") + '" font-family="serif" font-size="16px">'
+    var plotWidth = chartElem.getAttribute("width") + legend.getAttribute("width");
+    var plotHeight = Math.max(chartElem.getAttribute("height"), legend.getAttribute("height") + 100);
+    var xmlData = '<svg xmlns="http://www.w3.org/2000/svg" width="' + plotWidth + '" height="' + plotHeight + '" font-family="serif" font-size="16px">'
         + '<defs><style type="text/css"><![CDATA[' + graphStyle + ']]></style></defs>' + chartData + '</svg>';
     var downloadAnchor = document.createElement("a");
     downloadAnchor.innerHTML = "Download Image (created " + (new Date()).toLocaleString() + ", local time)";
