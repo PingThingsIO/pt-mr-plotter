@@ -21,7 +21,7 @@
 
       <ul class="nav navbar-nav" style="height:50px;">
           <li style="margin:15px;">
-            <button type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>Refer to the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%207.pdf' target='_blank'>First Steps</a> manual for information on the basic MicroPMU setup and using the MicroPMU Plotter interface.</p><p>Refer to the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%209.pdf' target='_blank'>Administrator</a> manual for information on managing the Quick Start Kit server and MicroPMU data.</p><p>For additional assistance, contact PSL support.</p><ul><li>Office: 1-510-522-4400</li><li>Fax: 1-510-522-4455</li><li>Email: support@powersensorsltd.com</li></ul>">Help</button>
+              <button type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>Refer to the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%207.pdf' target='_blank'>First Steps</a> manual for information on the basic MicroPMU setup and using the MicroPMU Plotter interface.</p><p>Refer to the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%209.pdf' target='_blank'>Administrator</a> manual for information on managing the Quick Start Kit server and MicroPMU data.</p><p>For additional assistance, contact PSL support.</p><ul><li>Office: 1-510-522-4400</li><li>Fax: 1-510-522-4455</li><li>Email: <a href='mailto:support@powerstandards.com' target='_top'>support@powersensorsltd.com</a></li></ul>">Help</button>
           </li>
       </ul>
       <ul class="nav navbar-nav" style="height:50px;">
@@ -495,6 +495,7 @@
                                         stroke: black;
                                         shape-rendering: crispEdges;
                                     }
+                                    /*
                                     text.title {
                                         font-size: 20px;
                                     }
@@ -509,6 +510,16 @@
                                     }
                                     g.data-density-axis text {
                                         font-size: 14px;
+                                    }
+                                    */
+                                    svg * {
+                                        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                                        font-size: 14px;
+                                        font-weight: normal;
+                                    }
+                                    text.label {
+                                        font-size: 14px;
+                                        font-weight: normal;
                                     }
                                     rect.clickscreen {
                                         pointer-events: visibleFill;
