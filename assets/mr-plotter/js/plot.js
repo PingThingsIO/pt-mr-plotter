@@ -42,6 +42,15 @@ function init_plot(self) {
 
     // Selection of the element to display progress is in self.idat
     self.idata.$loadingElem = $(self.find('.plotLoading'));
+    self.idata.$errorMessage = $(self.find('#err-message'));
+    self.idata.$errorAlert = $(self.find('#err-alert'));
+    self.idata.alert = function (message) {
+      if (message) {
+        self.idata.$errorMessage.html(message);
+        self.idata.$errorAlert.show();
+        self.idata.$loadingElem.html("");
+      }
+    };
 
     // Parameters of the last update
     self.idata.oldStartDate = undefined;
@@ -689,14 +698,15 @@ function applySettings(self, loadData, overrideAutomaticAxisUpdate) {
 function drawPlot(self) {
     // Get the time range we are going to plot
     var $loadingElem = self.idata.$loadingElem;
+
     $loadingElem.html("Verifying date range...");
     var startText = self.find(".startdate").value;
     var endText = self.find(".enddate").value;
     if (startText == "") {
-        $loadingElem.html("Error: Start date is not selected.");
+        self.idata.alert("Start date is not selected.");
         return;
     } else if (endText == "") {
-        $loadingElem.html("Error: End date is not selected.");
+        self.idata.alert("End date is not selected.");
         return;
     }
     var selectedTimezone = s3ui.getSelectedTimezone(self);
@@ -720,11 +730,11 @@ function drawPlot(self) {
         // startDate and endDate are in UTC
     } catch (err) {
         // Be careful, err may contain the user-entered timezone, which may contain a <script>.
-        $loadingElem.html(s3ui.escapeHTMLEntities(err.message));
+        self.idata.alert(s3ui.escapeHTMLEntities(err.message));
         return;
     }
     if (startDate >= endDate) {
-        $loadingElem.html("Error: Selected date range is invalid.");
+        self.idata.alert("Selected date range is invalid.");
         return;
     }
 
@@ -735,7 +745,7 @@ function drawPlot(self) {
     $loadingElem.html("Verifying stream selection...");
     var numstreams = self.idata.selectedStreams.length;
     if (numstreams == 0) {
-        $loadingElem.html("Error: No streams are selected.");
+        self.idata.alert("No streams are selected.");
         return;
     }
 
@@ -1139,11 +1149,12 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
    paticular new streams are not added and old ones not removed (DRAWFAST tells it to optimize for scrolling).
 */
 function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxisArray, axisData, $loadingElem, drawFast) {
+  self.idata.$errorAlert.hide();
     if (!drawFast && (streams.length == 0 || yAxisArray.length == 0)) {
         if (streams.length == 0) {
-            $loadingElem.html("Error: No streams are selected.");
+          $loadingElem.html("No streams are selected.");
         } else {
-            $loadingElem.html("Error: All selected streams have no data.");
+            self.idata.alert("All selected streams have no data.");
         }
         self.$("g.chartarea > g").remove();
         return;

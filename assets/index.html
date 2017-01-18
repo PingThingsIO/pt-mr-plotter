@@ -284,7 +284,7 @@
                   $(".prgbar").width( 100 - (space_remaining).toFixed(2)*100 +"%");
                   // $(".prgbar").width( (100) +"%");
                   $(".prgtext").html( (100 - (space_remaining).toFixed(3)*100).toString().substring(0,5) +"% <span data-localize='space_used'>used</span> ( " + bytesToSize(space_total - space_available) + " of " + bytesToSize(space_total) + " )" );
-
+$('#err-alert').hide();
                 });
 
             </script>
@@ -456,6 +456,12 @@
             <td width="80%">
                 <div class="container-fluid">
                     <div class="row">
+
+
+<div id="err-alert" class="alert alert-danger alert-dismissible" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <strong>Error!</strong> <span id="err-message"></span>
+</div>
                         <div class="col-md-12" id='chartDiv' style=''>
                             <div class="well chartContainer" id="chart_interface">
                                 <!-- THE ACTUAL CHART -->

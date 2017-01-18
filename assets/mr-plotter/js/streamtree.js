@@ -91,9 +91,9 @@ function updateStreamList(self) {
                 streamTree.checkbox_select_node(node);
 
                 // ONLY AUTOSCALE ALL CLICK IF 1ST STREAM SELECTED
-                if ( self.idata.counter == 0 ) {
+                console.log(self.idata.counter);
+                if ( self.idata.counter == 1 ) {
                     setTimeout( function() { $( ".showAll" ).click(); }, 500);
-                    self.idata.counter += 1;
                 }
 
             }
@@ -195,9 +195,8 @@ function makeSelectHandler(self, streamTree, selectAllChildren) {
                     if (node.children.length == 0) {
                         streamTree.old_select_node(node, suppress_event, prevent_open); // if it's a leaf, select it
 
-                        if ( self.idata.counter == 0 ) {
+                        if ( self.idata.counter == 1 ) {
                             setTimeout( function() { $( ".showAll" ).click(); }, 500);
-                            self.idata.counter += 1;
                         };
 
                     } else {
@@ -268,11 +267,11 @@ function pathsToTree(self, sourceName, streamList) {
                         childNode.data.streamdata = initiallySelectedStreams[sourceName][path];
                         initiallySelectedStreams[sourceName].count--;
                         if (initiallySelectedStreams[sourceName].count == 0) {
-                            self.idata.counter += 1;
+//                            self.idata.counter += 1;
                             // console.log(initiallySelectedStreams[sourceName][path]);
                             delete initiallySelectedStreams[sourceName];
                         } else {
-                            self.idata.counter += 1;
+//                            self.idata.counter += 1;
                             // console.log(initiallySelectedStreams[sourceName][path]);
                             delete initiallySelectedStreams[sourceName][path];
                         }
@@ -348,6 +347,7 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
         return result;
     } else if (node.data.selected != select) {
         node.data.selected = select;
+        self.idata.counter += select ? 1:-1;
         if (node.data.streamdata == undefined) {
             self.idata.pendingStreamRequests += 1;
             self.requester.makeMetadataRequest('select * where Metadata/SourceName = "' + node.data.sourceName + '" and Path = "' + node.data.path + '";', function (data) {
