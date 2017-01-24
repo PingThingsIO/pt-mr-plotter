@@ -290,6 +290,10 @@ function createPlotDownload(self) {
     var linkLocation = self.find(".download-graph");
     linkLocation.innerHTML = ""; // Clear what was there before...
     linkLocation.insertBefore(downloadAnchor, null); // ... and replace it with this download link
+    //downloadAnchor.click();
+    if (!('download' in downloadAnchor)) {
+        console.log("No download attribute");
+    }
 }
 
 function createPermalink(self, return_raw_document) {

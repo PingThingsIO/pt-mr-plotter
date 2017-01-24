@@ -91,7 +91,7 @@ function updateStreamList(self) {
                 streamTree.checkbox_select_node(node);
 
                 // ONLY AUTOSCALE ALL CLICK IF 1ST STREAM SELECTED
-                console.log(self.idata.counter);
+
                 if ( self.idata.counter == 1 ) {
                     setTimeout( function() { $( ".showAll" ).click(); }, 500);
                 }
