@@ -82,7 +82,8 @@ function updateStreamList(self) {
             s3ui.applySettings(self, false);
         });
 
-    streamTreeDiv.on("click", ".jstree-checkbox", function (event) {
+  streamTreeDiv.on("click", ".jstree-checkbox", function (event) {
+    var selectedBefore = self.idata.counter;
             var id = event.target.parentNode.parentNode.getAttribute("id");
             var node = streamTree.get_node(id);
             if (streamTree.is_selected(node)) {
@@ -90,9 +91,8 @@ function updateStreamList(self) {
             } else {
                 streamTree.checkbox_select_node(node);
 
-                // ONLY AUTOSCALE ALL CLICK IF 1ST STREAM SELECTED
-
-                if ( self.idata.counter == 1 ) {
+              // ONLY AUTOSCALE ALL CLICK IF 1ST STREAM SELECTED
+                if (!selectedBefore && self.idata.counter > 0 ) {
                     setTimeout( function() { $( ".showAll" ).click(); }, 500);
                 }
 
