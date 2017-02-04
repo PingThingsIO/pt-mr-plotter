@@ -267,7 +267,22 @@ function ensureData(self, uuid, pointwidthexp, startTime, endTime, callback, cac
                     callbackToUse = function () {};
                 }
                 if (dataCache.hasOwnProperty(uuid) && dataCache[uuid][pointwidthexp] == cache) { // If the stream or pointwidth has been deleted to limit memory, just return and don't cache
-                    if (typeof(streamdata) === "string") { // Catches the case where the AJAX request didn't go through
+                  if (typeof(streamdata) === "string") { // Catches the case where the AJAX request didn't go through
+
+                    var emptyStream = self.idata.selectedStreams.find(function (stream) {
+                      return stream.uuid == uuid;
+                    });
+                    if (emptyStream) {
+                      self.idata.alert('No Data.');
+                      console.log(emptyStream);
+                      var path = 'uPMU'+emptyStream.Path;
+
+                      var leaf = self.idata.leafNodes[path];
+                      if (leaf) {
+                        const node = self.idata.streamTree.get_node(leaf);
+                        self.idata.streamTree.deselect_node(node);
+                      }
+                    }
                         console.log("Could not get data from server: " + streamdata);
                         // Just use the previous data that was cached for drawing
                         callback(undefined);

@@ -290,6 +290,17 @@ $('#err-alert').hide();
             </script>
 
         </div>
+        <script type="text/javascript">
+         closeOverlayAlert = function () {
+           $('#err-overlay').removeClass('visible');
+         };
+        </script>        
+        <div id="err-overlay" onclick="closeOverlayAlert()">
+          <div id="err-alert" class="alert alert-danger" role="alert">
+            <button type="button" class="close" aria-label="Close" onclick="closeOverlayAlert()"><span aria-hidden="true">&times;</span></button>
+            <span id="err-message"></span>
+          </div>
+        </div>
 
         <footer>
             <div class="container" style="width: 100%; margin-top: 20px;">
@@ -453,12 +464,6 @@ $('#err-alert').hide();
             <td width="80%">
                 <div class="container-fluid">
                     <div class="row">
-
-
-<div id="err-alert" class="alert alert-danger alert-dismissible" role="alert">
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  <strong>Error!</strong> <span id="err-message"></span>
-</div>
                         <div class="col-md-12" id='chartDiv' style=''>
                             <div class="well chartContainer" id="chart_interface">
                                 <!-- THE ACTUAL CHART -->

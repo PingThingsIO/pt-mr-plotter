@@ -297,7 +297,7 @@ function init_graph(self, c1, c2) {
                             return;
                         }
                         if (range == undefined || range.Merged == undefined || range.Brackets == undefined) {
-                            self.find(".plotLoading").innerHTML = "Error: Selected streams have no data.";
+                          self.idata.alert("Error: Selected streams have no data.");
                             return;
                         }
                         s3ui.processBracketResponse(self, uuids, range);
@@ -311,11 +311,11 @@ function init_graph(self, c1, c2) {
                             self.imethods.setEndTime(new Date(naiveEnd.getTime() + 60000 * (naiveEnd.getTimezoneOffset() - s3ui.getTimezoneOffsetMinutes(tz[0], tz[1]))));
                             self.imethods.applyAllSettings();
                         } catch (err) {
-                            self.find(".plotLoading").innerHTML = err;
+                          self.idata.alert(err);
                         }
                     });
             } else {
-                self.find(".plotLoading").innerHTML = "Error: No streams are selected.";
+              self.idata.$loadingElem.html("Error: No streams are selected.");
             }
         };
     self.find(".automaticAxisSetting").onchange = function () {

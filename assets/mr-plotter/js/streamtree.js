@@ -87,13 +87,13 @@ function updateStreamList(self) {
             var id = event.target.parentNode.parentNode.getAttribute("id");
             var node = streamTree.get_node(id);
             if (streamTree.is_selected(node)) {
-                streamTree.deselect_node(node);
+              streamTree.deselect_node(node);
             } else {
                 streamTree.checkbox_select_node(node);
 
               // ONLY AUTOSCALE ALL CLICK IF 1ST STREAM SELECTED
                 if (!selectedBefore && self.idata.counter > 0 ) {
-                    setTimeout( function() { $( ".showAll" ).click(); }, 500);
+                    setTimeout( function() { $( ".showAll" ).click(); }, 700);
                 }
 
             }
@@ -155,7 +155,7 @@ function updateStreamList(self) {
     streamTree.old_select_node = streamTree.select_node;
     streamTree.select_node = makeSelectHandler(self, streamTree, false);
 
-    streamTree.checkbox_select_node = makeSelectHandler(self, streamTree, true); // select all children when checkbox is clicked, but just expand if text is clicked
+  streamTree.checkbox_select_node = makeSelectHandler(self, streamTree, true); // select all children when checkbox is clicked, but just expand if text is clicked
 }
 
 /* If SELECTALLCHILDREN is true, selects all the children. If not, simply expands the node. */
@@ -189,7 +189,7 @@ function makeSelectHandler(self, streamTree, selectAllChildren) {
                     }
                 } else if (selectAllChildren) {
                     if (streamCount <= 5 || confirm("About to select " + streamCount + " streams. Continue?")) {
-                        streamTree.old_select_node(node, suppress_event, prevent_open);
+                      streamTree.old_select_node(node, suppress_event, prevent_open);
                     }
                 } else {
                     if (node.children.length == 0) {
@@ -339,6 +339,7 @@ function getContextMenu(self, node, callback) {
    POST request was made for at least one stream object; otherwise returns
    false. */
 function selectNode(self, tree, select, node) { // unfortunately there's no simple way to differentiate between undetermined and unselected nodes
+  console.log(node);
     if (!node.data.child) {
         var result = false;
         for (var i = 0; i < node.children.length; i++) {
@@ -347,7 +348,11 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
         return result;
     } else if (node.data.selected != select) {
         node.data.selected = select;
-        self.idata.counter += select ? 1:-1;
+      self.idata.counter += select ? 1:-1;
+      if (!self.idata.counter) {
+                $('.startdate, .enddate').val('');
+
+      }
         if (node.data.streamdata == undefined) {
             self.idata.pendingStreamRequests += 1;
             self.requester.makeMetadataRequest('select * where Metadata/SourceName = "' + node.data.sourceName + '" and Path = "' + node.data.path + '";', function (data) {

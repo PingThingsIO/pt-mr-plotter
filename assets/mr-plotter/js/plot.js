@@ -41,16 +41,24 @@ function init_plot(self) {
     self.idata.widthmin = 450;
 
     // Selection of the element to display progress is in self.idat
-    self.idata.$loadingElem = $(self.find('.plotLoading'));
-    self.idata.$errorMessage = $(self.find('#err-message'));
-    self.idata.$errorAlert = $(self.find('#err-alert'));
+  self.idata.$loadingElem = $(self.find('.plotLoading'));
+  self.idata.$errorOverlay = $('#err-overlay');
+    self.idata.$errorMessage = $('#err-message');
+    self.idata.$errorAlert = $('#err-alert');
     self.idata.alert = function (message) {
       if (message) {
+        console.log(message);
         self.idata.$errorMessage.html(message);
         self.idata.$errorAlert.show();
+        self.idata.$errorOverlay.addClass('visible');
         self.idata.$loadingElem.html("");
       }
     };
+  self.idata.status = function (message) {
+    if (message) {
+        self.idata.$loadingElem.html(message);
+    }
+  };
 
     // Parameters of the last update
     self.idata.oldStartDate = undefined;
@@ -734,8 +742,8 @@ function drawPlot(self) {
         return;
     }
     if (startDate >= endDate) {
-        self.idata.alert("Selected date range is invalid.");
-        return;
+        self.idata.$loadingElem.html("Selected date range is invalid.");
+//        return;
     }
 
     /* Used for optimization; GET request is not sent if same time range and streams are used. */
@@ -1149,12 +1157,12 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
    paticular new streams are not added and old ones not removed (DRAWFAST tells it to optimize for scrolling).
 */
 function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxisArray, axisData, $loadingElem, drawFast) {
-  self.idata.$errorAlert.hide();
+//  self.idata.$errorOverlay.removeClass('visible');
     if (!drawFast && (streams.length == 0 || yAxisArray.length == 0)) {
         if (streams.length == 0) {
           $loadingElem.html("No streams are selected.");
         } else {
-            self.idata.alert("All selected streams have no data.");
+            $loadingElem.html("All selected streams have no data.");
         }
         self.$("g.chartarea > g").remove();
         return;
@@ -1229,7 +1237,8 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
             outOfRange = outOfRange && (mint < 0 || mint > HEIGHT) && (maxt < 0 || maxt > HEIGHT) && (mint < HEIGHT || maxt > 0);
         }
         processLineChunk(currLineChunk, lineChunks, points);
-        if ((lineChunks.length == 1 && lineChunks[0][0].length == 0) || streamdata[startIndex][0] > endTime || streamdata[j - 1][0] < startTime) {
+      if ((lineChunks.length == 1 && lineChunks[0][0].length == 0) || streamdata[startIndex][0] > endTime || streamdata[j - 1][0] < startTime) {
+        console.log('no data in specific time range');
             s3ui.setStreamMessage(self, streams[i].uuid, "No data in specified time range", 3);
         } else {
             s3ui.setStreamMessage(self, streams[i].uuid, undefined, 3);
