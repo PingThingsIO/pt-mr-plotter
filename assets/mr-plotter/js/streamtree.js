@@ -339,7 +339,6 @@ function getContextMenu(self, node, callback) {
    POST request was made for at least one stream object; otherwise returns
    false. */
 function selectNode(self, tree, select, node) { // unfortunately there's no simple way to differentiate between undetermined and unselected nodes
-  console.log(node);
     if (!node.data.child) {
         var result = false;
         for (var i = 0; i < node.children.length; i++) {
