@@ -208,6 +208,7 @@
             <script src="jquery/js/jquery-1.12.0.min.js"></script>
             <script src="jquery-migrate/js/jquery-migrate-1.3.0.js"></script>
             <script src="anytime/js/anytime.5.0.3.js"></script>
+            <script src="sortable/Sortable.min.js"></script>
             <script src="d3/js/d3.js"></script>
             <script src="jquery-simplecolorpicker/js/jquery.simplecolorpicker.js"></script>
             <script src="timezone-js/js/date.js"></script>
@@ -244,6 +245,7 @@
                     // $( ".autoscalebutton" ).click();
                     // console.log("autoscale!");
                 });
+
               });
 
             </script>
@@ -265,6 +267,25 @@
 
                 var freqOpt = $('#freq-'+defaultFreq+'hz');
                 if (freqOpt) freqOpt.click();
+
+                //initialize sortable legend
+                var legendTable = document.getElementsByClassName('legend')[0];
+                Sortable.create(legendTable, {
+                  handle: '.reorder-legend',
+                  draggable: 'tr',
+                  onEnd: function (e) {
+                    const streams = plotterSelf.idata.selectedStreams;
+                    if (e.newIndex >= streams.length) {
+                      var k = e.newIndex - streams.length;
+                      while ((k--) + 1) {
+                        streams.push(undefined);
+                      }
+                    }
+                    streams.splice(e.newIndex, 0, streams.splice(e.oldIndex, 1)[0]);
+                    plotterSelf.idata.selectedStreams = streams;
+                    s3ui.updatePlot(plotterSelf);
+                  }
+                });
               });
 
                 $.getJSON( "disk_usage.json", function( data_usage ) {
@@ -579,7 +600,8 @@ $('#err-alert').hide();
                                 <h3 style='margin-top: 0px;' data-localize='legend'>Legend</h3>
                                 <table class="table table-striped">
                                     <thead>
-                                        <tr>
+                                      <tr>
+                                        <th></th>
                                             <th data-localize='color'>Color</th>
                                             <th data-localize='stream'>Stream</th>
                                             <th data-localize='axis_name'>Axis Name</th>

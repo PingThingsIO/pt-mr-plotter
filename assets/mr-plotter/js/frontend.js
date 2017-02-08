@@ -76,6 +76,10 @@ function toggleLegend (self, show, streamdata, update) {
           .append("tr")
             .datum(streamdata)
             .attr("class", function (d) { return "legend-" + d.uuid; });
+      row.append('td').
+        attr('class', 'reorder-legend').
+        html('<span class="glyphicon glyphicon-menu-hamburger"></span>');
+      
         var colorMenu = row.append("td")
             .append(self.idata.makeColorMenu)
             .attr("class", function (d) { return "color-" + d.uuid; })
@@ -269,20 +273,17 @@ function getSelectedTimezone(self) {
 }
 
 function createPlotDownload(self) {
-  var legendToggler = $('#legend_toggler');
-  var legendVisible = legendToggler.data('visible');
 
-  if (legendVisible) legendToggler.click();
-  setTimeout(function () {
+
     var chartElem = self.find(".chart");
-    var legend = self.find("#legend-container");
+//    var legend = self.find("#legend-container");
     var chartData = chartElem.innerHTML.replace(/[\d.]+em/g, function (match) {
             return (parseFloat(match.slice(0, match.length - 2)) * 16) + "px";
         });
     var chartData = chartData.replace(">\n</tspan>", " font-color=\"white\"></tspan>"); // So it renders correctly in Inkview
     var graphStyle = self.find(".plotStyles").innerHTML;
-    var plotWidth = chartElem.getAttribute("width") + legend.getAttribute("width");
-    var plotHeight = Math.max(chartElem.getAttribute("height"), legend.getAttribute("height") + 100);
+  var plotWidth = chartElem.getAttribute("width");// + legend.getAttribute("width");
+  var plotHeight = chartElem.getAttribute("height"); //Math.max(, legend.getAttribute("height") + 100);
     var xmlData = '<svg xmlns="http://www.w3.org/2000/svg" width="' + plotWidth + '" height="' + plotHeight + '" font-family="serif" font-size="16px">'
         + '<defs><style type="text/css"><![CDATA[' + graphStyle + ']]></style></defs>' + chartData + '</svg>';
     var downloadAnchor = document.createElement("a");
@@ -299,8 +300,8 @@ function createPlotDownload(self) {
     if (!('download' in downloadAnchor)) {
         console.log("No download attribute");
     }
-    if (legendVisible) legendToggler.click();
-  }, 50);
+
+
 }
 
 function createPermalink(self, return_raw_document) {

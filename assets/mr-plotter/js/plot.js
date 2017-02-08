@@ -976,7 +976,8 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
     var legend;
     var legend_item;
     var legend_background;
-    var legend_array = self.idata.selectedStreams;
+  var legend_array = self.idata.selectedStreams;
+
   var legendVisible = $('#legend_toggler').data('visible');
   legend_background = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top");
     legend_background.append("rect")
@@ -1005,7 +1006,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
             .attr("fill", self.idata.streamSettings[legend_array[0].uuid].color)
             .attr("transform", (function () {
                 return function () {
-                    return "translate(" + 0 + ", " + ( 0 ) + ")rotate(0)";
+                    return "translate(240,0)rotate(0)";
                 };
             })())
             .text( function () { return legend_array[0].Path; } )
@@ -1042,7 +1043,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
 
         legend = d3.selectAll(legend_array)
             .each(function(d, i) {
-
+              if (i < 6) {
                 legend_item = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
                 .append("g")
                 .attr("class", "legend_box");
@@ -1054,32 +1055,35 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
                     .attr("class", function (d) { return "legend_item legend_number-"+ i +" legendcolor-" + legend_array[i].uuid; })
                     .attr("text-anchor", "end")
                     .attr("fill", self.idata.streamSettings[legend_array[i].uuid].color)
-                    .attr("transform", (function () {
-                            return function () {
-                                return "translate(" + 0 + ", " + ( i*20 ) + ")rotate(0)";
-                            };
-                         })())
-                    .text( function () { return legend_array[i].Path + " —"; } );
+                    .attr("transform", "translate(" + Math.floor((i+2)/2) * 240 + ", " + ( i%2 ) * 22  + ")rotate(0)")
+                    .text(legend_array[i].Path + " —" );
+              }
         });
 
         // console.log(legend_item);
     };
 
 
-    // LEGEND RESIZE FUNCTION NEEDS TO BE AFTER ITEMS ARE INITIALIZED
-    var lb_height = document.getElementById("legend_top").getBBox().height;
-    // console.log(lb_height);
-    var lb_width = document.getElementById("legend_top").getBBox().width;
-    // console.log(lb_width);
+  // LEGEND RESIZE FUNCTION NEEDS TO BE AFTER ITEMS ARE INITIALIZED
+  var legendBox = d3.select(self.find("svg.chart g.x-legend-cover"))[0][0].getBBox();
+
+    var lb_height = legendBox.height;
+
+    var lb_width = legendBox.width;
+  var numStreams = Math.min(6, self.idata.selectedStreams.length) + 1;
+  var legendWidth = Math.floor(numStreams/2) * 240;
 
     var legend_resize = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("rect#legend-background")
-    .attr("width", lb_width + 40 ) // Move 1 to the left and increase width by 2 to cover boundaries when zooming
-    .attr("transform", "translate(" + ( -lb_width -20 ) + ", " + -30 + ")")
-    .attr("height", lb_height + 35 );
-  var legendLeft =  lb_width + self.idata.WIDTH;
-  if (!legendVisible) legendLeft += self.idata.margin.left + self.idata.margin.right + 40;
+        .attr("width", legendWidth + 20 ) // Move 1 to the left and increase width by 2 to cover boundaries when zooming
+    .attr("transform", "translate(10,-20)")
+    .attr("height", lb_height + 13 );
+  var legendLeft =  0;//self.idata.margin.left + self.idata.WIDTH + self.idata.margin.right - (legendWidth + 40);
+
     var legend_container = d3.select(self.find("#legend-container")).
-      attr('transform', 'translate('+legendLeft+', 50)');
+        attr('transform', 'translate('+ legendLeft +', 25)').
+        attr('style', 'visibility:'+ (legendVisible ? 'visibile':'hidden'));
+  
+  
 
 
 
@@ -1536,16 +1540,10 @@ function showDataDensity(self, uuid) {
     .attr("font-weight", "normal")
     .attr("transform", (function () {
       return function () {
-        var standard = -60;
-        
+        var standard = -60;        
         var axisWidth = legendAxis.length ? legendAxis[0][0].getBBox().width : 0;
-
         var xOffset = Math.min(standard, -5 - axisWidth);
-        console.group();
-        console.log(xOffset);
-        console.log(legendAxis[0]);
-        console.log(axisWidth);
-        console.groupEnd();
+
         return "translate("+xOffset+",50)rotate(-90)";
       };
     })())

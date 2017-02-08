@@ -62,6 +62,17 @@ div.permalink, .legend .streamName, .axes .axisstreams {
 .legend td {
     padding: 2px;
 }
+
+tbody.legend>tr:nth-child(6) {
+    border-bottom: solid;
+}
+.reorder-legend {
+    text-align: center;
+    cursor: n-resize;
+}
+.reorder-legend:hover {
+    background: darkgray;
+}
 .streamName {
     cursor: pointer;
 }
