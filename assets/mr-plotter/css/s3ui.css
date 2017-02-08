@@ -63,8 +63,8 @@ div.permalink, .legend .streamName, .axes .axisstreams {
     padding: 2px;
 }
 
-tbody.legend>tr:nth-child(6) {
-    border-bottom: solid;
+tbody.legend>tr:nth-child(7) {
+    border-top: solid;
 }
 
 tbody.legend>tr:nth-child(n+7) {
