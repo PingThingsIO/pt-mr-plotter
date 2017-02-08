@@ -52,7 +52,6 @@
   </div>
 
         <script type="text/javascript">
-        <!--
             function toggle_visibility(id) {
                var e = document.getElementById(id);
                if(e.style.display == 'block') {
@@ -69,15 +68,18 @@
             };
 
             function legend_toggler(id) {
-               var e = document.getElementById(id);
-
-               if(e.style.visibility == 'visible') {
-                  $("#legend_toggler").html( "Show Legend" );
-                  e.style.visibility = 'hidden';
-                  } else {
-                  $("#legend_toggler").html( "Hide Legend" );
-                  e.style.visibility = 'visible';
-                  }
+              var toggler = $('#legend_toggler');
+              var legendVisible = toggler.data('visible');
+               if(legendVisible) {
+                 $("#legend_toggler").html( "Show Legend" );
+               } else {
+                 var selectedLegend = plotterSelf.idata.selectedLegendEntry;
+                 if (selectedLegend) selectedLegend.click();
+                 $("#legend_toggler").html( "Hide Legend" );
+               }
+              toggler.data('visible', !legendVisible);
+              if (plotterSelf.idata.selectedStreams.length)
+                s3ui.updatePlot(plotterSelf);
             };
             function changeResolutionFreq() {
               var freq = $('input[name=frequency]:checked').val();
@@ -246,11 +248,12 @@
 
             </script>
             <script>
+             plotterSelf = null;
               $(function () {
                 var plotterelem = document.getElementById("plotter");
                 plotterelem.innerHTML = ""; // Remove "Loading..." text
 
-                mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
+                plotterSelf = mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
 
                 //set default frequency from cookie
                 var defaultFreq = readCookie('frequency');
@@ -562,9 +565,11 @@ $('#err-alert').hide();
                                       // alert("This is not IE ");
                                     }
                                 </script>
-
+                                <div id="legend_toggler" class="btn btn-link" style='float: right; margin-left: 10px; margin-top: -3px; font-size: 12px;' onclick="legend_toggler();" data-visible="true">Hide Legend</div>                   
                             </div>
+         
                         </div>
+
                     </div>
                     <div class="well">
                         <div class="row">

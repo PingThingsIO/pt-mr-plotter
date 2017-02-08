@@ -226,7 +226,7 @@ function initPlot(self) {
         .attr("class", "background-rect")
         .attr("fill", "white")
         .attr("width", self.idata.margin.left + self.idata.WIDTH + self.idata.margin.right)
-        .attr("height", self.idata.margin.top + self.idata.HEIGHT + self.idata.margin.bottom)
+    .attr("height", self.idata.margin.top + self.idata.HEIGHT + self.idata.margin.bottom);
     var chartarea = chart.append("g")
         .attr("class", "chartarea")
         .attr("width", self.idata.WIDTH)
@@ -304,7 +304,7 @@ function initPlot(self) {
         .attr("text-anchor", "start")
         .attr("class", "cursorlabel")
         .attr("x", -alignoffset)
-        .attr("y", 75)
+        .attr("y", 75);
     x1.append("tspan")
         .html("x");
     x1.append("tspan")
@@ -321,7 +321,7 @@ function initPlot(self) {
         .attr("text-anchor", "end")
         .attr("class", "cursorlabel cursor-right-align")
         .attr("x", self.idata.WIDTH + alignoffset)
-        .attr("y", 75)
+        .attr("y", 75);
     x2.append("tspan")
         .html("x");
     x2.append("tspan")
@@ -519,18 +519,19 @@ function initPlot(self) {
         .attr("class", "x-axis axis");
     var yaxes = chart.append("g")
         .attr("transform", "translate(0, " + self.idata.margin.top + ")")
-        .attr("class", "y-axes")
+        .attr("class", "y-axes");
     yaxes.append("g")
         .attr("class", "y-axes-left");
     yaxes.append("g")
         .attr("transform", "translate(" + (self.idata.margin.left + self.idata.WIDTH) + ", 0)")
         .attr("class", "y-axes-right");
 
-    datadensitycover.append("g")
+  datadensitycover.append("g")
         .attr("transform", "translate(0, 10)")
         .attr("class", "data-density-plot")
       .append("g")
-        .attr("class", "data-density-axis");
+    .attr("class", "data-density-axis");
+
     var plotclickscreen = chart.append("rect") // To sense mouse click/drag
         .attr("width", self.idata.WIDTH)
         .attr("height", self.idata.HEIGHT)
@@ -726,7 +727,7 @@ function drawPlot(self) {
     var naiveStartDateObj = self.idata.dateConverter.parse(startText);
     var naiveEndDateObj = self.idata.dateConverter.parse(endText);
     try {
-        var tz = s3ui.getTimezoneOffsetMinutes(selectedTimezone, dst, true)
+      var tz = s3ui.getTimezoneOffsetMinutes(selectedTimezone, dst, true);
         self.idata.offset = tz[0] * -60000; // what to add to UTC to get to selected time zone
         // I probably don't need to sanitize the selectedTimezone since we know at this point that it's valid. But, it doesn't hurt.
         self.idata.xTitle.textContent = "Time [" + s3ui.escapeHTMLEntities(selectedTimezone) + " (" + tz[1] + ")]";
@@ -976,8 +977,8 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
     var legend_item;
     var legend_background;
     var legend_array = self.idata.selectedStreams;
-
-    legend_background = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
+  var legendVisible = $('#legend_toggler').data('visible');
+  legend_background = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top");
     legend_background.append("rect")
         .attr("id", "legend-background")
         .style("stroke", "black")
@@ -986,11 +987,17 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
 
     if (legend_array.length == 1) {
 
+ // ADDED IN CASE USER WANTS TO ALWAYS DEFAULT FIRST STREAM TO HAVE LEGEND ENABLED
+/*        var e = document.getElementById("legend-container");
+        if(!legendVisible) {
+          $("#legend_toggler").html( "Hide Legend" );
+          legendVisible = true;
+          }*/
 
 
         legend_item = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
         .append("g")
-        .attr("class", "legend_box")
+        .attr("class", "legend_box");
 
         var legend_first = legend_item.append("text")
             .attr("font-size", "12px")
@@ -1009,6 +1016,17 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
             .text(" —");
 
         // console.log(legend_item);
+ } else if (legend_array.length == 0) {
+
+        // BASE CASE IF USER DESELECTS ALL STREAMS TO REMOVE LEGEND BOX
+   var e = document.getElementById("legend-container");
+   
+        if( legendVisible ) {
+          $("#legend_toggler").html( "Show Legend" );
+          legendVisible = false;
+          }
+
+
 
     }  else {
 
@@ -1017,7 +1035,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .data(legend_array)
         .enter()
         .append("g")
-        .attr("class", "legend_box")
+        .attr("class", "legend_box");
 
 
         var legend_box = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll(".legend_box").remove();
@@ -1027,7 +1045,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
 
                 legend_item = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
                 .append("g")
-                .attr("class", "legend_box")
+                .attr("class", "legend_box");
 
                 // console.log(self.idata.streamSettings[legend_array[i].uuid].color);
 
@@ -1058,7 +1076,8 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
     .attr("width", lb_width + 40 ) // Move 1 to the left and increase width by 2 to cover boundaries when zooming
     .attr("transform", "translate(" + ( -lb_width -20 ) + ", " + -30 + ")")
     .attr("height", lb_height + 35 );
-    var legendLeft = lb_width + 40 + self.idata.margin.left + self.idata.WIDTH + self.idata.margin.right;
+  var legendLeft =  lb_width + self.idata.WIDTH;
+  if (!legendVisible) legendLeft += self.idata.margin.left + self.idata.margin.right + 40;
     var legend_container = d3.select(self.find("#legend-container")).
       attr('transform', 'translate('+legendLeft+', 50)');
 
@@ -1373,6 +1392,10 @@ function processLineChunk(lc, lineChunks, points) {
 }
 
 function showDataDensity(self, uuid) {
+  var legendToggler = $('#legend_toggler');
+  var legendVisible = legendToggler.data('visible');
+  if (legendVisible) legendToggler.click();
+  
     var oldShowingDensity = self.idata.showingDensity;
     self.idata.showingDensity = uuid;
     if (!self.idata.onscreen || !self.idata.oldData.hasOwnProperty(uuid)) {
@@ -1396,7 +1419,7 @@ function showDataDensity(self, uuid) {
     var pixelw = (domain[1] - domain[0]) / WIDTH;
     var pw = Math.pow(2, self.idata.oldData[uuid][2]);
     pixelw *= 1000000;
-    var offset = self.idata.offset
+  var offset = self.idata.offset;
     var startTime = domain[0].getTime() - offset;
     var totalmax = 0;
     var xPixel;
@@ -1504,7 +1527,29 @@ function showDataDensity(self, uuid) {
     var formatter = d3.format("f");
 
     ddplot.select("g.data-density-axis")
-        .call(d3.svg.axis().scale(yScale).orient("left").tickValues([0, Math.round(totalmax / 2), totalmax]).tickFormat(formatter));
+    .call(d3.svg.axis().scale(yScale).orient("left").tickValues([0, Math.round(totalmax / 2), totalmax]).tickFormat(formatter));
+  
+  d3.select(self.find("text.data-density-axistitle")).remove();
+  var legendAxis = d3.select(self.find("svg.chart g.data-density-axis"));
+      legendAxis.append("text")
+    .attr("class", "data-density-axistitle")
+    .attr("font-weight", "normal")
+    .attr("transform", (function () {
+      return function () {
+        var standard = -60;
+        
+        var axisWidth = legendAxis.length ? legendAxis[0][0].getBBox().width : 0;
+
+        var xOffset = Math.min(standard, -5 - axisWidth);
+        console.group();
+        console.log(xOffset);
+        console.log(legendAxis[0]);
+        console.log(axisWidth);
+        console.groupEnd();
+        return "translate("+xOffset+",50)rotate(-90)";
+      };
+    })())
+    .text('Samples');
 }
 
 function hideDataDensity(self) {
@@ -1548,3 +1593,5 @@ s3ui.showDataDensity = showDataDensity;
 s3ui.hideDataDensity = hideDataDensity;
 s3ui.resetZoom = resetZoom;
 s3ui.applyDisplayColor = applyDisplayColor;
+
+

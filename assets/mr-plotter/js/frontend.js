@@ -37,12 +37,12 @@ function init_frontend(self) {
     self.idata.selectedLegendEntry = undefined; // The currently selected legend entry
     self.idata.chart = self.find("svg.chart");
     self.idata.widthFunction = function () {
-            var $parent = $(self.find('.chartContainer'))
+      var $parent = $(self.find('.chartContainer'));
             var width = $parent.css("width");
             var leftpadding = $parent.css("padding-left");
             var rightpadding = $parent.css("padding-right");
             return s3ui.parsePixelsToInt(width) - s3ui.parsePixelsToInt(leftpadding) - s3ui.parsePixelsToInt(rightpadding);
-        }
+    };
 
     self.idata.changingpw = false;
     self.idata.defaultLoginMenuText = "Log in ";
@@ -269,6 +269,11 @@ function getSelectedTimezone(self) {
 }
 
 function createPlotDownload(self) {
+  var legendToggler = $('#legend_toggler');
+  var legendVisible = legendToggler.data('visible');
+
+  if (legendVisible) legendToggler.click();
+  setTimeout(function () {
     var chartElem = self.find(".chart");
     var legend = self.find("#legend-container");
     var chartData = chartElem.innerHTML.replace(/[\d.]+em/g, function (match) {
@@ -294,6 +299,8 @@ function createPlotDownload(self) {
     if (!('download' in downloadAnchor)) {
         console.log("No download attribute");
     }
+    if (legendVisible) legendToggler.click();
+  }, 50);
 }
 
 function createPermalink(self, return_raw_document) {
