@@ -66,6 +66,10 @@ div.permalink, .legend .streamName, .axes .axisstreams {
 tbody.legend>tr:nth-child(6) {
     border-bottom: solid;
 }
+
+tbody.legend>tr:nth-child(n+7) {
+    background-color: lightgray;
+}
 .reorder-legend {
     text-align: center;
     cursor: n-resize;
