@@ -209,6 +209,7 @@
             <script src="jquery-migrate/js/jquery-migrate-1.3.0.js"></script>
             <script src="anytime/js/anytime.5.0.3.js"></script>
             <script src="sortable/Sortable.min.js"></script>
+            <script src="jstz/jstz.min.js"></script>
             <script src="d3/js/d3.js"></script>
             <script src="jquery-simplecolorpicker/js/jquery.simplecolorpicker.js"></script>
             <script src="timezone-js/js/date.js"></script>
@@ -273,10 +274,36 @@
                 $('#plotter-tabs').tab();
                 $('#plotter-tabs-nav a').click(function (e) {
                   e.preventDefault();
-                  console.log('clicked tab');
-                  console.log(this);
                   $(this).tab('show');
                 });
+
+                //init timezone
+                function autoTimezone () {
+                  var defaultTz = jstz.determine().name();
+                  createCookie('timezone', defaultTz, 365);
+                  
+                  document.getElementById('timezone-dropdown').value = defaultTz;
+                }
+                
+                var defaultTz = readCookie('timezone');
+
+                if (defaultTz) document.getElementById('timezone-dropdown').value = defaultTz;
+                else autoTimezone();
+                
+                $('#timezone-dropdown').change(function (e) {
+                  if (plotterSelf.idata.selectedStreams.length)
+                    $('.plotButton').click();
+                  createCookie('timezone', e.currentTarget.value, 365);
+                });
+
+                $('#auto-timezone').click(function(e) {
+                  e.preventDefault();
+                  autoTimezone()
+                });
+
+                //size streamtree
+
+                $('.streamSelection>.well').css('min-height', $('svg.chart').height());
 
                 //init buttons
                 $('[data-toggle="popover"]').popover();
@@ -291,7 +318,7 @@
                   $('div[class^="autoscalebutton"]').click()
                   // $( ".autoscalebutton" ).click();
                   // console.log("autoscale!");
-                });                
+                });
               });
 
                 $.getJSON( "disk_usage.json", function( data_usage ) {
@@ -644,7 +671,7 @@ $('#err-alert').hide();
                                         </div>
                                       </div>
                                       <div class="form-group">
-                                        <p data-localize='end_date'>End date</p>
+                                        <p data-localize='end_date'>End Date</p>
                                         <div class="input-group" style="width: 100%;">
                                           <input type="text" class="form-control datefield enddate">
                                           <div class="nowButton btn input-group-addon" style="width:4em">Now</div>
@@ -654,11 +681,87 @@ $('#err-alert').hide();
                                     </div>
                                     <div class="col-md-6">
                                       <div class="form-group">
-                                        <p data-localize='timezone'>Timezone</p>
+                                        <p data-localize='timezone'>Timezone
+                                          <button id="auto-timezone" class="btn btn-default" style="float:right;">Autodetect</button>
+                                        </p>
                                         <div class="input-group" style="width: 100%;">
-                                          <select class="timezoneSelect form-control">
+                                          <select id="timezone-dropdown" class="timezoneSelect form-control">
+                                            <option value="Pacific/Midway">Pacific/Midway</option>
+                                            <option value="Pacific/Honolulu">Pacific/Honolulu</option>
+                                            <option value="America/Anchorage">America/Anchorage</option>
                                             <option value="America/Los_Angeles">America/Los_Angeles</option>
-                                            <option value="UTC">UTC</option>
+                                            <option value="America/Denver">America/Denver</option>
+                                            <option value="America/La_Paz">America/La_Paz</option>
+                                            <option value="America/Phoenix">America/Phoenix</option>
+                                            <option value="America/Chicago">America/Chicago</option>
+                                            <option value="America/Winnipeg">America/Winnipeg</option>
+                                            <option value="America/Monterrey">America/Monterrey</option>
+                                            <option value="America/Costa_Rica">America/Costa_Rica</option>
+                                            <option value="America/New_York">America/New_York</option>
+                                            <option value="America/Indiana/Indianapolis">America/Indiana/Indianapolis</option>
+                                            <option value="America/Bogota">America/Bogota</option>
+                                            <option value="America/Goose_Bay">America/Goose_Bay</option>
+                                            <option value="America/Caracas">America/Caracas</option>
+                                            <option value="America/Santiago">America/Santiago</option>
+                                            <option value="America/St_Johns">America/St_Johns</option>
+                                            <option value="America/Recife">America/Recife</option>
+                                            <option value="America/Argentina/Buenos_Aires">America/Argentina/Buenos_Aires</option>
+                                            <option value="America/Godthab">America/Godthab</option>
+                                            <option value="Atlantic/South_Georgia">Atlantic/South_Georgia</option>
+                                            <option value="Atlantic/Azores">Atlantic/Azores</option>
+                                            <option value="Atlantic/Cape_Verde">Atlantic/Cape_Verde</option>
+                                            <option value="Etc/UTC">Etc/UTC</option>
+                                            <option value="Europe/London">Europe/London</option>
+                                            <option value="Africa/Casablanca">Africa/Casablanca</option>
+                                            <option value="Europe/Bucharest">Europe/Bucharest</option>
+                                            <option value="Europe/Zagreb">Europe/Zagreb</option>
+                                            <option value="Europe/Brussels">Europe/Brussels</option>
+                                            <option value="Europe/Amsterdam">Europe/Amsterdam</option>
+                                            <option value="Africa/Kinshasa">Africa/Kinshasa</option>
+                                            <option value="Europe/Bucharest">Europe/Bucharest</option>
+                                            <option value="Africa/Cairo">Africa/Cairo</option>
+                                            <option value="Europe/Helsinki">Europe/Helsinki</option>
+                                            <option value="Europe/Athens">Europe/Athens</option>
+                                            <option value="Asia/Jerusalem">Asia/Jerusalem</option>
+                                            <option value="Africa/Johannesburg">Africa/Johannesburg</option>
+                                            <option value="Europe/Moscow">Europe/Moscow</option>
+                                            <option value="Asia/Kuwait">Asia/Kuwait</option>
+                                            <option value="Africa/Nairobi">Africa/Nairobi</option>
+                                            <option value="Asia/Baghdad">Asia/Baghdad</option>
+                                            <option value="Asia/Tehran">Asia/Tehran</option>
+                                            <option value="Asia/Muscat">Asia/Muscat</option>
+                                            <option value="Asia/Baku">Asia/Baku</option>
+                                            <option value="Asia/Kabul">Asia/Kabul</option>
+                                            <option value="Asia/Yekaterinburg">Asia/Yekaterinburg</option>
+                                            <option value="Asia/Karachi">Asia/Karachi</option>
+                                            <option value="Asia/Colombo">Asia/Colombo</option>
+                                            <option value="Asia/Kathmandu">Asia/Kathmandu</option>
+                                            <option value="Asia/Dhaka">Asia/Dhaka</option>
+                                            <option value="Asia/Dhaka">Asia/Dhaka</option>
+                                            <option value="Asia/Dhaka">Asia/Dhaka</option>
+                                            <option value="Asia/Rangoon">Asia/Rangoon</option>
+                                            <option value="Asia/Bangkok">Asia/Bangkok</option>
+                                            <option value="Asia/Krasnoyarsk">Asia/Krasnoyarsk</option>
+                                            <option value="Asia/Hong_Kong">Asia/Hong_Kong</option>
+                                            <option value="Asia/Kuala_Lumpur">Asia/Kuala_Lumpur</option>
+                                            <option value="Asia/Singapore">Asia/Singapore</option>
+                                            <option value="Asia/Taipei">Asia/Taipei</option>
+                                            <option value="Australia/Perth">Australia/Perth</option>
+                                            <option value="Asia/Irkutsk">Asia/Irkutsk</option>
+                                            <option value="Asia/Seoul">Asia/Seoul</option>
+                                            <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                            <option value="Asia/Yakutsk">Asia/Yakutsk</option>
+                                            <option value="Australia/Darwin">Australia/Darwin</option>
+                                            <option value="Australia/Adelaide">Australia/Adelaide</option>
+                                            <option value="Australia/Melbourne">Australia/Melbourne</option>
+                                            <option value="Australia/Brisbane">Australia/Brisbane</option>
+                                            <option value="Australia/Hobart">Australia/Hobart</option>
+                                            <option value="Asia/Vladivostok">Asia/Vladivostok</option>
+                                            <option value="Pacific/Guam">Pacific/Guam</option>
+                                            <option value="Pacific/Noumea">Pacific/Noumea</option>
+                                            <option value="Asia/Kamchatka">Asia/Kamchatka</option>
+                                            <option value="Pacific/Nauru">Pacific/Nauru</option>
+                                            <option value="Pacific/Tongatapu">Pacific/Tongatapu</option>                                            
                                             <option value="OTHER">Other:</option>
                                           </select>
                                           <div class="dstButton btn input-group-addon" style="width: 4em" data-toggle="button" aria-pressed="false">DST</div>
