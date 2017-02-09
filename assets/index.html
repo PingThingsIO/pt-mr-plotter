@@ -603,6 +603,54 @@ $('#err-alert').hide();
                                       <div id="makeG" class="makeGraph btn btn-success" data-localize='export_svg'>Export Graph to SVG Image</div>
                                     </div>
                                     <div class="download-graph"></div>
+                                    <div class="modal fade csv-modal" role="dialog" tabindex="-1" aria-hidden="true">
+                                      <div class="modal-dialog">
+                                        <div class="modal-content">
+                                          <div class="modal-header">
+                                            <div class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></div>
+                                            <div class="csv-settings">
+                                              <!-- <h4>1. Select the streams to include in the CSV file.</h4> //-->
+                                              <div class="csv-streams"></div>
+
+                                              <h4>Export to CSV File</h4>
+
+                                              <div class="csv-pointwidth">
+                                                <p>
+                                                  Data frequency:<br>
+                                                  <input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();"> 50Hz</input><br>
+                                                  <input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();"> 60Hz</input>
+                                                </p>
+                                                Time per row in your CSV file:
+                                                <select class="resolutions" oninput="updateInput(this.value)" onchange="updateInput(this.value)">
+                                                  <option id="half-cycle-resolution">1/2 cycle</option>
+                                                  <option id="full-cycle-resolution">1 cycle</option>
+                                                  <option value="4">1 second</option>
+                                                  <option value="5">1 minute</option>
+                                                  <option value="6">5 minutes</option>
+                                                  <option selected="selected" value="7">30 minutes</option>
+                                                  <option value="8">1 hour</option>
+                                                  <option value="9">1 day</option>
+                                                </select>
+
+                                                <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
+                                                <div class="selected-windowwidth"></div>
+                                                <div class="selected-window-desc"></div>
+                                              </div>
+
+
+                                              <!-- This form is not visible to the user, but is used to make the POST request for the CSV file. -->
+                                              <form class="csv-form" method="post" style="display: none;" target="_blank" enctype="text/plain">
+                                                <input class="csv-form-data" name="json" />
+                                              </form>
+                                            </div>
+                                          </div>
+                                          <div class="modal-footer">
+                                            <div class="btn btn-default" data-dismiss="modal">Cancel</div>
+                                            <div class="csv-button btn btn-primary" data-dismiss="modal">Create CSV File</div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>                                    
                                   </div>
 
                                 </td>
@@ -620,7 +668,7 @@ $('#err-alert').hide();
                               </tr>
                             </table>
                           </div>
-                        </div>
+                        </div>                        
                     </div>
                     
                     <div id="plotter-tabs"  class="row">
@@ -838,52 +886,5 @@ $('#err-alert').hide();
             </td>
         </tr>
     </table>
-    <div class="modal fade csv-modal" role="dialog" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <div class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></div>
-            <div class="csv-settings">
-              <!-- <h4>1. Select the streams to include in the CSV file.</h4> //-->
-              <div class="csv-streams"></div>
 
-              <h4>Export to CSV File</h4>
-
-              <div class="csv-pointwidth">
-                <p>
-                  Data frequency:<br>
-                  <input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();"> 50Hz</input><br>
-                  <input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();"> 60Hz</input>
-                </p>
-                Time per row in your CSV file:
-                <select class="resolutions" oninput="updateInput(this.value)" onchange="updateInput(this.value)">
-                  <option id="half-cycle-resolution">1/2 cycle</option>
-                  <option id="full-cycle-resolution">1 cycle</option>
-                  <option value="4">1 second</option>
-                  <option value="5">1 minute</option>
-                  <option value="6">5 minutes</option>
-                  <option selected="selected" value="7">30 minutes</option>
-                  <option value="8">1 hour</option>
-                  <option value="9">1 day</option>
-                </select>
-
-                <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
-                <div class="selected-windowwidth"></div>
-                <div class="selected-window-desc"></div>
-              </div>
-
-
-              <!-- This form is not visible to the user, but is used to make the POST request for the CSV file. -->
-              <form class="csv-form" method="post" style="display: none;" target="_blank" enctype="text/plain">
-                <input class="csv-form-data" name="json" />
-              </form>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <div class="btn btn-default" data-dismiss="modal">Cancel</div>
-            <div class="csv-button btn btn-primary" data-dismiss="modal">Create CSV File</div>
-          </div>
-        </div>
-      </div>
-    </div>
 </template>
