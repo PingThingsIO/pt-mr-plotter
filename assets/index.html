@@ -308,7 +308,7 @@
 
                 //size streamtree
 
-                $('.streamSelection>.well').css('min-height', $('svg.chart').height());
+                $('.streamTree').css('min-height', $('svg.chart').height());
 
                 //init buttons
                 $('[data-toggle="popover"]').popover();
@@ -437,40 +437,43 @@ $('#err-alert').hide();
             <td width="18%" id='toggle_column' style='width: 100%; display: block;'>
                 <div class="leftColumn" id="leftColumn">
                     <!-- STREAM SELECTION MENU -->
-                        <h3 data-localize='select_streams'>Select Streams
-                        <div style='float: right; margin-top: -2px; margin-bottom: 10px;' class="streamTreeOptions btn-group">
-                                <div style='display: none;' class="refreshStreamTree btn btn-default">Refresh</div>
-                                <div onClick="window.location.reload();" class="btn btn-default">Deselect All</div>
-                                <div style='display: none;' class="deselectStreamTree btn btn-default">Deselect All</div>
-                                <!-- <div class="deselectStreamTree btn btn-default">Deselect All</div> //-->
-                            </div></h3>
+
 
 
                     <div class="streamSelection">
 
-                        <div class="well" style="background: white;">
-                            <div class="streamTree"></div>
+                      <div class="well">
+                        <h3 style="margin-top:0px;" data-localize='select_streams'>Select Streams
+                          <div style='float: right; margin-top: -4px; margin-bottom: 10px;' class="streamTreeOptions btn-group">
+                            <div style='display: none;' class="refreshStreamTree btn btn-default">Refresh</div>
+                            <div onClick="window.location.reload();" class="btn btn-default">Deselect All</div>
+                            <div style='display: none;' class="deselectStreamTree btn btn-default">Deselect All</div>
+                            <!-- <div class="deselectStreamTree btn btn-default">Deselect All</div> //-->
+                          </div></h3>                        
+                        <div class="streamTree" style="background: white; padding-top:5px;"></div>
+                        <hr>
+                        <div class='progress'>
+                          <div class='prgtext'>Disk Usage</div>
+                          <div class='prgbar'></div>
+                          <div class='prginfo'>
+                            <span style='float: left;'></span>
+                            <span style='float: right;'></span>
+                            <span style='clear: both;'></span>
+                          </div>
                         </div>
+                        <div style='clear: both;'></div>                    
+                        <div class="infoBar">
+                          <div class="plotLoading" style="width: 100%; margin-top: 20px; font-size: 1.25em;"></div> <!-- Displays details about how the plot is loading -->
+                        </div>
+                      </div>
                     </div>
+
+
 
 
                         <!-- <div class="btn btn-primary" style='float: right; margin-right: 10px;' onclick='$( ".showAll" ).click();'>Plot all Data</div> //-->
 
-                    <div class='progress'>
-                            <div class='prgtext'>Disk Usage</div>
-                            <div class='prgbar'></div>
-                            <div class='prginfo'>
-                                    <span style='float: left;'></span>
-                                    <span style='float: right;'></span>
-                                    <span style='clear: both;'></span>
-                            </div>
-                    </div>
-                    <div class="infoBar">
-                      <div class="plotLoading" style="width: 100%; margin-top: 20px; font-size: 1.25em;"></div> <!-- Displays details about how the plot is loading -->
-                    </div>
-                        <div style='clear: both;'></div>
 
-                    <hr>
                 </div>
             </td>
             <td width="80%">

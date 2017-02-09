@@ -110,6 +110,7 @@ div.streamTree {
 }
 div.leftColumn {
     margin-left: 10px;
+    margin-right: 10px;
     min-width: 240px;
 }
 div.timeSelection {
