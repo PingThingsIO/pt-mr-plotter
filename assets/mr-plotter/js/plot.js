@@ -986,14 +986,14 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .style("stroke-width", 1)
         .attr("fill", "white");
 
-    if (legend_array.length == 1) {
+/*    if (legend_array.length == 1) {
 
  // ADDED IN CASE USER WANTS TO ALWAYS DEFAULT FIRST STREAM TO HAVE LEGEND ENABLED
 /*        var e = document.getElementById("legend-container");
         if(!legendVisible) {
           $("#legend_toggler").html( "Hide Legend" );
           legendVisible = true;
-          }*/
+          }*/ /*
 
 
         legend_item = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
@@ -1017,7 +1017,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
             .text(" —");
 
         // console.log(legend_item);
- } else if (legend_array.length == 0) {
+ } else */if (legend_array.length == 0) {
 
         // BASE CASE IF USER DESELECTS ALL STREAMS TO REMOVE LEGEND BOX
    var e = document.getElementById("legend-container");
@@ -1049,13 +1049,14 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
                 .attr("class", "legend_box");
 
                 // console.log(self.idata.streamSettings[legend_array[i].uuid].color);
-
+                var column = Math.floor((i+2)/2);
                 var legend_items = legend_item.append("text")
                     .attr("font-size", "12px")
-                    .attr("class", function (d) { return "legend_item legend_number-"+ i +" legendcolor-" + legend_array[i].uuid; })
+                    .attr("class", "legend_column_"+column+" legend_item legend_number-"+ i +" legendcolor-" + legend_array[i].uuid)
+                    .attr("data-row", (i%2))
                     .attr("text-anchor", "end")
                     .attr("fill", self.idata.streamSettings[legend_array[i].uuid].color)
-                    .attr("transform", "translate(" + Math.floor((i+2)/2) * 240 + ", " + ( i%2 ) * 22  + ")rotate(0)")
+                    .attr("transform", "translate(" + column * 240 + ", " + ( i%2 ) * 22  + ")rotate(0)")
                     .text(legend_array[i].Path + " —" );
               }
         });
@@ -1066,16 +1067,41 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
 
   // LEGEND RESIZE FUNCTION NEEDS TO BE AFTER ITEMS ARE INITIALIZED
   var legendBox = d3.select(self.find("svg.chart g.x-legend-cover"))[0][0].getBBox();
+  var numLegendColumns = Math.min(3, Math.ceil(legend_array.length / 2));
+  var columnSpacer = 20;
+  var maxWidths = [];
+  for (var i=1; i<=numLegendColumns; i++) {
+    var maxWidth = 0;
+    var legendColumns = d3.select(self.find('svg.chart g.x-legend-cover')).selectAll('.legend_column_'+i);
 
+    legendColumns[0].forEach(function (legendEntry, index) {
+      if (legendEntry && legendEntry.getBBox) {
+        var width = legendEntry.getBBox().width;
+        maxWidth = Math.max(width, maxWidth);
+      }
+    });
+    maxWidths.push(maxWidth);
+    legendColumns[0].forEach(function (legendEntry, index) {
+      var leftOffset = 0;
+      for (var j=0; j<i; j++) {
+        leftOffset += maxWidths[j] + columnSpacer;
+      }
+      console.log({leg: legendEntry});
+      legendEntry.setAttribute("transform", "translate(" + leftOffset + ", " + ( index%2 ) * 22  + ")rotate(0)");
+    });
+  }
     var lb_height = legendBox.height;
 
     var lb_width = legendBox.width;
   var numStreams = Math.min(6, self.idata.selectedStreams.length) + 1;
-  var legendWidth = Math.floor(numStreams/2) * 240;
+  var legendWidth = 0;
+  for (var i = 0; i < maxWidths.length; i++) {
+    legendWidth += maxWidths[i] + columnSpacer;
+  }
 
     var legend_resize = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("rect#legend-background")
-        .attr("width", legendWidth + 20 ) // Move 1 to the left and increase width by 2 to cover boundaries when zooming
-    .attr("transform", "translate(10,-20)")
+        .attr("width", legendWidth) // Move 1 to the left and increase width by 2 to cover boundaries when zooming
+    .attr("transform", "translate("+columnSpacer / 2+",-20)")
     .attr("height", lb_height + 13 );
   var legendLeft =  0;//self.idata.margin.left + self.idata.WIDTH + self.idata.margin.right - (legendWidth + 40);
 
