@@ -234,12 +234,15 @@
 
             <script>
              plotterSelf = null;
-              $(function () {
+             $(function () {
+               
                 var plotterelem = document.getElementById("plotter");
                 plotterelem.innerHTML = ""; // Remove "Loading..." text
 
                 plotterSelf = mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
 
+               $('#plotter-tabs').slideUp(0);
+               
                 //set default frequency from cookie
                 var defaultFreq = readCookie('frequency');
 
@@ -298,7 +301,9 @@
 
                 $('#auto-timezone').click(function(e) {
                   e.preventDefault();
-                  autoTimezone()
+                  autoTimezone();
+                  if (plotterSelf.idata.selectedStreams.length)                  
+                    $('.plotButton').click();
                 });
 
                 //size streamtree
@@ -472,7 +477,8 @@ $('#err-alert').hide();
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12" id='chartDiv' style=''>
-                            <div class="well chartContainer" id="chart_interface">
+                          <div class="well chartContainer" id="chart_interface">
+                            <div id="legend_toggler" class="btn btn-link"  onclick="legend_toggler();" data-visible="true">Hide Legend</div>                                               
                                 <!-- THE ACTUAL CHART -->
                                 <svg class="chart" width="800" height="430" background="white">
                                     <rect width="800" height="430" class="background-rect" fill="white"></rect>  <!-- The background is white, not transparent. -->
@@ -569,12 +575,51 @@ $('#err-alert').hide();
                                       // alert("This is not IE ");
                                     }
                                 </script>
-                                <div id="legend_toggler" class="btn btn-link" style='float: right; margin-left: 10px; margin-top: -3px; font-size: 12px;' onclick="legend_toggler();" data-visible="true">Hide Legend</div>                   
                             </div>
          
                         </div>
 
                     </div>
+
+
+
+                    <!-- EXPORT TO CSV -->                    
+                    <div class="row">
+
+                        <div class=" col-md-12">
+                          <div class="well">
+                            <h3 data-localize="export" style="margin-top:0px;">Export</h3>
+                            <table width='100%'>
+                              <tr>
+                                <td width='50%'>
+
+
+                                  <div class="graphExport">
+                                    <div class="btn-group-horizontal">
+                                      <div class="makecsv btn btn-success" data-localize='export_csv'>Export Graph to CSV File</div>&nbsp;&nbsp;
+                                      <div id="makeG" class="makeGraph btn btn-success" data-localize='export_svg'>Export Graph to SVG Image</div>
+                                    </div>
+                                    <div class="download-graph"></div>
+                                  </div>
+
+                                </td>
+                                <td width='50%'>
+
+                                  <!-- PERMALINK -->
+                                  <div class="permalinkGenerate" style='float: right;'>
+                                    <div class="getPermalink btn btn-success" data-localize='gen_permalink'>Generate Permalink</div>
+                                    <input type="checkbox" class="includeMetadata" />
+                                    <span data-localize='embed_metadata'>Embed Stream Metadata</span>
+                                    <div class="permalink"></div>
+                                    <!-- <input type='text' class="permalink" /> //-->
+                                  </div>
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+                        </div>
+                    </div>
+                    
                     <div id="plotter-tabs"  class="row">
                       <div class="col-md-12">                          
                           <ul id="plotter-tabs-nav" class="nav nav-tabs nav-justified" role="tablist">
@@ -593,11 +638,6 @@ $('#err-alert').hide();
                                 <h3 data-localize="time">Time</h3>
                               </a>
                             </li>                            
-                            <li role="presentation">
-                              <a aria-controls="export-tab" data-target="#export-tab" role="tab" data-toggle="tab">
-                                <h3 data-localize="export">Export</h3>
-                              </a>
-                            </li>
                           </ul>
 
                         </div>
@@ -784,38 +824,6 @@ $('#err-alert').hide();
                             </div>
 
                             
-                            <!-- EXPORT TO CSV -->
-                            <div role="tabpanel" id="export-tab" class="tab-pane fade col-md-12">
-                              <div class="well">
-                                <table width='100%'>
-                                  <tr>
-                                    <td width='50%'>
-
-
-                                      <div class="graphExport">
-                                        <div class="btn-group-horizontal">
-                                          <div class="makecsv btn btn-success" data-localize='export_csv'>Export Graph to CSV File</div>&nbsp;&nbsp;
-                                          <div id="makeG" class="makeGraph btn btn-success" data-localize='export_svg'>Export Graph to SVG Image</div>
-                                        </div>
-                                        <div class="download-graph"></div>
-                                      </div>
-
-                                    </td>
-                                    <td width='50%'>
-
-                                      <!-- PERMALINK -->
-                                      <div class="permalinkGenerate" style='float: right;'>
-                                        <div class="getPermalink btn btn-success" data-localize='gen_permalink'>Generate Permalink</div>
-                                        <input type="checkbox" class="includeMetadata" />
-                                        <span data-localize='embed_metadata'>Embed Stream Metadata</span>
-                                        <div class="permalink"></div>
-                                        <!-- <input type='text' class="permalink" /> //-->
-                                      </div>
-                                    </td>
-                                  </tr>
-                                </table>
-                              </div>
-                            </div>
 
 
 

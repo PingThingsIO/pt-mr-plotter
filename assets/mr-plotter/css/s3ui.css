@@ -164,6 +164,7 @@ psl css additions
 
     
 }
+
 #plotter-tabs .nav-tabs>li.active>a {
     background: #f5f5f5;
     border-bottom-color: #f5f5f5;
@@ -175,4 +176,20 @@ psl css additions
 
 body {
     overflow-x: hidden;
+}
+
+#legend_toggler {
+    position:absolute;
+    top: -1px;
+    left: 12px;
+    font-size: 12px;
+    opacity: 0;
+    will-change: opacity;
+    transition: opacity 400ms;
+    pointer-events: none;
+}
+
+#legend_toggler.visible {
+    opacity: 1;
+    pointer-events: auto;
 }

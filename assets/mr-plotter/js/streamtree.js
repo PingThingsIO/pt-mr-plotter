@@ -349,8 +349,15 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
         node.data.selected = select;
       self.idata.counter += select ? 1:-1;
       if (!self.idata.counter) {
-                $('.startdate, .enddate').val('');
 
+                $('.startdate, .enddate').val('');
+        $('#legend_toggler').removeClass('visible');
+        $('#plotter-tabs').slideUp();
+      }
+      else {
+
+        $('#legend_toggler').addClass('visible');
+        $('#plotter-tabs').slideDown();
       }
         if (node.data.streamdata == undefined) {
             self.idata.pendingStreamRequests += 1;
