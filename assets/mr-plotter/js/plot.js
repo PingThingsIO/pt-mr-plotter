@@ -1086,7 +1086,6 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
       for (var j=0; j<i; j++) {
         leftOffset += maxWidths[j] + columnSpacer;
       }
-      console.log({leg: legendEntry});
       legendEntry.setAttribute("transform", "translate(" + leftOffset + ", " + ( index%2 ) * 22  + ")rotate(0)");
     });
   }
