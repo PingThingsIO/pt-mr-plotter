@@ -986,50 +986,8 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .style("stroke-width", 1)
         .attr("fill", "white");
 
-/*    if (legend_array.length == 1) {
 
- // ADDED IN CASE USER WANTS TO ALWAYS DEFAULT FIRST STREAM TO HAVE LEGEND ENABLED
-/*        var e = document.getElementById("legend-container");
-        if(!legendVisible) {
-          $("#legend_toggler").html( "Hide Legend" );
-          legendVisible = true;
-          }*/ /*
-
-
-        legend_item = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
-        .append("g")
-        .attr("class", "legend_box");
-
-        var legend_first = legend_item.append("text")
-            .attr("font-size", "12px")
-            .attr("class", function () { return "legend_item legendcolor-" + legend_array[0].uuid; })
-            .attr("fill", self.idata.streamSettings[legend_array[0].uuid].color)
-            .attr("transform", (function () {
-                return function () {
-                    return "translate(240,0)rotate(0)";
-                };
-            })())
-            .text( function () { return legend_array[0].Path; } )
-            .append("tspan")
-            .attr("font-size", "12px")
-            .attr("fill", self.idata.streamSettings[legend_array[0].uuid].color)
-            .attr("font-weight", "bold")
-            .text(" —");
-
-        // console.log(legend_item);
- } else */if (legend_array.length == 0) {
-
-        // BASE CASE IF USER DESELECTS ALL STREAMS TO REMOVE LEGEND BOX
-   var e = document.getElementById("legend-container");
-   
-        if( legendVisible ) {
-          $("#legend_toggler").html( "Show Legend" );
-          legendVisible = false;
-          }
-
-
-
-    }  else {
+  if (legend_array.length) {
 
 
         legend_item = d3.select(self.find("svg.chart g.x-legend-cover")).selectAll("g#legend_top")
@@ -1565,9 +1523,9 @@ function showDataDensity(self, uuid) {
     .attr("font-weight", "normal")
     .attr("transform", (function () {
       return function () {
-        var standard = -60;        
+        var standard = -70;        
         var axisWidth = legendAxis.length ? legendAxis[0][0].getBBox().width : 0;
-        var xOffset = Math.min(standard, -5 - axisWidth);
+        var xOffset = Math.min(standard, -10 - axisWidth);
 
         return "translate("+xOffset+",50)rotate(-90)";
       };

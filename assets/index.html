@@ -71,11 +71,11 @@
               var toggler = $('#legend_toggler');
               var legendVisible = toggler.data('visible');
                if(legendVisible) {
-                 $("#legend_toggler").html( "Show Legend" );
+                 $("#legend_toggler").html( "Show" );
                } else {
                  var selectedLegend = plotterSelf.idata.selectedLegendEntry;
                  if (selectedLegend) selectedLegend.click();
-                 $("#legend_toggler").html( "Hide Legend" );
+                 $("#legend_toggler").html( "Hide" );
                }
               toggler.data('visible', !legendVisible);
               if (plotterSelf.idata.selectedStreams.length)
@@ -365,14 +365,7 @@ $('#err-alert').hide();
         </div>
 
         <footer>
-            <div class="container" style="width: 100%; margin-top: 20px;">
-                <p class="text-muted">
-                    The Multi-Resolution Plotter "Mr. Plotter"&nbsp;&nbsp;Copyright &copy; 2016 Sam Kumar, Michael Andersen, and the University of California, Berkeley.<br>
-                    This program comes with ABSOLUTELY NO WARRANTY.<br>
-                    This is free software and you are welcome to redistribute it under certain conditions. Click
-                    <a href="http://www.gnu.org/licenses/gpl-3.0.html" target="_blank">here</a> for details.
-                </p>
-            </div>
+
         </footer>
     </body>
 </html>
@@ -480,8 +473,7 @@ $('#err-alert').hide();
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12" id='chartDiv' style=''>
-                          <div class="well chartContainer" id="chart_interface">
-                            <div id="legend_toggler" class="btn btn-link"  onclick="legend_toggler();" data-visible="true">Hide Legend</div>                                               
+                          <div class="well chartContainer" id="chart_interface">                                    
                                 <!-- THE ACTUAL CHART -->
                                 <svg class="chart" width="800" height="430" background="white">
                                     <rect width="800" height="430" class="background-rect" fill="white"></rect>  <!-- The background is white, not transparent. -->
@@ -676,8 +668,9 @@ $('#err-alert').hide();
                           <ul id="plotter-tabs-nav" class="nav nav-tabs nav-justified" role="tablist">
                             <li role="presentation" class="active">
                               <a  aria-controls="legend-tab" data-target="#legend-tab" role="tab" data-toggle="tab">
-                                <h3 data-localize="legend">Legend</h3>
+                                <button id="legend_toggler" class="btn btn-info"  onclick="legend_toggler();" data-visible="true">Hide</button><h3 data-localize="legend">Legend</h3>
                               </a>
+                                                            
                             </li>
                             <li role="presentation">
                               <a aria-controls="y-axes-tab" data-target="#y-axes-tab" role="tab" data-toggle="tab">
@@ -696,7 +689,7 @@ $('#err-alert').hide();
                             
                             <!-- STREAM LEGEND -->                          
                             <div role="tabpanel" id="legend-tab" class="tab-pane fade in active col-md-12">
-                              <div class="well">
+                              <div class="well">                                
                                 <div class="streamLegend">
                                   <table class="table table-striped">
                                     <thead>
