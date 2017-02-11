@@ -357,8 +357,10 @@ function init_graph(self, c1, c2) {
         };
     self.find("#dst-checkbox").onclick = function () {
             self.idata.changedTimes = true;
-            // s3ui.updatePlotMessage(self);
+      // s3ui.updatePlotMessage(self);
+      var checked = $('#dst-checkbox')[0].checked;
 
+      createCookie('dst', checked, 365);
         // AUTO CLICK PLOT BUTTON
             setTimeout(function () {
                     $( ".plotButton" ).click();

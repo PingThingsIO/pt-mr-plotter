@@ -309,7 +309,7 @@
                else autoTimezone();
 
                var defaultDST = readCookie('dst');
-               if (defaultDST) $('#dst-checkbox')[0].checked = defaultDST;
+               if (defaultDST) $('#dst-checkbox')[0].checked = (defaultDST != 'false') ? true : false;
                else autoDST();
                 
                 $('#timezone-dropdown').change(function (e) {
