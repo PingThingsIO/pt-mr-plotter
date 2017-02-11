@@ -345,9 +345,8 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
   
   if (node.data.selected != select) {
     if (!select && self.idata.selectedStreamsBuffer.length == 1) {
-    $('.startdate, .enddate').val('');
-      $('#plotter-rows').slideUp();
-      $('#plot-directions').fadeIn();
+      $('.startdate, .enddate').val('');
+      hidePlotter();
   }
         node.data.selected = select;
         if (node.data.streamdata == undefined) {

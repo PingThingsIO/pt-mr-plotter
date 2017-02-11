@@ -51,7 +51,15 @@
     </div>
   </div>
 
-        <script type="text/javascript">
+  <script type="text/javascript">
+   function showPlotter () {
+     $('#plotter-rows').fadeIn(100);
+     $('#plot-directions').fadeOut(100);      
+   }
+   function hidePlotter () {
+     $('#plotter-rows').fadeOut(100);
+     $('#plot-directions').fadeIn(100)
+   }
             function toggle_visibility(id) {
                var e = document.getElementById(id);
                if(e.style.display == 'block') {

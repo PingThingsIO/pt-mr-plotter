@@ -1201,8 +1201,7 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
 
     $('.startdate').val(self.idata.dateConverter.format(new Date(startTime + (tzOffset + offset))));
     $('.enddate').val(self.idata.dateConverter.format(new Date(endTime + (tzOffset + offset) + secDiff)));
-    $('#plotter-rows').slideDown();
-    $('#plot-directions').fadeOut();
+    showPlotter();
   }
 
     var xPixel;
