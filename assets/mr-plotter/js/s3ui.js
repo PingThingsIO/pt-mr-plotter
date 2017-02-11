@@ -197,7 +197,7 @@ function init_visuals(self, options) {
     setVisibility(self, options, "div.timeSelection", "hide_time_selection");
     setVisibility(self, options, "div.streamSelection", "hide_stream_tree");
     setVisibility(self, options, "div.login", "hide_login");
-    setVisibility(self, options, "g.plotDirections", "hide_plot_directions");
+  
     setVisibility(self, options, "div.streamTreeOptions", "hide_streamtree_options");
 
     setCSSRule(self, options, "tr.streamLegend-" + self.idata.instanceid + " select.axis-select { display: none; }", "hide_axis_selection");

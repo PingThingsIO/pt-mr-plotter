@@ -252,7 +252,7 @@
 
                plotterSelf = mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
 
-               $('#plotter-tabs').hide();
+               $('#plotter-rows').hide();
                 //set default frequency from cookie
                 var defaultFreq = readCookie('frequency');
 
@@ -327,8 +327,12 @@
                 });
 
                 //size streamtree
+               var streamWell = $('.streamSelection');
+               var streamTree = $('.streamTree');
+               var chartWell = $('#chartDiv');
+               var streamTreeHeight = chartWell.height() - streamWell.height() - 15;
 
-                $('.streamTree').css('min-height', $('svg.chart').height());
+                streamTree.css('min-height', streamTreeHeight);
 
                 //init buttons
                 $('[data-toggle="popover"]').popover();
@@ -497,10 +501,11 @@ $('#err-alert').hide();
                                 <!-- THE ACTUAL CHART -->
                                 <svg class="chart" width="800" height="430" background="white">
                                     <rect width="800" height="430" class="background-rect" fill="white"></rect>  <!-- The background is white, not transparent. -->
-                                    <g class="plotDirections" transform="translate(30, 30)">
-                                        <image xlink:href="images/qs_start_up.jpg" x="-25" y="-30" height="100%" width="100%" />
-                                    </g>
+
                                 </svg>
+                                <div id="plot-directions">
+                                  <img src="images/qs_start_up.jpg" >
+                                </div>
 
                             <noscript>You must enable Javascript in order to use this plotting tool.</noscript>
 
@@ -596,7 +601,7 @@ $('#err-alert').hide();
 
                     </div>
 
-
+                    <div id="plotter-rows">
 
                     <!-- EXPORT TO CSV -->                    
                     <div class="row">
@@ -903,6 +908,7 @@ $('#err-alert').hide();
                             
                           </div>
 
+                    </div>
                     </div>
                 </div>
             </td>

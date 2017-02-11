@@ -196,7 +196,7 @@ function makeSelectHandler(self, streamTree, selectAllChildren) {
                         streamTree.old_select_node(node, suppress_event, prevent_open); // if it's a leaf, select it
 
                         if ( self.idata.selectedStreams.length == 1 ) {
-                            setTimeout( function() { $( ".showAll" ).click(); }, 500);
+                            setTimeout( function() { $( ".showAll" ).click(); });
                         };
 
                     } else {
@@ -346,7 +346,8 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
   if (node.data.selected != select) {
     if (!select && self.idata.selectedStreamsBuffer.length == 1) {
     $('.startdate, .enddate').val('');
-    $('#plotter-tabs').slideUp();
+      $('#plotter-rows').slideUp();
+      $('#plot-directions').fadeIn();
   }
         node.data.selected = select;
         if (node.data.streamdata == undefined) {

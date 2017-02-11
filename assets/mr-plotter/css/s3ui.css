@@ -188,3 +188,15 @@ body {
 .checkbox.skinny {
     margin: 0;
 }
+
+#plot-directions {
+    position: absolute;
+    top:20px;
+
+    background: white;
+    height: calc(100% - 65px);
+    width: calc(100% - 65px);
+    text-align: center;
+}
+
+
