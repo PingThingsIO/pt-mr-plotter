@@ -166,9 +166,10 @@ function repaintZoomNewData(self, callback, stopCache, widthEstimate) {
     var selectedStreams = self.idata.selectedStreams;
     var domain = self.idata.oldXScale.domain();
 
-    // textContent added instead for IE compatibility and to patch cross-site scripting vulnerability
-    self.idata.xStart.textContent = self.idata.labelFormatter.format(domain[0]);
-    self.idata.xEnd.textContent = self.idata.labelFormatter.format(domain[1]);
+  // textContent added instead for IE compatibility and to patch cross-site scripting vulnerability
+  
+  self.idata.xStart.textContent = self.idata.labelFormatter.format(domain[0]);
+  self.idata.xEnd.textContent = self.idata.labelFormatter.format(domain[1]);
     s3ui.updateVertCursorStats(self);
     var numResponses = 0;
   function makeDataCallback(stream, startTime, endTime) {
@@ -728,6 +729,7 @@ function drawPlot(self) {
     var naiveEndDateObj = self.idata.dateConverter.parse(endText);
     try {
       var tz = s3ui.getTimezoneOffsetMinutes(selectedTimezone, dst, true);
+
         self.idata.offset = tz[0] * -60000; // what to add to UTC to get to selected time zone
         // I probably don't need to sanitize the selectedTimezone since we know at this point that it's valid. But, it doesn't hurt.
         self.idata.xTitle.textContent = "Time [" + s3ui.escapeHTMLEntities(selectedTimezone) + " (" + tz[1] + ")]";
@@ -1193,12 +1195,12 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
   var startTime = domain[0].getTime() - offset;
   var endTime = domain[1].getTime() - offset;
   if (streams.length) {
-    console.log(startTime);
-    console.log(endTime);
-    var secDiff = (endTime-startTime < 1000) ? 1000:0;
 
-    $('.startdate').val(self.idata.dateConverter.format(new Date(startTime)));
-    $('.enddate').val(self.idata.dateConverter.format(new Date(endTime + secDiff)));
+    var secDiff = (endTime-startTime < 1000) ? 1000:0;
+    var tzOffset = new Date().getTimezoneOffset() * 60 * 1000;
+
+    $('.startdate').val(self.idata.dateConverter.format(new Date(startTime + (tzOffset + offset))));
+    $('.enddate').val(self.idata.dateConverter.format(new Date(endTime + (tzOffset + offset) + secDiff)));
     $('#plotter-tabs').slideDown();
   }
 
@@ -1265,7 +1267,7 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
             s3ui.setStreamMessage(self, streams[i].uuid, undefined, 3);
         }
         color = streamSettings[streams[i].uuid].color;
-        // console.log(color);
+
         dataObj = {color: color, points: points, uuid: streams[i].uuid};
         dataObj.linechunks = lineChunks.map(function (x) {
                 x[0].reverse();
@@ -1275,7 +1277,7 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
             });
         dataArray.push(dataObj);
 
-        // console.log(dataObj);
+
 
 
         if (outOfRange) {
