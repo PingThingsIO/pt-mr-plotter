@@ -46,7 +46,8 @@ function init_frontend(self) {
 
     self.idata.changingpw = false;
     self.idata.defaultLoginMenuText = "Log in ";
-    self.idata.prevLoginMenuText = self.idata.defaultLoginMenuText;
+  self.idata.prevLoginMenuText = self.idata.defaultLoginMenuText;
+
 }
 
 /* Adds or removes (depending on the value of SHOW) the stream
@@ -58,13 +59,14 @@ function toggleLegend (self, show, streamdata, update) {
     }
     self.idata.drawnBefore = false;
     var streamSettings = self.idata.streamSettings;
-    var nameElem;
+  var nameElem;
+  
     if (show) {
         if (streamSettings.hasOwnProperty(streamdata.uuid) && streamSettings[streamdata.uuid].active) {
             return;
         }
         self.idata.selectedStreamsBuffer.push(streamdata);
-
+         
 
 
 
@@ -212,13 +214,18 @@ function toggleLegend (self, show, streamdata, update) {
         streamSettings[streamdata.uuid].active = false;
         for (var i = 0; i < self.idata.selectedStreamsBuffer.length; i++) {
             if (self.idata.selectedStreamsBuffer[i].uuid == streamdata.uuid) {
-                self.idata.selectedStreamsBuffer.splice(i, 1);
+              self.idata.selectedStreamsBuffer.splice(i, 1);
                 break;
+
             }
         }
+
+      
+
         if (update) {
             s3ui.applySettings(self, false); // Make stream removal visible on the graph
         }
+
     }
 }
 
@@ -260,7 +267,7 @@ function updatePlotMessage(self) {
 
 function getSelectedTimezone(self) {
     var timezoneSelect = self.find(".timezoneSelect");
-    var dst = (self.find(".dstButton").getAttribute("aria-pressed") == "true");
+    var dst = (self.find("#dst-checkbox").checked);
     var selection = timezoneSelect[timezoneSelect.selectedIndex].value;
     if (selection == "OTHER") {
         /* This is too early to perform the input sanitization in case someone is injecting a <script> here,

@@ -185,4 +185,6 @@ body {
     left: calc(50% - 80px);
 }
 
-
+.checkbox.skinny {
+    margin: 0;
+}

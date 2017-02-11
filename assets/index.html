@@ -233,16 +233,26 @@
             <script src="mr-plotter/js/requester.js"></script>
 
             <script>
+
+             Date.prototype.stdTimezoneOffset = function() {
+               var jan = new Date(this.getFullYear(), 0, 1);
+               var jul = new Date(this.getFullYear(), 6, 1);
+               return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+             };
+
+             Date.prototype.dst = function() {
+               return this.getTimezoneOffset() < this.stdTimezoneOffset();
+             };
+             
              plotterSelf = null;
              $(function () {
                
                 var plotterelem = document.getElementById("plotter");
                 plotterelem.innerHTML = ""; // Remove "Loading..." text
 
-                plotterSelf = mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
+               plotterSelf = mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
 
-               $('#plotter-tabs').slideUp(0);
-               
+               $('#plotter-tabs').hide();
                 //set default frequency from cookie
                 var defaultFreq = readCookie('frequency');
 
@@ -284,14 +294,23 @@
                 function autoTimezone () {
                   var defaultTz = jstz.determine().name();
                   createCookie('timezone', defaultTz, 365);
-                  
                   document.getElementById('timezone-dropdown').value = defaultTz;
                 }
+
+               function autoDST () {
+                 var dst = (new Date()).dst();
+                 $('#dst-checkbox')[0].checked = dst;
+                 createCookie('dst', dst, 365);
+               }
                 
                 var defaultTz = readCookie('timezone');
 
                 if (defaultTz) document.getElementById('timezone-dropdown').value = defaultTz;
-                else autoTimezone();
+               else autoTimezone();
+
+               var defaultDST = readCookie('dst');
+               if (defaultDST) $('#dst-checkbox')[0].checked = defaultDST;
+               else autoDST();
                 
                 $('#timezone-dropdown').change(function (e) {
                   if (plotterSelf.idata.selectedStreams.length)
@@ -302,6 +321,7 @@
                 $('#auto-timezone').click(function(e) {
                   e.preventDefault();
                   autoTimezone();
+                  autoDST();
                   if (plotterSelf.idata.selectedStreams.length)                  
                     $('.plotButton').click();
                 });
@@ -764,11 +784,13 @@ $('#err-alert').hide();
                                       </div>
                                     </div>
                                     <div class="col-md-6">
+
                                       <div class="form-group">
                                         <p data-localize='timezone'>Timezone
                                           <button id="auto-timezone" class="btn btn-default" style="float:right;">Autodetect</button>
                                         </p>
-                                        <div class="input-group" style="width: 100%;">
+                                        <div class="input-group " style="width: 100%;">
+                                          <div class="col-md-6 col-md-offset-2">
                                           <select id="timezone-dropdown" class="timezoneSelect form-control">
                                             <option value="Pacific/Midway">Pacific/Midway</option>
                                             <option value="Pacific/Honolulu">Pacific/Honolulu</option>
@@ -848,7 +870,14 @@ $('#err-alert').hide();
                                             <option value="Pacific/Tongatapu">Pacific/Tongatapu</option>                                            
                                             <option value="OTHER">Other:</option>
                                           </select>
-                                          <div class="dstButton btn input-group-addon" style="width: 4em" data-toggle="button" aria-pressed="false">DST</div>
+                                          </div>
+                                          <div class="col-md-3 text-center">
+                                            <div class="checkbox skinny">
+                                              <label>
+                                                <input id="dst-checkbox" type="checkbox"> DST
+                                              </label>
+                                            </div>
+                                          </div>
                                         </div>
                                         <input type="text" class="otherTimezone form-control" style="visibility: hidden;" />
                                       </div>

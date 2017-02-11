@@ -112,6 +112,7 @@ s3ui.exec_permalink = function (self, link_id) {
             });
     };
 
+
 s3ui.__init__ = function (self) {
         s3ui.instances.push(self);
 
@@ -354,7 +355,7 @@ function init_graph(self, c1, c2) {
             self.idata.changedTimes = true;
             // s3ui.updatePlotMessage(self);
         };
-    self.find(".dstButton").onclick = function () {
+    self.find("#dst-checkbox").onclick = function () {
             self.idata.changedTimes = true;
             // s3ui.updatePlotMessage(self);
 

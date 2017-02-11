@@ -171,7 +171,7 @@ function repaintZoomNewData(self, callback, stopCache, widthEstimate) {
     self.idata.xEnd.textContent = self.idata.labelFormatter.format(domain[1]);
     s3ui.updateVertCursorStats(self);
     var numResponses = 0;
-    function makeDataCallback(stream, startTime, endTime) {
+  function makeDataCallback(stream, startTime, endTime) {
         return function (data, low, high) {
             if (thisID != self.idata.drawRequestID) { // another request has been made
                 return;
@@ -735,7 +735,8 @@ function drawPlot(self) {
         var endDateObj = new timezoneJS.Date(naiveEndDateObj.getFullYear(), naiveEndDateObj.getMonth(), naiveEndDateObj.getDate(), naiveEndDateObj.getHours(), naiveEndDateObj.getMinutes(), naiveEndDateObj.getSeconds(), 'UTC');
         // startDateObj.getTime() and endDateObj.getTime() are in selected time zone
         var startDate = startDateObj.getTime() - self.idata.offset;
-        var endDate = endDateObj.getTime() - self.idata.offset;
+      var endDate = endDateObj.getTime() - self.idata.offset;
+
         // startDate and endDate are in UTC
     } catch (err) {
         // Be careful, err may contain the user-entered timezone, which may contain a <script>.
@@ -746,6 +747,7 @@ function drawPlot(self) {
         self.idata.$loadingElem.html("Selected date range is invalid.");
 //        return;
     }
+
 
     /* Used for optimization; GET request is not sent if same time range and streams are used. */
     var sameTimeRange = ((startDate == self.idata.oldStartDate) && (endDate == self.idata.oldEndDate));
@@ -1144,11 +1146,11 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
 
     s3ui.updateHorizCursorStats(self);
 
-    // console.log(toDraw);
+
 
     for (var i = 0; i < toDraw.length; i++) {
         s3ui.applyDisplayColor(self, toDraw[i], streamSettings);
-        // console.log("TODRAW: ");
+
     }
 
 
@@ -1186,8 +1188,20 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
     var subsetdata;
     var scaledX;
     var startIndex;
-    var domain = xScale.domain();
-    var startTime, endTime;
+  var domain = xScale.domain();
+  var offset = self.idata.offset;  
+  var startTime = domain[0].getTime() - offset;
+  var endTime = domain[1].getTime() - offset;
+  if (streams.length) {
+    console.log(startTime);
+    console.log(endTime);
+    var secDiff = (endTime-startTime < 1000) ? 1000:0;
+
+    $('.startdate').val(self.idata.dateConverter.format(new Date(startTime)));
+    $('.enddate').val(self.idata.dateConverter.format(new Date(endTime + secDiff)));
+    $('#plotter-tabs').slideDown();
+  }
+
     var xPixel;
     var color;
     var mint, maxt;
@@ -1197,7 +1211,7 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
     var pixelw = (domain[1] - domain[0]) / WIDTH * 1000000; // pixel width in nanoseconds
     var currpt;
     var prevpt;
-    var offset = self.idata.offset;
+
     var lineChunks;
     var points;
     var currLineChunk;
@@ -1211,15 +1225,16 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
       if (!data.hasOwnProperty(streams[i].uuid)) {
             s3ui.setStreamMessage(self, streams[i].uuid, "No data in specified time range", 3);
             continue;
-        }
+      }
+  startTime = domain[0].getTime() - offset;
+  endTime = domain[1].getTime() - offset;      
         lineChunks = [];
         points = [];
         currLineChunk = [[], [], []]; // first array is min points, second is mean points, third is max points
         streamdata = data[streams[i].uuid][1];
         pw = Math.pow(2, data[streams[i].uuid][2]);
         yScale = axisData[streamSettings[streams[i].uuid].axisid][2];
-        startTime = domain[0].getTime() - offset;
-        endTime = domain[1].getTime() - offset;
+
         startIndex = s3ui.binSearchCmp(streamdata, [startTime, 0], s3ui.cmpTimes);
         if (startIndex > 0 && s3ui.cmpTimes(streamdata[startIndex], [startTime, 0]) > 0) {
             startIndex--; // make sure to plot an extra data point at the beginning

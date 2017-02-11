@@ -99,18 +99,8 @@ function setTimezone(tz) {
 
 /* Sets the DST setting to the specified value. */
 function setDST(dst) {
-    var dstButton = this.find(".dstButton");
-    if (dst) {
-        if (dstButton.getAttribute("aria-pressed") == "false") {
-            dstButton.setAttribute("aria-pressed", "true")
-            $(dstButton).addClass("active");
-        }
-    } else {
-        if (dstButton.getAttribute("aria-pressed") == "true") {
-            dstButton.setAttribute("aria-pressed", "false");
-            $(dstButton).removeClass("active");
-        }
-    }
+  this.find("#dst-checkbox").checked = dst;
+ 
 }
 
 /* To create another y-axis, call "addYAxis". */

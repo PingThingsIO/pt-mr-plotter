@@ -19,7 +19,7 @@
  */
 
 function init_streamtree(self) {
-    self.idata.counter = 0;
+
     self.idata.streamTree = undefined;
     self.idata.$streamTreeDiv = undefined;
     self.idata.rootNodes = undefined;; // Acts as a set of root nodes: maps name to id
@@ -83,7 +83,7 @@ function updateStreamList(self) {
         });
 
   streamTreeDiv.on("click", ".jstree-checkbox", function (event) {
-    var selectedBefore = self.idata.counter;
+
             var id = event.target.parentNode.parentNode.getAttribute("id");
             var node = streamTree.get_node(id);
             if (streamTree.is_selected(node)) {
@@ -91,8 +91,8 @@ function updateStreamList(self) {
             } else {
                 streamTree.checkbox_select_node(node);
 
-              // ONLY AUTOSCALE ALL CLICK IF 1ST STREAM SELECTED
-                if (!selectedBefore && self.idata.counter > 0 ) {
+
+                if (!self.idata.selectedStreams.length) {
                     setTimeout( function() { $( ".showAll" ).click(); }, 700);
                 }
 
@@ -195,7 +195,7 @@ function makeSelectHandler(self, streamTree, selectAllChildren) {
                     if (node.children.length == 0) {
                         streamTree.old_select_node(node, suppress_event, prevent_open); // if it's a leaf, select it
 
-                        if ( self.idata.counter == 1 ) {
+                        if ( self.idata.selectedStreams.length == 1 ) {
                             setTimeout( function() { $( ".showAll" ).click(); }, 500);
                         };
 
@@ -267,12 +267,8 @@ function pathsToTree(self, sourceName, streamList) {
                         childNode.data.streamdata = initiallySelectedStreams[sourceName][path];
                         initiallySelectedStreams[sourceName].count--;
                         if (initiallySelectedStreams[sourceName].count == 0) {
-//                            self.idata.counter += 1;
-                            // console.log(initiallySelectedStreams[sourceName][path]);
                             delete initiallySelectedStreams[sourceName];
                         } else {
-//                            self.idata.counter += 1;
-                            // console.log(initiallySelectedStreams[sourceName][path]);
                             delete initiallySelectedStreams[sourceName][path];
                         }
                         childNode.data.selected = true;
@@ -345,16 +341,14 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
             result = selectNode(self, tree, select, tree.get_node(node.children[i])) || result;
         }
         return result;
-    } else if (node.data.selected != select) {
+    }
+  
+  if (node.data.selected != select) {
+    if (!select && self.idata.selectedStreamsBuffer.length == 1) {
+    $('.startdate, .enddate').val('');
+    $('#plotter-tabs').slideUp();
+  }
         node.data.selected = select;
-      self.idata.counter += select ? 1:-1;
-      if (!self.idata.counter) {
-        $('.startdate, .enddate').val('');
-        $('#plotter-tabs').slideUp();
-      }
-      else {
-        $('#plotter-tabs').slideDown();
-      }
         if (node.data.streamdata == undefined) {
             self.idata.pendingStreamRequests += 1;
             self.requester.makeMetadataRequest('select * where Metadata/SourceName = "' + node.data.sourceName + '" and Path = "' + node.data.path + '";', function (data) {
@@ -364,9 +358,10 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
                             data = JSON.parse(data)[0];
                             node.data.streamdata = data;
                         }
-                        s3ui.toggleLegend(self, select, node.data.streamdata, true);
+                      s3ui.toggleLegend(self, select, node.data.streamdata, true);
                     }
-                });
+            });
+
             return true;
         } else {
             s3ui.toggleLegend(self, select, node.data.streamdata, true);
