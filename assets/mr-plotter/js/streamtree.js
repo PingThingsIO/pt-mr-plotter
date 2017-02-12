@@ -90,12 +90,6 @@ function updateStreamList(self) {
               streamTree.deselect_node(node);
             } else {
                 streamTree.checkbox_select_node(node);
-
-
-                if (!self.idata.selectedStreams.length) {
-                    setTimeout( function() { $( ".showAll" ).click(); }, 700);
-                }
-
             }
             return false;
         });
@@ -208,7 +202,7 @@ function makeSelectHandler(self, streamTree, selectAllChildren) {
         };
 
         $( ".streamTree" ).ready(function() {
-            if ( self.idata.selectedStreamsBuffer.length == 0 ) { setTimeout ( function() { streamTree.toggle_node("root_0"); }, 1000); };
+          if ( self.idata.selectedStreamsBuffer.length == 0 ) { setTimeout ( function() { streamTree.toggle_node("root_0"); }, 200); };
         });
 
     return handler;
@@ -347,7 +341,11 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
     if (!select && self.idata.selectedStreamsBuffer.length == 1) {
       $('.startdate, .enddate').val('');
       hidePlotter();
-  }
+    }
+    if (select && !self.idata.selectedStreamsBuffer.length) {
+      setTimeout( function() { $( ".showAll" ).click(); }, 400);
+      showPlotter();
+    }
         node.data.selected = select;
         if (node.data.streamdata == undefined) {
             self.idata.pendingStreamRequests += 1;
