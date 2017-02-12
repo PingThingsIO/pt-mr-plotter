@@ -198,5 +198,13 @@ body {
     width: calc(100% - 65px);
     text-align: center;
 }
+#plot-directions>img {
+    max-width:100%;
+    position: relative;
+top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);    
+}
 
 
