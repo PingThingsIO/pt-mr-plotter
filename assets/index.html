@@ -781,20 +781,23 @@ $('#err-alert').hide();
                                   <div class="row">
                                     <div class="col-md-6">
                                       <div class="form-group">
-                                        <p data-localize='start_date'>Start Date</p>
+                                        <p data-localize='start_date'>Manual Zoom: Start Date</p>
                                         <div class="input-group" style="width: 100%;">
                                           <input type="text" class="form-control datefield startdate" />
                                           <div class="m1yButton btn input-group-addon" style="width:4em">-1Y</div>
                                         </div>
                                       </div>
                                       <div class="form-group">
-                                        <p data-localize='end_date'>End Date</p>
+                                        <p data-localize='end_date'>Manual Zoom: End Date</p>
                                         <div class="input-group" style="width: 100%;">
                                           <input type="text" class="form-control datefield enddate">
                                           <div class="nowButton btn input-group-addon" style="width:4em">Now</div>
                                         </div>
 
                                       </div>
+                                      <div class="text-center">
+                                        <div class="btn btn-primary" data-localize='manual_zoom' onclick='$( ".plotButton" ).click();'>&larr; Manual Zoom &rarr; </div>
+                                      </div>                                      
                                     </div>
                                     <div class="col-md-6">
 
@@ -893,9 +896,6 @@ $('#err-alert').hide();
                                           </div>
                                         </div>
                                         <input type="text" class="otherTimezone form-control" style="visibility: hidden;" />
-                                      </div>
-                                      <div class="text-center">
-                                        <div class="btn btn-primary" data-localize='manual_zoom' onclick='$( ".plotButton" ).click();'>&larr; Manual Zoom &rarr; </div>
                                       </div>
                                     </div>
                                   </div>
