@@ -777,34 +777,42 @@ $('#err-alert').hide();
                             <!-- TIME SELECTION -->
                             <div rol="tabpanel" id="time-tab" class="tab-pane fade col-md-12">
                               <div class="well">
-                                <form role="form">
-                                  <div class="row">
-                                    <div class="col-md-6">
-                                      <div class="form-group">
-                                        <p data-localize='start_date'>Manual Zoom: Start Date</p>
-                                        <div class="input-group" style="width: 100%;">
-                                          <input type="text" class="form-control datefield startdate" />
-                                          <div class="m1yButton btn input-group-addon" style="width:4em">-1Y</div>
-                                        </div>
-                                      </div>
-                                      <div class="form-group">
-                                        <p data-localize='end_date'>Manual Zoom: End Date</p>
-                                        <div class="input-group" style="width: 100%;">
-                                          <input type="text" class="form-control datefield enddate">
-                                          <div class="nowButton btn input-group-addon" style="width:4em">Now</div>
-                                        </div>
 
-                                      </div>
-                                      <div class="text-center">
+                                  <div class="row text-center">
+                                    
+                                    <div id="manual-zoom" class="col-md-6">
+                                      <h3 data-localize="manual_zoom">Manual Zoom</h3>
+                                      <br>
+                                      <form class="form-inline">
+                                        <div class="form-group">
+                                          <label for="start-date" data-localize='start_date'>Start Date</label>                                        
+                                          <div class="input-group">
+
+                                            <input id="start-date" type="text" class="form-control datefield startdate" />
+                                            <div class="m1yButton input-group-addon" style="width:4em">-1Y</div>
+                                          </div>
+                                        </div>
+                                      </form>
+                                      <br>                                      
+                                      <form class="form-inline">
+                                        <div class="form-group">
+                                          <label for="end-date" data-localize='end_date'>End Date</label>
+                                          <div class="input-group">
+                                            <input id="end-date" type="text" class="form-control datefield enddate">
+                                            <div class="nowButton  input-group-addon" style="width:4em">Now</div>
+                                          </div>
+
+                                        </div>
+                                      </form>
+                                      <br>
                                         <div class="btn btn-primary" data-localize='manual_zoom' onclick='$( ".plotButton" ).click();'>&larr; Manual Zoom &rarr; </div>
-                                      </div>                                      
+                               
                                     </div>
                                     <div class="col-md-6">
-
+                                      <form class="form">
                                       <div class="form-group">
-                                        <p data-localize='timezone'>Timezone
-                                          <button id="auto-timezone" class="btn btn-default" style="float:right;">Autodetect</button>
-                                        </p>
+                                        <h3 data-localize='timezone'>Timezone</h3>
+                                        <br>
                                         <div class="input-group " style="width: 100%;">
                                           <div class="col-md-6 col-md-offset-2">
                                           <select id="timezone-dropdown" class="timezoneSelect form-control">
@@ -884,7 +892,7 @@ $('#err-alert').hide();
                                             <option value="Asia/Kamchatka">Asia/Kamchatka</option>
                                             <option value="Pacific/Nauru">Pacific/Nauru</option>
                                             <option value="Pacific/Tongatapu">Pacific/Tongatapu</option>                                            
-                                            <option value="OTHER">Other:</option>
+                                            <!-- <option value="OTHER">Other:</option> -->
                                           </select>
                                           </div>
                                           <div class="col-md-3 text-center">
@@ -896,11 +904,14 @@ $('#err-alert').hide();
                                           </div>
                                         </div>
                                         <input type="text" class="otherTimezone form-control" style="visibility: hidden;" />
+                                        <br>
+                                        <button id="auto-timezone" class="btn btn-info">Autodetect</button>                                        
                                       </div>
+                                      </form>
                                     </div>
                                   </div>
                                   
-                                </form>
+
 
                                 <div class="row">
                                   <div class="plotButton btn btn-primary" style='visibility: hidden;'>Apply Date Range and Plot</div>

@@ -201,10 +201,17 @@ body {
 #plot-directions>img {
     max-width:100%;
     position: relative;
-top: 50%;
+    top: 50%;
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);    
 }
 
 
+#manual-zoom {
+    border-right: solid 1px #ddd;
+}
+
+#start0, #end0 {
+    min-width: 190px;
+}
