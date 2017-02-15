@@ -407,7 +407,8 @@ function executePermalink(self, args, set_streams_only) {
 }
 
 function finishExecutingPermalink(self, streams, colors, args, streamToSelect, set_streams_only) {
-    self.imethods.selectStreams(streams);
+  self.imethods.selectStreams(streams);
+  showPlotter();
     var i;
     for (i = 0; i < streams.length; i++) {
         if (colors[i] != undefined) {
