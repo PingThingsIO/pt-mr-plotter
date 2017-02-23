@@ -360,10 +360,12 @@
 
                 $.getJSON( "disk_usage.json", function( data_usage ) {
                   var items = [];
-                  var space_available = data_usage['diskarray'][1]['spaceavail'];
-                  var space_total = data_usage['diskarray'][1]['spacetotal'];
-                  // console.log(space_available/space_total);
-
+                  for (disk in data_usage['diskarray']) {
+                      if (data_usage['diskarray'][disk]['mount'] == "/ssd") {
+                          var space_available = data_usage['diskarray'][disk]['spaceavail'];
+                          var space_total = data_usage['diskarray'][disk]['spacetotal'];
+                      }
+                  }
                   var space_remaining = space_available/space_total;
                   var space_free = space_total - space_available;
                   var space_remaining_gb = space_available/1024/1024;
@@ -377,7 +379,7 @@
 
                   $(".prgbar").width( 100 - (space_remaining).toFixed(2)*100 +"%");
                   // $(".prgbar").width( (100) +"%");
-                  $(".prgtext").html( (100 - (space_remaining).toFixed(3)*100).toString().substring(0,5) +"% <span data-localize='space_used'>used</span> ( " + bytesToSize(space_total - space_available) + " of " + bytesToSize(space_total) + " )" );
+                  $(".prgtext").html(Math.round(100 - (space_remaining * 100)).toString().substring(0,5) +"% <span data-localize='space_used'>used</span> ( " + bytesToSize(space_total - space_available) + " of " + bytesToSize(space_total) + " )" );
 $('#err-alert').hide();
                 });
 
