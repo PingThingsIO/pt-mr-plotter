@@ -21,7 +21,7 @@
 
       <ul class="nav navbar-nav" style="height:50px;">
           <li style="margin:15px;">
-              <button type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>Refer to the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%207.pdf' target='_blank'>First Steps</a> manual for information on the basic MicroPMU setup and using the MicroPMU Plotter interface.</p><p>Refer to the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%209.pdf' target='_blank'>Administrator</a> manual for information on managing the Quick Start Kit server and MicroPMU data.</p><p>For additional assistance, contact PSL support.</p><ul><li>Office: 1-510-522-4400</li><li>Fax: 1-510-522-4455</li><li>Email: <a href='mailto:support@powerstandards.com' target='_top'>support@powersensorsltd.com</a></li></ul>">Help</button>
+              <button type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>View the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%209.pdf' target='_blank'>First Steps</a> manual</p><p>View the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%2014.pdf' target='_blank'>Administrator</a> manual</p><p>PSL assistance contact information:</p><ul><li>Office: +1-510-522-4400</li><li>Fax: +1-510-522-4455</li><li>Email: <a href='mailto:support@powerstandards.com' target='_top'>support@powersensorsltd.com</a></li></ul>">Help</button>
           </li>
       </ul>
       <ul class="nav navbar-nav" style="height:50px;">
@@ -413,7 +413,7 @@ $('#err-alert').hide();
     <div class="login">
                         <div id="toggler" class="btn btn-link" style='float: left; margin-left: 10px; margin-right: 10px;' onclick="toggle_visibility('toggle_column');">&larr; Hide</div>
 
-                        <h3 style='float: left; margin-left: 10px; margin-right: 10px; padding-top: 0px; padding-bottom: none; margin-top: 4px;'>MicroPMU Plotting Application v1.4.1</h3>
+                        <h3 style='float: left; margin-left: 10px; margin-right: 10px; padding-top: 0px; padding-bottom: none; margin-top: 4px;'>MicroPMU Plotting Application v1.4.2</h3>
 
                         <!--
                         <div class="btn btn btn-primary" style='float: left; margin-right: 10px;' onclick='$( ".showAll" ).click();'>Plot all Data</div>
@@ -701,13 +701,13 @@ $('#err-alert').hide();
                     <div id="plotter-tabs"  class="row">
                       <div class="col-md-12">                          
                           <ul id="plotter-tabs-nav" class="nav nav-tabs nav-justified" role="tablist">
-                            <li role="presentation" class="active">
+                            <li role="presentation">
                               <a  aria-controls="legend-tab" data-target="#legend-tab" role="tab" data-toggle="tab">
                                 <button id="legend_toggler" class="btn btn-info"  onclick="legend_toggler();" data-visible="true">Hide</button><h3 data-localize="legend">Legend</h3>
                               </a>
                                                             
                             </li>
-                            <li role="presentation">
+                            <li role="presentation" class="active">
                               <a aria-controls="y-axes-tab" data-target="#y-axes-tab" role="tab" data-toggle="tab">
                                 <h3 data-localize="axes">Axes</h3>
                               </a>
