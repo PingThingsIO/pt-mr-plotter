@@ -21,7 +21,7 @@
 
       <ul class="nav navbar-nav" style="height:50px;">
           <li style="margin:15px;">
-              <button type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>View the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%209.pdf' target='_blank'>First Steps</a> manual</p><p>View the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%2014.pdf' target='_blank'>Administrator</a> manual</p><p>PSL assistance contact information:</p><ul><li>Office: +1-510-522-4400</li><li>Fax: +1-510-522-4455</li><li>Email: <a href='mailto:support@powerstandards.com' target='_top'>support@powersensorsltd.com</a></li></ul>">Help</button>
+              <button type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>View the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%209.pdf' target='_blank'>First Steps</a> manual</p><p>View the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%2014.pdf' target='_blank'>Administrator</a> manual</p><p>View the <a href='/documents/MicroPMU%20Installation%20and%20User%27s%20Manual%20-%20v1.1.pdf' target='_blank'>microPMU</a> user's manual</p><p>PSL assistance contact information:</p><ul><li>Office: +1-510-522-4400</li><li>Fax: +1-510-522-4455</li><li>Email: <a href='mailto:support@powerstandards.com' target='_top'>support@powersensorsltd.com</a></li></ul>">Help</button>
           </li>
       </ul>
       <ul class="nav navbar-nav" style="height:50px;">
@@ -178,7 +178,7 @@
 
 
                 .progress {
-                    border: 2px solid #000;
+                    border: 2px solid #5e96e4;
                     height: 20px;
                     width: inherit;
             }
@@ -386,10 +386,13 @@
                   $(".prgtext").html(Math.round(100 - (space_remaining * 100)).toString().substring(0,5) +"% <span data-localize='space_used'>used</span> ( " + bytesToSize(space_total - space_available) + " of " + bytesToSize(space_total) + " )" );
                   if (Math.round(100 - (space_remaining * 100)) >= 90) {
                       $(".prgbar").css("background", "#ff0000");
+                      $(".progress").css("border-color", "#990000");
                   } else if (Math.round(100 - (space_remaining * 100)) >= 85) {
                       $(".prgbar").css("background", "#ffa500");
+                      $(".progress").css("border-color", "#996300");
                   } else if (Math.round(100 - (space_remaining * 100)) >= 80) {
                       $(".prgbar").css("background", "#ffd700");
+                      $(".progress").css("border-color", "#998100");
                   }
 
                   if ((space_remaining_gb) <= 20) {
