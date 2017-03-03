@@ -178,7 +178,7 @@
 
 
                 .progress {
-                    border: 2px solid #5E96E4;
+                    border: 2px solid #000;
                     height: 20px;
                     width: inherit;
             }
@@ -193,7 +193,7 @@
                         z-index: 999;
                 }
                 .progress .prgtext {
-                        color: #286692;
+                        color: #000;
                         text-align: center;
                         font-size: 12px;
                         margin-left: 3px;
@@ -384,12 +384,12 @@
                   $(".prgbar").width( 100 - (space_remaining).toFixed(2)*100 +"%");
                   // $(".prgbar").width( (100) +"%");
                   $(".prgtext").html(Math.round(100 - (space_remaining * 100)).toString().substring(0,5) +"% <span data-localize='space_used'>used</span> ( " + bytesToSize(space_total - space_available) + " of " + bytesToSize(space_total) + " )" );
-                  if (Math.round(100 - (space_remaining * 100)) >= 80) {
-                      $(".prgbar").css("background", "#ffd700");
+                  if (Math.round(100 - (space_remaining * 100)) >= 90) {
+                      $(".prgbar").css("background", "#ff0000");
                   } else if (Math.round(100 - (space_remaining * 100)) >= 85) {
                       $(".prgbar").css("background", "#ffa500");
-                  } else if (Math.round(100 - (space_remaining * 100)) >= 90) {
-                      $(".prgbar").css("background", "#ff0000");
+                  } else if (Math.round(100 - (space_remaining * 100)) >= 80) {
+                      $(".prgbar").css("background", "#ffd700");
                   }
 
                   if ((space_remaining_gb) <= 20) {
