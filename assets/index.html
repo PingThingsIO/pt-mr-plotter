@@ -321,17 +321,21 @@
                else autoDST();
                 
                 $('#timezone-dropdown').change(function (e) {
-                  if (plotterSelf.idata.selectedStreams.length)
-                    $('.plotButton').click();
-                  createCookie('timezone', e.currentTarget.value, 365);
+                    if (plotterSelf.idata.selectedStreams.length) {
+                        $('.plotButton').click();
+                        createCookie('timezone', e.currentTarget.value, 365);
+                        $(".showAll").click();
+                    }
                 });
 
                 $('#auto-timezone').click(function(e) {
-                  e.preventDefault();
-                  autoTimezone();
-                  autoDST();
-                  if (plotterSelf.idata.selectedStreams.length)                  
-                    $('.plotButton').click();
+                    e.preventDefault();
+                    autoTimezone();
+                    autoDST();
+                    if (plotterSelf.idata.selectedStreams.length) {
+                        $('.plotButton').click();
+                        $(".showAll").click();
+                    }
                 });
 
                 //size streamtree
@@ -380,6 +384,18 @@
                   $(".prgbar").width( 100 - (space_remaining).toFixed(2)*100 +"%");
                   // $(".prgbar").width( (100) +"%");
                   $(".prgtext").html(Math.round(100 - (space_remaining * 100)).toString().substring(0,5) +"% <span data-localize='space_used'>used</span> ( " + bytesToSize(space_total - space_available) + " of " + bytesToSize(space_total) + " )" );
+                  if (Math.round(100 - (space_remaining * 100)) >= 80) {
+                      $(".prgbar").css("background", "#ffd700");
+                  } else if (Math.round(100 - (space_remaining * 100)) >= 85) {
+                      $(".prgbar").css("background", "#ffa500");
+                  } else if (Math.round(100 - (space_remaining * 100)) >= 90) {
+                      $(".prgbar").css("background", "#ff0000");
+                  }
+
+                  if ((space_remaining_gb) <= 20) {
+                      $("<p>No longer accepting new data</p><p>Drive is full</p>").insertAfter(".progress");
+                  }
+
 $('#err-alert').hide();
                 });
 
@@ -807,7 +823,7 @@ $('#err-alert').hide();
                                         </div>
                                       </form>
                                       <br>
-                                        <div class="btn btn-primary" data-localize='manual_zoom' onclick='$( ".plotButton" ).click();'>&larr; Manual Zoom &rarr; </div>
+                                        <div class="btn btn-primary" data-localize='manual_zoom' onclick="$( '.plotButton' ).click();">&larr; Manual Zoom &rarr; </div>
                                
                                     </div>
                                     <div class="col-md-6">
