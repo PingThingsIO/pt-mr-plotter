@@ -21,7 +21,7 @@
 
       <ul class="nav navbar-nav" style="height:50px;">
           <li style="margin:15px;">
-              <button type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>View the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%2011.pdf' target='_blank'>First Steps</a> manual</p><p>View the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%2015.pdf' target='_blank'>Administrator</a> manual</p><p>View the <a href='/documents/MicroPMU%20Installation%20and%20User%27s%20Manual%20-%20v1.1.pdf' target='_blank'>microPMU</a> user's manual</p><p>PSL assistance contact information:</p><ul><li>Office: +1-510-522-4400</li><li>Fax: +1-510-522-4455</li><li>Email: <a href='mailto:support@powerstandards.com' target='_top'>support@powersensorsltd.com</a></li></ul>">Help</button>
+              <a id="helpbtn" tabindex="0" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>View the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%2011.pdf' target='_blank'>First Steps</a> manual</p><p>View the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%2015.pdf' target='_blank'>Administrator</a> manual</p><p>View the <a href='/documents/MicroPMU%20Installation%20and%20User%27s%20Manual%20-%20v1.1.pdf' target='_blank'>microPMU</a> user's manual</p><p>PSL assistance contact information:</p><ul><li>Office: +1-510-522-4400</li><li>Fax: +1-510-522-4455</li><li>Email: <a href='mailto:support@powerstandards.com' target='_top'>support@powersensorsltd.com</a></li></ul>">Help</a>
           </li>
       </ul>
       <ul class="nav navbar-nav" style="height:50px;">
@@ -174,6 +174,23 @@
                 font: 10px sans-serif;
                 background: yellow;
                 box-shadow: 2px 2px 1px #888;
+            }
+
+            #helpbtn {
+                padding: 1px 6px;
+                font-size: 12px;
+                color: #333;
+                background-color: #fff;
+                text-align: center;
+                vertical-align: middle;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            #helpbtn:hover {
+                background-color: #e6e6e6;
+                border-color: #adadad;
             }
 
 
