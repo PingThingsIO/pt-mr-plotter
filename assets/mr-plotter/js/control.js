@@ -313,7 +313,7 @@ function createVerticalCursor(xCoord) {
         return false;
     }
     var self = this;
-    var newCursor = new s3ui.Cursor(this, xCoord, this.idata.cursorgroup, this.idata.HEIGHT + 65, -65, true, this.idata.$background, function () {
+    var newCursor = new s3ui.Cursor(this, xCoord, this.idata.cursorgroup, this.idata.HEIGHT, 0, true, this.idata.$background, function () {
             self.find(".permalink").innerHTML = "";
             s3ui.updateVertCursorStats(self);
         });
