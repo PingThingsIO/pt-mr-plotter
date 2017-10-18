@@ -275,7 +275,7 @@ function ensureData(self, uuid, pointwidthexp, startTime, endTime, callback, cac
                     if (emptyStream) {
                       self.idata.alert('No Data.');
                       console.log(emptyStream);
-                      var path = 'uPMU'+emptyStream.Path;
+                      var path = 'uPMU'+emptyStream.path;
 
                       var leaf = self.idata.leafNodes[path];
                       if (leaf) {

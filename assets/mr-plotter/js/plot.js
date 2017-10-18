@@ -1017,7 +1017,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
                     .attr("text-anchor", "end")
                     .attr("fill", self.idata.streamSettings[legend_array[i].uuid].color)
                     .attr("transform", "translate(" + column * 240 + ", " + ( i%2 ) * 22  + ")rotate(0)")
-                    .text(legend_array[i].Path + " —" );
+                    .text(legend_array[i].path + " —" );
               }
         });
 

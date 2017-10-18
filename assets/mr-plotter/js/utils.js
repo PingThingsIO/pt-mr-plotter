@@ -269,7 +269,7 @@ function getUnitString(unitDict) {
 }
 
 function getPSLUnit(stream) {
-    var pathcomps = stream.Path.split("/");
+    var pathcomps = stream.path.split("/");
     var last = pathcomps[pathcomps.length - 1];
     if (s3ui.pslunitmap.hasOwnProperty(last)) {
         return s3ui.pslunitmap[last];
