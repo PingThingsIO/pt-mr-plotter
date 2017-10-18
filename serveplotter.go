@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -22,8 +22,13 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"crypto/rand"
+	"crypto/tls"
 	"encoding/base64"
+	"encoding/csv"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -76,17 +81,18 @@ func (rw RespWrapper) GetWriter() io.Writer {
 }
 
 /* State needed to handle HTTP requests. */
+var btrdbConn *btrdb.BTrDB
 var dr *DataRequester
 var br *DataRequester
-var mdServer string
-var permalinkConn *mgo.Collection
-var accountConn *mgo.Collection
-var csvURL string
-var token64len int
-var token64dlen int
+var etcdConn *etcd.Client
 var permalinklen int
-var permalinkdlen int
-var csvMaxPoints int64
+var csvMaxPoints uint64
+var dataTimeout time.Duration
+var bracketTimeout time.Duration
+var csvTimeout time.Duration
+var mdTimeout time.Duration
+var permalinkNumBytes int
+var permalinkMaxTries int
 
 /* I don't order these elements from largest to smallest, so the int64s at the
    bottom may not be 8-byte aligned. That's OK, because I don't anticipate
@@ -150,6 +156,7 @@ var configRequiredKeys = map[string]bool{
 
 func main() {
 	var config Config
+	var err error
 	var filename string
 
 	if len(os.Args) < 2 {
@@ -160,33 +167,103 @@ func main() {
 
 	rawConfig, err := ini.Load(filename)
 	if err != nil {
-		fmt.Printf("Could not parse %s: %v\n", filename, err)
-		return
+		log.Fatalf("Could not parse %s: %v", filename, err)
 	}
 
 	/* Validate the configuration file. */
 	defaultSect := rawConfig.Section("")
-	for requiredKey, _ := range configRequiredKeys {
-		if !defaultSect.HasKey(requiredKey) {
-			fmt.Printf("Configuration file is missing required key \"%s\"\n", requiredKey)
-			return
+	for requiredKey, required := range configRequiredKeys {
+		if required && !defaultSect.HasKey(requiredKey) {
+			log.Fatalf("Configuration file is missing required key \"%s\"", requiredKey)
 		}
 	}
 
 	rawConfig.NameMapper = ini.TitleUnderscore
 	err = rawConfig.MapTo(&config)
 	if err != nil {
-		fmt.Printf("Could not map configuration file: %v\n", err)
-		return
+		log.Fatalf("Could not map configuration file: %v", err)
 	}
 
-	mdServer = config.MetadataServer
-	csvURL = config.CsvUrl
+	if len(config.BtrdbEndpoints) == 0 {
+		config.BtrdbEndpoints = btrdb.EndpointsFromEnv()
+	}
+
+	if config.UseHttps {
+		start := make(chan struct{}, 1)
+		go func() {
+			httpsCertPrefix := accounts.GetTagEtcdPath()
+			watchchan := etcdConn.Watch(context.Background(), httpsCertPrefix)
+			<-start
+			for watchresp := range watchchan {
+				err2 := watchresp.Err()
+				if err2 != nil {
+					log.Fatalf("Error watching https certificates: %v", err2)
+				}
+				updateTLSConfig(&config)
+			}
+
+			log.Fatalln("Watch on tags was lost")
+		}()
+		updateTLSConfig(&config)
+		start <- struct{}{}
+	}
+
+	var sessionkeys *keys.SessionKeys
+	sessionkeys, err = keys.RetrieveSessionKeys(context.Background(), etcdConn)
+	if err != nil {
+		log.Fatalf("Could not get session keys from etcd: %v", err)
+	}
+	var sessionencryptkey []byte
+	var sessionmackey []byte
+
+	if sessionkeys != nil {
+		log.Println("Found session keys in etcd")
+		sessionencryptkey = sessionkeys.EncryptKey
+		sessionmackey = sessionkeys.MACKey
+	} else {
+		log.Println("Session keys not in etcd; generating session keys...")
+		var keybytes = make([]byte, 32)
+		if _, err = rand.Read(keybytes); err != nil {
+			log.Fatalf("Could not generate session keys: %v", err)
+		}
+		sessionkeys = &keys.SessionKeys{
+			EncryptKey: keybytes[:16],
+			MACKey:     keybytes[16:],
+		}
+		_, err = keys.UpsertSessionKeysAtomically(context.Background(), etcdConn, sessionkeys)
+		if err != nil {
+			log.Fatalf("Could not update session key: %v", err)
+		}
+		/* Now read the keys from etcd. Don't just use the bytes in case the
+		   atomic update failed. */
+		sessionkeys, err = keys.RetrieveSessionKeys(context.Background(), etcdConn)
+		if err != nil {
+			log.Fatalf("Could not get session keys from etcd after insert: %v", err)
+		}
+		sessionencryptkey = sessionkeys.EncryptKey
+		sessionmackey = sessionkeys.MACKey
+	}
+
+	if bytes.Equal(sessionencryptkey, sessionmackey) {
+		log.Fatalln("The session encryption and MAC keys are the same; to ensure that session state is stored securely on the client, please change them to be different")
+	}
+
+	err = setEncryptKey(sessionencryptkey)
+	if err != nil {
+		log.Fatalf("Invalid encryption key: %v", err)
+	}
+	err = setMACKey(sessionmackey)
+	if err != nil {
+		log.Fatalf("Invalid MAC key: %v", err)
+	}
+
+	setTagPermissionCacheSize(config.MaxCachedTagPermissions)
+
 	csvMaxPoints = config.CsvMaxPointsPerStream
 
 	mongoConn, err := mgo.Dial(config.MongoServer)
 	if err != nil {
-		fmt.Printf("Could not connect to MongoDB Server at address %s\n", config.MongoServer)
+		log.Fatalf("Error: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -219,7 +296,11 @@ func main() {
 	http.HandleFunc("/data", dataHandler)
 	http.HandleFunc("/bracketws", bracketwsHandler)
 	http.HandleFunc("/bracket", bracketHandler)
-	http.HandleFunc("/metadata", metadataHandler)
+	http.HandleFunc("/treetop", treetopHandler)
+	http.HandleFunc("/treebranch", treebranchHandler)
+	http.HandleFunc("/treeleaf", treeleafHandler)
+	http.HandleFunc("/metadataleaf", metadataleafHandler)
+	http.HandleFunc("/metadatauuid", metadatauuidHandler)
 	http.HandleFunc("/permalink", permalinkHandler)
 	http.HandleFunc("/csv", csvHandler)
 	http.HandleFunc("/login", loginHandler)
@@ -247,27 +328,27 @@ func main() {
 			var loggedRedirect http.Handler = httpHandlers.CompressHandler(httpHandlers.CombinedLoggingHandler(os.Stdout, redirect))
 			log.Fatal(http.ListenAndServe(portStrHTTP, loggedRedirect))
 		} else {
-			log.Fatal(http.ListenAndServe(portStrHTTP, loggedHandler))
+			log.Fatal(http.ListenAndServe(portStrHTTP, mrPlotterHandler))
 		}
 	} else if config.UseHttps {
-		log.Fatal(http.ListenAndServeTLS(portStrHTTPS, config.CertFile, config.KeyFile, loggedHandler))
+		log.Fatal(mrPlotterServer.ListenAndServeTLS("", ""))
 	} else if config.UseHttp {
-		log.Fatal(http.ListenAndServe(portStrHTTP, loggedHandler))
+		log.Fatal(mrPlotterServer.ListenAndServe())
 	}
 	os.Exit(1)
 }
 
-func logWaitingRequests(output io.Writer, period time.Duration) {
+func logWaitingRequests(period time.Duration) {
 	for {
 		time.Sleep(period)
-		output.Write([]byte(fmt.Sprintf("Waiting data requests: %v; Waiting bracket requests: %v\n", dr.totalWaiting, br.totalWaiting)))
+		log.Printf("Waiting data requests: %v; Waiting bracket requests: %v", dr.totalWaiting, br.totalWaiting)
 	}
 }
 
-func logNumGoroutines(output io.Writer, period time.Duration) {
+func logNumGoroutines(period time.Duration) {
 	for {
 		time.Sleep(period)
-		output.Write([]byte(fmt.Sprintf("Number of goroutines: %v\n", runtime.NumGoroutine())))
+		log.Printf("Number of goroutines: %v", runtime.NumGoroutine())
 	}
 }
 
@@ -375,7 +456,7 @@ func parseBracketRequest(request string, writ Writable, expectExtra bool) (uuids
 
 func validateToken(token string) *LoginSession {
 	tokenslice, err := base64.StdEncoding.DecodeString(token)
-	if err != nil || len(tokenslice) != TOKEN_BYTE_LEN {
+	if err != nil {
 		return nil
 	}
 	return getloginsession(tokenslice)
@@ -415,9 +496,18 @@ func datawsHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-			if hasPermission(loginsession, uuidBytes) {
-				dr.MakeDataRequest(uuidBytes, startTime, endTime, uint8(pw), &cw)
+			var ctx = r.Context()
+			var cancelfunc context.CancelFunc
+			if dataTimeout >= 0 {
+				ctx, cancelfunc = context.WithTimeout(ctx, dataTimeout)
 			} else {
+				ctx, cancelfunc = context.WithCancel(ctx)
+			}
+			if hasPermission(ctx, loginsession, uuidBytes) {
+				dr.MakeDataRequest(ctx, uuidBytes, startTime, endTime, uint8(pw), &cw)
+				cancelfunc()
+			} else {
+				cancelfunc()
 				cw.GetWriter().Write([]byte("[]"))
 			}
 		}
@@ -427,13 +517,13 @@ func datawsHandler(w http.ResponseWriter, r *http.Request) {
 
 		writer, err := websocket.NextWriter(ws.TextMessage)
 		if err != nil {
-			fmt.Println("Could not echo tag to client")
+			log.Printf("Could not echo tag to client: %v", err)
 		}
 
 		if cw.CurrWriter != nil {
 			_, err = writer.Write([]byte(echoTag))
 			if err != nil {
-				fmt.Println("Could not echo tag to client")
+				log.Printf("Could not echo tag to client: %v", err)
 			}
 			writer.Close()
 		}
@@ -470,9 +560,18 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		if hasPermission(loginsession, uuidBytes) {
-			dr.MakeDataRequest(uuidBytes, startTime, endTime, uint8(pw), wrapper)
+		var ctx = r.Context()
+		var cancelfunc context.CancelFunc
+		if dataTimeout >= 0 {
+			ctx, cancelfunc = context.WithTimeout(ctx, dataTimeout)
 		} else {
+			ctx, cancelfunc = context.WithCancel(ctx)
+		}
+		if hasPermission(ctx, loginsession, uuidBytes) {
+			dr.MakeDataRequest(ctx, uuidBytes, startTime, endTime, uint8(pw), wrapper)
+			cancelfunc()
+		} else {
+			cancelfunc()
 			wrapper.GetWriter().Write([]byte("[]"))
 		}
 	}
@@ -512,18 +611,21 @@ func bracketwsHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-			var canview bool = true
+			var viewable []uuid.UUID = uuids[:0]
+			var ctx = r.Context()
+			var cancelfunc context.CancelFunc
+			if bracketTimeout >= 0 {
+				ctx, cancelfunc = context.WithTimeout(ctx, bracketTimeout)
+			} else {
+				ctx, cancelfunc = context.WithCancel(ctx)
+			}
 			for _, uuid := range uuids {
-				if !hasPermission(loginsession, uuid) {
-					canview = false
-					break
+				if hasPermission(ctx, loginsession, uuid) {
+					viewable = append(viewable, uuid)
 				}
 			}
-			if canview {
-				br.MakeBracketRequest(uuids, &cw)
-			} else {
-				br.MakeBracketRequest([]uuid.UUID{}, &cw)
-			}
+			br.MakeBracketRequest(ctx, uuids, &cw)
+			cancelfunc()
 		}
 		if cw.CurrWriter != nil {
 			cw.CurrWriter.Close()
@@ -531,13 +633,13 @@ func bracketwsHandler(w http.ResponseWriter, r *http.Request) {
 
 		writer, err := websocket.NextWriter(ws.TextMessage)
 		if err != nil {
-			fmt.Println("Could not echo tag to client")
+			log.Printf("Could not echo tag to client: %v", err)
 		}
 
 		if cw.CurrWriter != nil {
 			_, err = writer.Write([]byte(echoTag))
 			if err != nil {
-				fmt.Println("Could not echo tag to client")
+				log.Printf("Could not echo tag to client: %v", err)
 			}
 			writer.Close()
 		}
@@ -558,6 +660,7 @@ func bracketHandler(w http.ResponseWriter, r *http.Request) {
 	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("Could not read received POST payload: %v", err)))
+		return
 	}
 
 	wrapper := RespWrapper{w}
@@ -574,18 +677,22 @@ func bracketHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		var canview bool = true
+		var ctx = r.Context()
+		var cancelfunc context.CancelFunc
+		if bracketTimeout >= 0 {
+			ctx, cancelfunc = context.WithTimeout(ctx, bracketTimeout)
+		} else {
+			ctx, cancelfunc = context.WithCancel(ctx)
+		}
+
+		filtereduuids := uuids[:0]
 		for _, uuid := range uuids {
-			if !hasPermission(loginsession, uuid) {
-				canview = false
-				break
+			if hasPermission(ctx, loginsession, uuid) {
+				filtereduuids = append(filtereduuids, uuid)
 			}
 		}
-		if canview {
-			br.MakeBracketRequest(uuids, wrapper)
-		} else {
-			br.MakeBracketRequest([]uuid.UUID{}, wrapper)
-		}
+		br.MakeBracketRequest(ctx, filtereduuids, wrapper)
+		cancelfunc()
 	}
 }
 
@@ -594,15 +701,22 @@ func metadataHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("You must send a POST request to get data."))
-		return
+		return true
 	}
 
 	var n int
 
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_REQSIZE)
-	request, err := ioutil.ReadAll(r.Body) // should probably limit the size of this
+	request, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.Write([]byte("Could not read request."))
+		w.Write([]byte(fmt.Sprintf("Could not read received POST payload: %v", err)))
+		return nil, false
+	}
+	return request, true
+}
+
+func treetopHandler(w http.ResponseWriter, r *http.Request) {
+	if onlyallowpost(w, r) {
 		return
 	}
 
@@ -626,8 +740,7 @@ func metadataHandler(w http.ResponseWriter, r *http.Request) {
 
 	mdReq, err := http.NewRequest("POST", fmt.Sprintf("%s?tags=%s", mdServer, tags), strings.NewReader(string(request)))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Could not perform HTTP request to metadata server: %v", err)))
+		w.Write([]byte(fmt.Sprintf("Error: %v\n", err)))
 		return
 	}
 
@@ -636,8 +749,12 @@ func metadataHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.DefaultClient.Do(mdReq)
 
 	if err != nil {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		w.Write([]byte(fmt.Sprintf("Could not forward request to metadata server: %v", err)))
+		w.Write([]byte(fmt.Sprintf("Error: %v\n", err)))
+	}
+}
+
+func mdDispatch(w http.ResponseWriter, r *http.Request, dispatch func(context.Context, *etcd.Client, *btrdb.BTrDB, *LoginSession, string) ([]byte, error)) {
+	if onlyallowpost(w, r) {
 		return
 	}
 
@@ -650,6 +767,28 @@ func metadataHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(buffer[:bytesRead])
 	}
 	resp.Body.Close()
+	}
+	w.Write(toplevel)
+}
+
+func treebranchHandler(w http.ResponseWriter, r *http.Request) {
+	mdDispatch(w, r, func(ctx context.Context, ec *etcd.Client, bc *btrdb.BTrDB, ls *LoginSession, toplevel string) ([]byte, error) {
+		levels, err := treebranchPaths(ctx, ec, bc, ls, toplevel)
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(levels)
+	})
+}
+
+func treeleafHandler(w http.ResponseWriter, r *http.Request) {
+	mdDispatch(w, r, func(ctx context.Context, ec *etcd.Client, bc *btrdb.BTrDB, ls *LoginSession, branch string) ([]byte, error) {
+		levels, err := treeleafPaths(ctx, ec, bc, ls, branch)
+		if err != nil {
+			return nil, err
+		}
+		return json.Marshal(levels)
+	})
 }
 
 const PERMALINK_HELP string = "To create a permalink, send the data as a JSON document via a POST request. To retrieve a permalink, set a GET request, specifying \"id=<permalink identifier>\" in the URL."
@@ -718,19 +857,23 @@ func permalinkHandler(w http.ResponseWriter, r *http.Request) {
 		err = permalinkEncoder.Encode(jsonPermalink)
 
 		if err != nil {
-			fmt.Printf("Could not encode permlink data: %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("Could not read received POST payload: %v", err)))
+			return
 		}
 	} else {
 		var permalinkDecoder *json.Decoder = json.NewDecoder(r.Body)
 
 		err = permalinkDecoder.Decode(&jsonPermalink)
 		if err != nil {
-			w.Write([]byte(fmt.Sprintf("Error: received invalid JSON: %v", err)))
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("Received invalid JSON: %v", err)))
 			return
 		}
 
 		err = validatePermalinkJSON(jsonPermalink)
 		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -745,19 +888,45 @@ func permalinkHandler(w http.ResponseWriter, r *http.Request) {
 			id64len := base64.URLEncoding.EncodedLen(len(id))
 			id64buf := make([]byte, id64len, id64len)
 			base64.URLEncoding.Encode(id64buf, []byte(id))
+
+			success, err = permalink.InsertPermalinkData(ctx, etcdConn, string(id64buf), jsonLiteral)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(fmt.Sprintf("Could not insert permalink into database: %v", err)))
+				return
+			}
+		}
+
+		if success {
 			w.Write(id64buf)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("Could not add permalink to database: %v", err)))
+			w.Write([]byte("Server error"))
+
+			log.Printf("Could not find a unique permalink ID in %d tries!", permalinkMaxTries)
 		}
 	}
+}
+
+// RawCSVRequest encapsulates a request to the Mr. Plotter backend for a CSV.
+type RawCSVRequest struct {
+	StartTime  int64
+	EndTime    int64
+	UUIDs      []string `json:"UUIDS"`
+	Labels     []string
+	QueryType  string
+	WindowText string
+	WindowUnit string
+	UnitofTime string
+	Token      string `json:"_token,omitempty"`
+	PointWidth uint8
 }
 
 func csvHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("To get a CSV file, send the required data as a JSON document via a POST request."))
+		fmt.Fprint(w, "To get a CSV file, send the required data as a JSON document via a POST request.")
 		return
 	}
 
@@ -767,7 +936,7 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = io.ReadFull(r.Body, make([]byte, 5)) // Remove the "json="
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Bad request"))
+		fmt.Fprint(w, "Bad request")
 		return
 	}
 
@@ -776,7 +945,7 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 	err = jsonCSVReqDecoder.Decode(&jsonCSVReq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Malformed request"))
+		fmt.Fprint(w, "Malformed request")
 		return
 	}
 
@@ -791,15 +960,18 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 
 	/* Taken from the BTrDB HTTP interface bindings, to make sure I handle the units in the same way. */
 	switch jsonCSVReq.UnitofTime {
+	case "s":
+		cq.StartTime *= 1000000000
+		cq.EndTime *= 1000000000
 	case "":
 		fallthrough
 	case "ms":
-		deltaT *= 1000000
-	case "ns":
+		cq.StartTime *= 1000000
+		cq.EndTime *= 1000000
 	case "us":
-		deltaT *= 1000
-	case "s":
-		deltaT *= 1000000000
+		cq.StartTime *= 1000
+		cq.EndTime *= 1000
+	case "ns":
 	default:
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("Invalid unit of time: must be 'ns', 'ms', 'us' or 's' (got '%s')", jsonCSVReq.UnitofTime)))
@@ -828,14 +1000,30 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		uuidobj := uuid.Parse(uuidstr)
 		if uuidobj == nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Malformed UUID"))
+			fmt.Fprint(w, "Malformed UUID")
 			return
 		}
-		if !hasPermission(loginsession, uuidobj) {
+
+		if !hasPermission(ctx, loginsession, uuidobj) {
 			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Insufficient permissions"))
+			fmt.Fprint(w, "Insufficient permissions")
 			return
 		}
+
+		s := btrdbConn.StreamFromUUID(uuidobj)
+		ex, err2 := s.Exists(ctx)
+		if err2 != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "%s", err2.Error())
+			return
+		}
+		if !ex {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Stream does not exist")
+			return
+		}
+
+		cq.Streams = append(cq.Streams, s)
 	}
 
 	// Don't send the token to BTrDB
@@ -866,10 +1054,12 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.DefaultClient.Do(csvReq)
 
 	if err != nil {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		w.Write([]byte(fmt.Sprintf("Could not forward request to database: %v", err)))
-		resp.Body.Close()
-		return
+		goto printerror
+	} else {
+		cw.Flush()
+		if err = cw.Error(); err != nil {
+			goto printerror
+		}
 	}
 
 	var buffer []byte = make([]byte, FORWARD_CHUNKSIZE) // forward the response in 4 KiB chunks
@@ -939,6 +1129,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		base64.StdEncoding.Encode(token64buf, tokenarr)
 		w.Write(token64buf)
 	}
+	// else: invalid credentials, so respond with nothing
 }
 
 func parseToken(reader io.Reader) []byte {
@@ -1044,7 +1235,7 @@ func changepwHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenslice, err = base64.StdEncoding.DecodeString(token)
-	if err != nil || len(tokenslice) != TOKEN_BYTE_LEN {
+	if err != nil {
 		w.Write([]byte(ERROR_INVALID_TOKEN))
 		return
 	}

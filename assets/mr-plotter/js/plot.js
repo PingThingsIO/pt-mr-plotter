@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -858,10 +858,10 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
                 startIndex++; // make sure we only look at data in the specified range
             }
             endIndex = s3ui.binSearchCmp(streamdata, [endTime, 0], s3ui.cmpTimes);
-            if (endIndex < streamdata.length && s3ui.cmpTimes(streamdata[endIndex], endTime)) {
+            if (endIndex < streamdata.length && s3ui.cmpTimes(streamdata[endIndex], endTime) > 0) {
                 endIndex--; // make sure we only look at data in the specified range
             }
-            for (k = startIndex; k < endIndex; k++) {
+            for (k = startIndex; k <= endIndex; k++) {
                 datapointmin = streamdata[k][2];
                 datapointmax = streamdata[k][4];
                 if (!(totalmin <= datapointmin)) {

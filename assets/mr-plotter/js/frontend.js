@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -381,8 +381,28 @@ function createPermalink(self, return_raw_document) {
     return true;
 }
 
+function getCSVQueryType(self) {
+    if ($(self.find(".csv-querytype-aligned")).hasClass("active")) {
+        return "aligned";
+    } else if ($(self.find(".csv-querytype-windows")).hasClass("active")) {
+        return "windows";
+    } else if ($(self.find(".csv-querytype-raw")).hasClass("active")) {
+        return "raw";
+    } else {
+        throw "No query type is selected";
+    }
+}
+
+function setPWSelectorValue(self, pwselector, zero) {
+    pwselector.value = zero ? 62 : 63 - self.idata.csvpwestimate;
+    self.find(".csv-windowsize-text").value = Math.pow(2, self.idata.csvpwestimate);
+    $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
+    pwselector.onchange();
+}
+
 function buildCSVMenu(self) {
     var settingsObj = {};
+    var queryType = getCSVQueryType(self);
     var graphExport = self.find("div.graphExport");
     var streamsettings = graphExport.querySelector("div.csv-streams");
     $(streamsettings).empty();
@@ -439,7 +459,6 @@ function buildCSVMenu(self) {
 
     var domain = self.idata.oldXScale;
     var submitButton = graphExport.querySelector("div.csv-button");
-    var $submitButton = $(submitButton);
     var textSpace;
     var widthlists = [
       8333333, //half 60hz
@@ -454,6 +473,43 @@ function buildCSVMenu(self) {
       86400000000000 //day
     ];
     if (streams.length > 0 && domain != undefined) {
+        $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
+        var csvWindowSize = self.find(".csv-windowsize");
+        var csvPointWidth = self.find(".csv-pointwidth");
+        var csvPointWidthDescriptor = self.find(".csv-pointwidth-descriptor");
+        var pwselector = self.find(".pointwidth-selector");
+        var queryType = getCSVQueryType(self);
+        self.find(".csv-querytype-aligned").onclick = function () {
+                setTimeout(function () {
+                    pwselector.value = 63 - self.idata.csvpwestimate;
+                    pwselector.onchange();
+                }, 0);
+                queryType = "aligned";
+                csvPointWidthDescriptor.innerHTML = "Window Size";
+                csvWindowSize.setAttribute("style", "display: none;");
+                csvPointWidth.setAttribute("style", "");
+            };
+        self.find(".csv-querytype-windows").onclick = function () {
+                setTimeout(function () {
+                        pwselector.value = 62;
+                        self.find(".csv-windowsize-text").value = Math.pow(2, self.idata.csvpwestimate);
+                        $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
+                        pwselector.onchange();
+                    }, 0);
+                queryType = "windows";
+                csvPointWidthDescriptor.innerHTML = "Window Size Precision";
+                csvWindowSize.setAttribute("style", "");
+                csvPointWidth.setAttribute("style", "");
+            };
+        self.find(".csv-querytype-raw").onclick = function () {
+                queryType = "raw";
+                csvPointWidthDescriptor.innerHTML = "";
+                csvWindowSize.setAttribute("style", "display: none;");
+                csvPointWidth.setAttribute("style", "display: none;");
+            };
+
+        self.find(".csv-querytype-" + queryType).onclick();
+
         domain = domain.domain();
         $(pwselector).css("display", "");
 
@@ -469,7 +525,6 @@ function buildCSVMenu(self) {
                 } else {
                    $submitButton.removeClass("disabled")
                 }
-                m1.nextSibling.nextSibling.innerHTML = statusString;
             };
 
         pwselectbox.onchange = function () {
@@ -496,8 +551,8 @@ function buildCSVMenu(self) {
                 createCSVDownload(self, streams, settingsObj, domain, widthlists[parseInt(pwselectbox.value)], graphExport);
             };
     } else {
-        $(pwselector).css("display", "none");
-        textSpace = pwselector.nextSibling.nextSibling;
+        $(pwselectortl).css("display", "none");
+        textSpace = pwselectortl.nextSibling.nextSibling;
         textSpace.innerHTML = "";
         textSpace.nextSibling.nextSibling.innerHTML = "";
         submitButton.onclick = function () { return false; };
@@ -508,8 +563,6 @@ function buildCSVMenu(self) {
 function createCSVDownload(self, streams, settingsObj, domain, wt, graphExport) {
     streams = streams.filter(function (x) { return settingsObj.hasOwnProperty(x.uuid); }).map(function (x) { return x.uuid; });
     var dataJSON = {
-            "UUIDS": streams,
-            "Labels": streams.map(function (x) { return settingsObj[x]; }),
             "StartTime": domain[0] - self.idata.offset,
             "EndTime": domain[1] - self.idata.offset,
             "UnitOfTime": "ms",
@@ -537,8 +590,12 @@ function login(self) {
     setLoginText(self, "Logging in...");
     self.requester.makeLoginRequest(username, password, function (token) {
             setButtonEnabled($loginButton, true);
-            if (token === "") {
-                loginmessage.innerHTML = "Invalid username or password";
+            if (token === "" || token === " ") {
+                if (token === "") {
+                    loginmessage.innerHTML = "Invalid username or password";
+                } else {
+                    loginmessage.innerHTML = "Server error"
+                }
                 restoreLoginText(self);
                 $loginButton.dropdown("toggle");
             } else {
@@ -549,7 +606,7 @@ function login(self) {
                 $loginList.find(".loginstate-loggedin").show();
             }
         }, function (error) {
-            loginmessage.innerHTML = "A server error has occurred";
+            loginmessage.innerHTML = "Could not contact server; check Internet connection";
             restoreLoginText(self);
             setButtonEnabled($loginButton, true);
             $loginButton.dropdown("toggle");
@@ -634,7 +691,7 @@ function changepw(self, event) {
             } else if (response === s3ui.ERROR_INVALID_TOKEN) {
                 sessionExpired(self);
                 return;
-            } else if (response === "Bad password") {
+            } else if (response === "Incorrect password") {
                 loginmessage.innerHTML = "Current password is incorrect";
                 showChangepwMenu(self);
             } else {
