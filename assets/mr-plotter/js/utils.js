@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -22,13 +22,28 @@ var slashRE = new RegExp("/", "g");
 
 function formatPath(metadata) {
     /* Check that the path doesn't contain anything nasty. */
-    return escapeHTMLEntities(metadata.Path).replace(slashRE, "/ "); // so the line breaks where appropriate
+    return escapeHTMLEntities(metadata.path).replace(slashRE, "/ "); // so the line breaks where appropriate
+}
+
+function getUnit(metadata) {
+    return metadata.annotations.unit || metadata.tags.unit || "Unknown";
 }
 
 function getFilepath(datum) {
-    var rawpath = formatPath(datum);
-    var sourceName = datum.Metadata.SourceName;
-    return (sourceName == undefined ? '<no source name>' : sourceName) + rawpath;
+    // used to incorporate datum.Metadata.SourceName but I simplified things a bit
+    return formatPath(datum);
+}
+
+function splitPath(path) {
+    var parts = path.split("/", 1);
+    /* The sourcename is never the empty string. */
+    if (parts[0].length === 0) {
+        parts = path.slice(1).split("/", 1);
+        parts[0] = "/" + parts[0];
+    }
+    var sourcename = parts[0];
+    var path = path.slice(sourcename.length);
+    return [sourcename, path];
 }
 
 function getInfo (datum, linebreak, escapeHTML) {
@@ -268,7 +283,9 @@ function getPSLAxisFilter(stream) {
 }
 
 s3ui.formatPath = formatPath;
+s3ui.getUnit = getUnit;
 s3ui.getFilepath = getFilepath;
+s3ui.splitPath = splitPath;
 s3ui.getInfo = getInfo;
 s3ui.makeMenuMaker = makeMenuMaker;
 s3ui.binSearch = binSearch;

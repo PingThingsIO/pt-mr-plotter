@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -215,7 +215,7 @@ function updateVertCursorStats(self) {
             var deltananos = delta % 1000000;
             var timearr;
             if (selectedData.length > 0) {
-                var units = self.idata.oldData[self.idata.showingDensity][0].Properties.UnitofMeasure;
+                var units = s3ui.getUnit(self.idata.oldData[self.idata.showingDensity][0]);
                 var leftPoint = getNearestDataPoint(self, x1millis, x1nanos, selectedData, self.idata.showingDensity, delta * 2);
                 showEntry(cursors.fx1);
                 if (leftPoint.length == 6) { // if we haven't cached the exact time
@@ -301,7 +301,7 @@ function updateHorizCursorStats(self) {
         self.idata.showingHorizCursors = true;
         growMarginIfNecessary(self);
         var scale = self.idata.oldAxisData[self.idata.streamSettings[self.idata.showingDensity].axisid][2];
-        var units = self.idata.oldData[self.idata.showingDensity][0].Properties.UnitofMeasure;
+        var units = s3ui.getUnit(self.idata.oldData[self.idata.showingDensity][0]);
         var firstVal = scale.invert(firstCursor.coord);
         var domain = scale.domain();
         var scaledelta = (domain[1] - domain[0]) / self.idata.HEIGHT;

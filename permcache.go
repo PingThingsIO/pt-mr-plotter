@@ -5,184 +5,132 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Caches streams that users are permitted to see. */
+/* Caches permissions. */
 
 package main
 
 import (
-	"container/list"
-	"fmt"
-	"io"
-	"net/http"
+	"context"
+	"log"
 	"strings"
-	"sync"
-	
-	uuid "github.com/pborman/uuid"
+
+	"gopkg.in/btrdb.v4"
+
+	"github.com/SoftwareDefinedBuildings/mr-plotter/accounts"
+	etcd "github.com/coreos/etcd/clientv3"
+	"github.com/pborman/uuid"
+	"github.com/samkumar/reqcache"
 )
 
-const MAX_CACHED uint64 = 4096 // Maximum number of streams that are cached
-
-type TagInfo struct {
-	name string
-	permissions map[uuid.Array]bool // Maps UUID to permission bit. Protected by permcacheLock.
-	element *list.Element
+type TagPermissionQuery struct {
+	tagname string
+	uu      uuid.Array
 }
 
-// Maps TAG to a struct describing its permissions
-var permcache map[string]*TagInfo = make(map[string]*TagInfo)
-var defaulttags = []string{ "public" }
-var totalCached uint64 = 0
+var defaulttags = []string{accounts.PublicTag}
+var permcache = reqcache.NewLRUCache(1024, queryPermission, nil)
+var prefixcache = reqcache.NewLRUCache(1024, queryPrefixes, nil)
 
-// This is a bit coarse: I don't really need to lock the whole permcache if I'm just changing one entry
-// But hierarchical locking would be overkill here...
-var permcacheLock sync.Mutex = sync.Mutex{}
+func permCacheDaemon(ctx context.Context, ec *etcd.Client) {
+	permCachePrefix := accounts.GetTagEtcdPath()
+	watchchan := ec.Watch(ctx, permCachePrefix, etcd.WithPrefix())
 
-// Use LRU policy: keep track of which tags are used most recently
-var lruList *list.List = list.New()
-var lruListLock sync.Mutex = sync.Mutex{}
+	// At some point we may want to consider using a data structure for the
+	// permission cache that is more efficient for this operation. For now,
+	// I'm going to leave it as is because changing tag definitions should
+	// be relatively rare.
+	for watchresp := range watchchan {
+		err := watchresp.Err()
+		if err != nil {
+			log.Fatalf("Error watching tags: %v", err)
+		}
+		permcache.Invalidate()
+	}
 
-func hasPermission(session *LoginSession, uuidBytes uuid.UUID) bool {
+	log.Fatalln("Watch on tags was lost")
+}
+
+func setTagPermissionCacheSize(newMaxCached uint64) {
+	permcache.SetCapacity(newMaxCached)
+}
+
+func hasPermission(ctx context.Context, session *LoginSession, uuidBytes uuid.UUID) bool {
 	var tags []string
+
+	/* First, check if the stream exists. */
+	s := btrdbConn.StreamFromUUID(uuidBytes)
+	if ok, err := s.Exists(ctx); !ok || err != nil {
+		/* We don't want to cache this result. That way, we don't have to worry
+		 * about invalidating the cache if a stream is created.
+		 */
+		return false
+	}
+
 	if session == nil {
 		tags = defaulttags
 	} else {
-		tags = session.tags
+		tags = session.TagSlice()
 	}
 	uuidString := uuidBytes.String()
 	for _, tag := range tags {
-		if tagHasPermission(tag, uuidBytes, uuidString) {
+		if tagHasPermission(ctx, tag, uuidBytes, uuidString, s) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
-func tagHasPermission(tag string, uuidBytes uuid.UUID, uuidString string) bool {
-	var hasPerm bool
-	
-	uuidarr := uuidBytes.Array()
-	permcacheLock.Lock()
-	taginfo, ok := permcache[tag]
-	if !ok {
-		/* Cache Miss: never seen this token */
-		taginfo = &TagInfo{ name: tag, permissions: make(map[uuid.Array]bool) }
-		lruListLock.Lock()
-		taginfo.element = lruList.PushFront(taginfo)
-		lruListLock.Unlock()
-		permcache[tag] = taginfo
-	} else {
-		lruListLock.Lock()
-		lruList.MoveToFront(taginfo.element) // most recently used
-		lruListLock.Unlock()
-		hasPerm, ok = taginfo.permissions[uuidBytes.Array()]
-		if ok {
-			/* Cache Hit */
-			permcacheLock.Unlock()
-			return hasPerm
-		}
-		/* Cache Miss: never seen this UUID */
-	}
-	permcacheLock.Unlock()
-	
-	/* Ask the metadata server for the metadata of the corresponding stream. */
-	query := fmt.Sprintf("select * where uuid = \"%s\";", uuidString)
-	mdReq, err := http.NewRequest("POST", fmt.Sprintf("%s?tags=%s", mdServer, tag), strings.NewReader(query))
+func tagHasPermission(ctx context.Context, tag string, uuidBytes uuid.UUID, uuidString string, s *btrdb.Stream) bool {
+	query := TagPermissionQuery{tagname: tag, uu: uuidBytes.Array()}
+	hasPerm, err := permcache.Get(ctx, query)
 	if err != nil {
+		log.Printf("Could not request tag data: %v", err)
 		return false
 	}
-	
-	mdReq.Header.Set("Content-Type", "text")
-	mdReq.Header.Set("Content-Length", fmt.Sprintf("%v", len(query)))
-	resp, err := http.DefaultClient.Do(mdReq)
-	
-	if err != nil {
-		return false
-	}
-	
-	/* If the response is [] we lack permission; if it's longer we have permission. */
-	buf := make([]byte, 3)
-	n, err := io.ReadFull(resp.Body, buf)
-	resp.Body.Close()
-	
-	if n == 3 && buf[0] == '[' {
-		hasPerm = true
-	} else if n == 2 && err == io.ErrUnexpectedEOF && buf[0] == '[' && buf[1] == ']' {
-		hasPerm = false
-	} else {
-		/* Server error. */
-		fmt.Printf("Metadata server error: %v %c %c %c\n", n, buf[0], buf[1], buf[2])
-		return false
-	}
-	
-	/* If we didn't return early due to some kind of error, cache the result and return it. */
-	permcacheLock.Lock()
-	if taginfo.element != nil { // If this has been evicted from the cache, don't bother
-		_, ok := taginfo.permissions[uuidarr]
-		taginfo.permissions[uuidarr] = hasPerm // still update cached value
-		if !ok { // If a different goroutine added it before we got here, then skip this part
-			totalCached += 1
-			if totalCached > MAX_CACHED {
-				// Make this access return quickly, so start pruning in a new goroutine
-				fmt.Println("Pruning cache")
-				go pruneCache()
-			}
-		}
-	}
-	permcacheLock.Unlock()
-	
-	return hasPerm
+	return hasPerm.(bool)
 }
 
-func pruneCache() {
-	permcacheLock.Lock()
-	lruListLock.Lock()
-	defer lruListLock.Unlock()
-	defer permcacheLock.Unlock()
-	
-	if totalCached <= (MAX_CACHED >> 1) {
-		// In case this gets invoked twice, make sure it only runs once
-		return
+func queryPermission(ctx context.Context, key interface{}) (interface{}, uint64, error) {
+	query := key.(TagPermissionQuery)
+	s := btrdbConn.StreamFromUUID(query.uu.UUID())
+	coll, err := s.Collection(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
-	
-	var tag string
-	var taginfo *TagInfo
-	
-	for tag, taginfo = range permcache {
-		for key, perm := range taginfo.permissions {
-			if !perm {
-				delete(taginfo.permissions, key)
-				totalCached -= 1
-			}
-		}
-		if len(taginfo.permissions) == 0 {
-			lruList.Remove(taginfo.element)
-			delete(permcache, tag)
-			taginfo.element = nil
+	prefixes, err := prefixcache.Get(ctx, query.tagname)
+	if err != nil {
+		return nil, 0, err
+	}
+	for pfx := range prefixes.(map[string]struct{}) {
+		if strings.HasPrefix(coll, pfx) {
+			return true, 1, nil
 		}
 	}
-	
-	var element *list.Element
-	// Now, remove cached permissions until we're within the limit
-	for totalCached > (MAX_CACHED >> 1) {
-		element = lruList.Back() // least recently used
-		lruList.Remove(element)
-		taginfo = element.Value.(*TagInfo)
-		delete(permcache, taginfo.name)
-		totalCached -= uint64(len(taginfo.permissions))
-		taginfo.element = nil // mark as discarded
+	return false, 1, nil
+}
+
+func queryPrefixes(ctx context.Context, key interface{}) (interface{}, uint64, error) {
+	tag := key.(string)
+	tagdef, err := accounts.RetrieveTagDef(ctx, etcdConn, tag)
+	if err != nil {
+		return nil, 0, err
 	}
+	if tagdef == nil {
+		return map[string]struct{}{}, 0, nil
+	}
+	return tagdef.PathPrefix, uint64(len(tagdef.PathPrefix)), nil
 }
