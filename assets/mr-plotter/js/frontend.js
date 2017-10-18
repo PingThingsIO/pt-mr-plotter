@@ -454,9 +454,13 @@ function buildCSVMenu(self) {
         streamsettings.innerHTML = "You must plot streams in your desired time range before you can generate a CSV file.";
     }
 
-    var pwselector = graphExport.querySelector(".windowwidth-selector");
-    var pwselectbox = graphExport.querySelector(".resolutions");
-
+    /*PSL Code <<<<*/
+    //var pwselector = graphExport.querySelector(".windowwidth-selector");
+    //var pwselectbox = graphExport.querySelector(".resolutions");
+    //======
+    var pwselector = graphExport.querySelector(".pointwidth-selector");
+    var pwselectortl = pwselector.parentNode;
+    //MRP Code >>>>>>
     var domain = self.idata.oldXScale;
     var submitButton = graphExport.querySelector("div.csv-button");
     var textSpace;
@@ -514,6 +518,7 @@ function buildCSVMenu(self) {
         $(pwselector).css("display", "");
 
         pwselector.onchange = function () {
+// <<<<<<< HEAD
                 var wt = widthlists[this.value];
                 var m1 = this.nextSibling.nextSibling;
                 //m1.innerHTML = "Window width: "+widthdesc[this.value];
@@ -524,8 +529,21 @@ function buildCSVMenu(self) {
                    statusString += "<br><strong>(Too many to download - choose a longer time per CSV row)</strong>"
                 } else {
                    $submitButton.removeClass("disabled")
+// =======
+//                 var pw = Math.pow(2, 62 - this.value);
+//                 var m1 = pwselectortl.nextSibling.nextSibling;
+//                 var prefix = (queryType === "windows" ? "Maximum error in window size: " : "Window size: ");
+//                 m1.innerHTML = prefix + s3ui.nanosToUnit(pw) + " [exponent = " + (62 - this.value) + "]";
+//                 if (queryType === "windows") {
+//                     m1.nextSibling.nextSibling.innerHTML = "";
+//                 } else {
+//                     var pps = Math.ceil(1000000 * (domain[1] - domain[0]) / pw);
+//                     statusString = "About " + pps + (pps == 1 ? " window per stream" : " windows per stream");
+//                     m1.nextSibling.nextSibling.innerHTML = statusString;
+//>>>>>>> mrpv4
                 }
             };
+// <<<<<<< HEAD
 
         pwselectbox.onchange = function () {
                 var wt = widthlists[this.value];
@@ -546,6 +564,14 @@ function buildCSVMenu(self) {
         //pwselectbox.value = self.idata.oldData[streams[0].uuid][2];
         //pwselector.onchange();
         pwselectbox.onchange();
+// =======
+//         if (streams.length == 0 || self.idata.oldData[streams[0].uuid] === undefined) {
+//             self.idata.csvpwestimate = 0;
+//         } else {
+//             self.idata.csvpwestimate = self.idata.oldData[streams[0].uuid][2];
+//         }
+//         setPWSelectorValue(self, pwselector, queryType === "windows");
+// >>>>>>> mrpv4
 
         submitButton.onclick = function () {
                 createCSVDownload(self, streams, settingsObj, domain, widthlists[parseInt(pwselectbox.value)], graphExport);
@@ -565,8 +591,18 @@ function createCSVDownload(self, streams, settingsObj, domain, wt, graphExport) 
     var dataJSON = {
             "StartTime": domain[0] - self.idata.offset,
             "EndTime": domain[1] - self.idata.offset,
-            "UnitOfTime": "ms",
-            "WindowWidth": wt,
+// <<<<<<< HEAD
+//             "UnitOfTime": "ms",
+//             "WindowWidth": wt,
+// =======
+            "UUIDS": streams,
+            "Labels": streams.map(function (x) { return settingsObj[x]; }),
+            "QueryType": getCSVQueryType(self),
+            "WindowText": self.find(".csv-windowsize-text").value,
+            "WindowUnit": self.find(".csv-unit-current").innerHTML,
+            "UnitofTime": "ms",
+            "PointWidth": pwe,
+//>>>>>>> mrpv4
             "_token": self.requester.getToken()
         };
     var csvform = graphExport.querySelector(".csv-form");

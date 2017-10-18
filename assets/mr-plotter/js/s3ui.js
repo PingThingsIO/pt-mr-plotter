@@ -40,25 +40,6 @@ MrPlotter.prototype.find = function (expr) {
 MrPlotter.prototype.$ = function (expr) {
         return $(this.domelem.querySelectorAll(expr));
     };
-/*
- * Copyright (C) 2016 Sam Kumar, Michael Andersen, and the University
- * of California, Berkeley.
- *
- * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
- *
- * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Mr. Plotter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 /** Instantiates Mr. Plotter as a child of the provided DOM element.
     BACKEND is the hostname/port of the backend (ex. localhost:8080).
@@ -72,7 +53,8 @@ function mr_plotter(parent, storagekey, options, cb1, cb2, backend) {
     var template = document.getElementById("mrplotter");
     var container = document.createElement("div");
     if (backend == undefined) {
-        backend = window.location.hostname + (window.location.port ? ":" + window.location.port : "");
+        backend = "localhost:8080/https://viz.predictivegrid.com";
+        // backend = window.location.hostname + (window.location.port ? ":" + window.location.port : "");
     }
     try {
         a.b();
@@ -131,7 +113,6 @@ s3ui.exec_permalink = function (self, link_id) {
                 s3ui.executePermalink(self, permalinkJSON);
             });
     };
-
 
 s3ui.__init__ = function (self) {
         s3ui.instances.push(self);
@@ -247,12 +228,16 @@ function setCSSRule(self, options, rule, attr) {
 
 function init_graph(self, c1, c2) {
     // Finish building the graph components
+// <<<<<<< HEAD
 
     /* PSL wants there to be 9 default axes. */
     for (var i = 0; i < s3ui.pslaxisnames.length; i++) {
         var axisid = s3ui.addYAxis(self, true);
         self.imethods.renameAxis(axisid, s3ui.pslaxisnames[i]);
     }
+// =======
+//     s3ui.addYAxis(self);
+// >>>>>>> mrpv4
 
     // first callback
     c1(self);
@@ -261,6 +246,7 @@ function init_graph(self, c1, c2) {
     self.imethods.updateGraphSize();
     $(window).resize(self.imethods.updateGraphSize);
 
+// <<<<<<< HEAD
 
     $("#toggler").click(function ( ) { // missing the ( !!
         self.imethods.updateGraphSize();
@@ -269,6 +255,8 @@ function init_graph(self, c1, c2) {
     });
 
 
+// =======
+// >>>>>>> mrpv4
     // For some reason, Any+Time requires the text elements to have IDs.
     // So, I'm going to give them IDs that are unique across all instances
     self.find(".startdate").id = "start" + self.idata.instanceid;

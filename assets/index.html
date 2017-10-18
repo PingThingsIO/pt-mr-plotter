@@ -26,9 +26,8 @@
         <link rel="stylesheet" type="text/css" href="anytime/css/anytime.5.0.3.css">
         <link rel="stylesheet" type="text/css" href="jquery-simplecolorpicker/css/jquery.simplecolorpicker.css">
         <link rel="stylesheet" type="text/css" href="vakata-jstree/themes/default/style.min.css">
-        <link rel="stylesheet" type="text/css" href="bootstrap-3.3.6/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="bootstrap-3.3.6/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="mr-plotter/css/s3ui.css">
-
     </head>
 
     <body>
@@ -438,6 +437,34 @@
 $('#err-alert').hide();
                 });
 
+                $(function () {
+                        var plotterelem = document.getElementById("plotter");
+                        plotterelem.innerHTML = ""; // Remove "Loading..." text
+
+                        /*
+                         * This overrides the second callback to select the
+                         * psl_alameda/L1MAG stream as soon as the plot is
+                         * loaded.
+                         *
+                         * If you do not wish to have a stream selected when
+                         * the plot is loaded, then just leave overriden_cb2
+                         * undefined. You can simply invoke the mr_plotter
+                         * function with two arguments (since in Javascript,
+                         * extra parameters are undefined in the callee if
+                         * not provided by the caller).
+                         */
+                        var overriden_cb2 = undefined;
+                        overriden_cb2 = function (inst) {
+                                if (window.location.search.length > 0) {
+                                    s3ui.exec_permalink(inst, window.location.search.slice(1));
+                                } else {
+                                    inst.imethods.selectStreams([{ "Path" : "/upmu/psl_alameda/L1MAG", "uuid" : "2ff1a558-7f44-11e4-82ce-002590e8ec24", "Properties" : { "UnitofTime" : "ns", "Timezone" : "UTC", "UnitofMeasure" : "V", "ReadingType" : "double" }, "Metadata" : { "SourceName" : "uPMU", "Instrument" : { "ModelName" : "PQube3", "SerialNumber" : "P3001276" } } }]);
+                                    inst.find(".showAll").click();
+                                }
+                            };
+
+                        mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined, undefined);
+                    });
             </script>
 
         </div>
@@ -454,6 +481,15 @@ $('#err-alert').hide();
         </div>
 
         <footer>
+
+            <div class="container" style="width: 100%;">
+                <p class="text-muted">
+                    The Multi-Resolution Plotter "Mr. Plotter"&nbsp;&nbsp;Copyright &copy; 2016 Sam Kumar, Michael Andersen, and the University of California, Berkeley.<br>
+                    This program comes with ABSOLUTELY NO WARRANTY.<br>
+                    This is free software and you are welcome to redistribute it under certain conditions. Click
+                    <a href="http://www.gnu.org/licenses/agpl.html" target="_blank">here</a> for details.
+                </p>
+            </div>
         </footer>
     </body>
 </html>

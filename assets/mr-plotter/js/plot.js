@@ -93,7 +93,6 @@ function init_plot(self) {
     self.idata.xEnd = undefined;
     self.idata.xLegend = undefined;
 
-
     self.idata.zoom = d3.behavior.zoom()
         .on("zoomstart", function () { repaintZoomNewData(self, function () {}, true); })
         .on("zoom", function () {
@@ -750,7 +749,6 @@ function drawPlot(self) {
 //        return;
     }
 
-
     /* Used for optimization; GET request is not sent if same time range and streams are used. */
     var sameTimeRange = ((startDate == self.idata.oldStartDate) && (endDate == self.idata.oldEndDate));
 
@@ -897,9 +895,6 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
 
     numstreams = streams.length;
 
-
-
-
     var yScales = $.map(toDraw, function (elem) {
             var scale;
             if (isNaN(axisData[elem.axisid][0])) { // manual scale
@@ -968,9 +963,12 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
     self.idata.margin.right = Math.max(100, rightMargins[rightMargins.length - 1]);
     updateSize(self, false);
 
-    // color = streamSettings[streams[i].uuid].color;
-    // console.log(self.idata.streamSettings);
+// <<<<<<< HEAD
+//     // color = streamSettings[streams[i].uuid].color;
+//     // console.log(self.idata.streamSettings);
 
+// =======
+// >>>>>>> mrpv4
     // Draw the y-axes
     var update;
 
@@ -1091,9 +1089,6 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .each(function (yAxis) { d3.select(this).call(yAxis.orient("left")); });
     update.exit().remove();
 
-
-
-
     update = d3.select(self.find("svg.chart g.y-axes-right"))
       .selectAll("g.y-axis-right")
       .data(rightYAxes);
@@ -1105,10 +1100,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .each(function (yAxis) { d3.select(this).call(yAxis.orient("right")); });
     update.exit().remove();
 
-
-
-
-    // Draw the y-axis titles on left side
+    // Draw the y-axis titles
     update = d3.select(self.find("svg.chart g.y-axes-left"))
       .selectAll("text.ytitle")
       .data(leftYObjs);
@@ -1145,16 +1137,12 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .text(function (d) { return d.axisname; });
     update.exit().remove();
 
-
     s3ui.updateHorizCursorStats(self);
-
-
 
     for (var i = 0; i < toDraw.length; i++) {
         s3ui.applyDisplayColor(self, toDraw[i], streamSettings);
 
     }
-
 
     self.find(".permalink").innerHTML = "";
     drawStreams(self, data, streams, streamSettings, xScale, yScales, yAxisArray, axisData, $loadingElem, false);
@@ -1172,7 +1160,12 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
         if (streams.length == 0) {
           $loadingElem.html("No streams are selected.");
         } else {
-            $loadingElem.html("All selected streams have no data.");
+// <<<<<<< HEAD
+//             $loadingElem.html("All selected streams have no data.");
+// =======
+            /* This should be unreachable. */
+            $loadingElem.html("Error: No axes have assigned streams.");
+// >>>>>>> mrpv4
         }
         self.$("g.chartarea > g").remove();
         return;

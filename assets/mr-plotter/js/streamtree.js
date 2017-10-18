@@ -98,9 +98,7 @@ function updateStreamList(self) {
             selectNode(self, streamTree, false, data.node);
             s3ui.applySettings(self, false);
         });
-
-  streamTreeDiv.on("click", ".jstree-checkbox", function (event) {
-
+    streamTreeDiv.on("click", ".jstree-checkbox", function (event) {
             var id = event.target.parentNode.parentNode.getAttribute("id");
             var node = streamTree.get_node(id);
             if (streamTree.is_selected(node)) {
@@ -185,7 +183,7 @@ function updateStreamList(self) {
     streamTree.old_select_node = streamTree.select_node;
     streamTree.select_node = makeSelectHandler(self, streamTree, false);
 
-  streamTree.checkbox_select_node = makeSelectHandler(self, streamTree, true); // select all children when checkbox is clicked, but just expand if text is clicked
+    streamTree.checkbox_select_node = makeSelectHandler(self, streamTree, true); // select all children when checkbox is clicked, but just expand if text is clicked
 }
 
 function needToLoad(node) {
@@ -231,23 +229,32 @@ function makeSelectHandler(self, streamTree, selectAllChildren) {
                                     } else {
                                         handleFailedLoad(status);
                                     }
-                                } else {
-                                    alert("Could not load node contents (could not communicate with archiver)");
-                                }
-                            });
-                    }
-                } else if (selectAllChildren) {
-                    if (streamCount <= 5 || confirm("About to select " + streamCount + " streams. Continue?")) {
-                      streamTree.old_select_node(node, suppress_event, prevent_open);
-                    }
-                } else {
-                    if (node.children.length == 0) {
+// <<<<<<< HEAD
+//                                 } else {
+//                                     alert("Could not load node contents (could not communicate with archiver)");
+//                                 }
+//                             });
+//                     }
+//                 } else if (selectAllChildren) {
+//                     if (streamCount <= 5 || confirm("About to select " + streamCount + " streams. Continue?")) {
+//                       streamTree.old_select_node(node, suppress_event, prevent_open);
+//                     }
+//                 } else {
+//                     if (node.children.length == 0) {
+//                         streamTree.old_select_node(node, suppress_event, prevent_open); // if it's a leaf, select it
+
+//                         if ( self.idata.selectedStreams.length == 1 ) {
+//                             setTimeout( function() { $( ".showAll" ).click(); });
+//                         };
+
+// =======
+                                });
+                        }
+                    } else if (node.children.length == 0) {
                         streamTree.old_select_node(node, suppress_event, prevent_open); // if it's a leaf, select it
-
-                        if ( self.idata.selectedStreams.length == 1 ) {
-                            setTimeout( function() { $( ".showAll" ).click(); });
-                        };
-
+                    } else if (selectAllChildren) {
+                        handler(node.children, suppress_event, true, true);
+// >>>>>>> mrpv4
                     } else {
                         streamTree.toggle_node(node);
                         // console.log( self.idata.selectedStreamsBuffer.length );
@@ -486,8 +493,16 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
                         }
                       s3ui.toggleLegend(self, select, node.data.streamdata, true);
                     }
-            });
+// <<<<<<< HEAD
+//             });
 
+// =======
+                }, function (jqXHR) {
+                    self.idata.pendingStreamRequests -= 1;
+                    handleFailedLoad(jqXHR.responseText);
+                    tree.deselect_node(node);
+                });
+// >>>>>>> mrpv4
             return true;
         } else if (node.data.streamdata !== undefined) {
             s3ui.toggleLegend(self, select, node.data.streamdata, true);
