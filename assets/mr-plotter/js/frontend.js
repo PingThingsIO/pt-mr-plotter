@@ -402,7 +402,7 @@ function setPWSelectorValue(self, pwselector, zero) {
 
 function buildCSVMenu(self) {
     var settingsObj = {};
-    var queryType = getCSVQueryType(self);
+    // var queryType = getCSVQueryType(self);
     var graphExport = self.find("div.graphExport");
     var streamsettings = graphExport.querySelector("div.csv-streams");
     $(streamsettings).empty();
@@ -455,14 +455,15 @@ function buildCSVMenu(self) {
     }
 
     /*PSL Code <<<<*/
-    //var pwselector = graphExport.querySelector(".windowwidth-selector");
-    //var pwselectbox = graphExport.querySelector(".resolutions");
+    var pwselector = graphExport.querySelector(".windowwidth-selector");
+    var pwselectbox = graphExport.querySelector(".resolutions");
     //======
-    var pwselector = graphExport.querySelector(".pointwidth-selector");
-    var pwselectortl = pwselector.parentNode;
+    // var pwselector = graphExport.querySelector(".pointwidth-selector");
+    // var pwselectortl = pwselector.parentNode;
     //MRP Code >>>>>>
     var domain = self.idata.oldXScale;
     var submitButton = graphExport.querySelector("div.csv-button");
+    var $submitButton = $(submitButton);
     var textSpace;
     var widthlists = [
       8333333, //half 60hz
@@ -477,42 +478,42 @@ function buildCSVMenu(self) {
       86400000000000 //day
     ];
     if (streams.length > 0 && domain != undefined) {
-        $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
-        var csvWindowSize = self.find(".csv-windowsize");
-        var csvPointWidth = self.find(".csv-pointwidth");
-        var csvPointWidthDescriptor = self.find(".csv-pointwidth-descriptor");
-        var pwselector = self.find(".pointwidth-selector");
-        var queryType = getCSVQueryType(self);
-        self.find(".csv-querytype-aligned").onclick = function () {
-                setTimeout(function () {
-                    pwselector.value = 63 - self.idata.csvpwestimate;
-                    pwselector.onchange();
-                }, 0);
-                queryType = "aligned";
-                csvPointWidthDescriptor.innerHTML = "Window Size";
-                csvWindowSize.setAttribute("style", "display: none;");
-                csvPointWidth.setAttribute("style", "");
-            };
-        self.find(".csv-querytype-windows").onclick = function () {
-                setTimeout(function () {
-                        pwselector.value = 62;
-                        self.find(".csv-windowsize-text").value = Math.pow(2, self.idata.csvpwestimate);
-                        $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
-                        pwselector.onchange();
-                    }, 0);
-                queryType = "windows";
-                csvPointWidthDescriptor.innerHTML = "Window Size Precision";
-                csvWindowSize.setAttribute("style", "");
-                csvPointWidth.setAttribute("style", "");
-            };
-        self.find(".csv-querytype-raw").onclick = function () {
-                queryType = "raw";
-                csvPointWidthDescriptor.innerHTML = "";
-                csvWindowSize.setAttribute("style", "display: none;");
-                csvPointWidth.setAttribute("style", "display: none;");
-            };
+        // $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
+        // var csvWindowSize = self.find(".csv-windowsize");
+        // var csvPointWidth = self.find(".csv-pointwidth");
+        // var csvPointWidthDescriptor = self.find(".csv-pointwidth-descriptor");
+        // var pwselector = self.find(".pointwidth-selector");
+        // var queryType = getCSVQueryType(self);
+        // self.find(".csv-querytype-aligned").onclick = function () {
+        //         setTimeout(function () {
+        //             pwselector.value = 63 - self.idata.csvpwestimate;
+        //             pwselector.onchange();
+        //         }, 0);
+        //         queryType = "aligned";
+        //         csvPointWidthDescriptor.innerHTML = "Window Size";
+        //         csvWindowSize.setAttribute("style", "display: none;");
+        //         csvPointWidth.setAttribute("style", "");
+        //     };
+        // self.find(".csv-querytype-windows").onclick = function () {
+        //         setTimeout(function () {
+        //                 pwselector.value = 62;
+        //                 self.find(".csv-windowsize-text").value = Math.pow(2, self.idata.csvpwestimate);
+        //                 $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
+        //                 pwselector.onchange();
+        //             }, 0);
+        //         queryType = "windows";
+        //         csvPointWidthDescriptor.innerHTML = "Window Size Precision";
+        //         csvWindowSize.setAttribute("style", "");
+        //         csvPointWidth.setAttribute("style", "");
+        //     };
+        // self.find(".csv-querytype-raw").onclick = function () {
+        //         queryType = "raw";
+        //         csvPointWidthDescriptor.innerHTML = "";
+        //         csvWindowSize.setAttribute("style", "display: none;");
+        //         csvPointWidth.setAttribute("style", "display: none;");
+        //     };
 
-        self.find(".csv-querytype-" + queryType).onclick();
+        // self.find(".csv-querytype-" + queryType).onclick();
 
         domain = domain.domain();
         $(pwselector).css("display", "");
