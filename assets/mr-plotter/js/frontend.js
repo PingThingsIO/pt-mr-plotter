@@ -455,13 +455,8 @@ function buildCSVMenu(self) {
         streamsettings.innerHTML = "You must plot streams in your desired time range before you can generate a CSV file.";
     }
 
-    /*PSL Code <<<<*/
     var pwselector = graphExport.querySelector(".windowwidth-selector");
     var pwselectbox = graphExport.querySelector(".resolutions");
-    //======
-    // var pwselector = graphExport.querySelector(".pointwidth-selector");
-    // var pwselectortl = pwselector.parentNode;
-    //MRP Code >>>>>>
     var domain = self.idata.oldXScale;
     var submitButton = graphExport.querySelector("div.csv-button");
     var $submitButton = $(submitButton);
@@ -479,48 +474,10 @@ function buildCSVMenu(self) {
       86400000000000 //day
     ];
     if (streams.length > 0 && domain != undefined) {
-        // $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
-        // var csvWindowSize = self.find(".csv-windowsize");
-        // var csvPointWidth = self.find(".csv-pointwidth");
-        // var csvPointWidthDescriptor = self.find(".csv-pointwidth-descriptor");
-        // var pwselector = self.find(".pointwidth-selector");
-        // var queryType = getCSVQueryType(self);
-        // self.find(".csv-querytype-aligned").onclick = function () {
-        //         setTimeout(function () {
-        //             pwselector.value = 63 - self.idata.csvpwestimate;
-        //             pwselector.onchange();
-        //         }, 0);
-        //         queryType = "aligned";
-        //         csvPointWidthDescriptor.innerHTML = "Window Size";
-        //         csvWindowSize.setAttribute("style", "display: none;");
-        //         csvPointWidth.setAttribute("style", "");
-        //     };
-        // self.find(".csv-querytype-windows").onclick = function () {
-        //         setTimeout(function () {
-        //                 pwselector.value = 62;
-        //                 self.find(".csv-windowsize-text").value = Math.pow(2, self.idata.csvpwestimate);
-        //                 $(self.find(".csv-unit-option-nanoseconds")).click(); // Select "nanoseconds"
-        //                 pwselector.onchange();
-        //             }, 0);
-        //         queryType = "windows";
-        //         csvPointWidthDescriptor.innerHTML = "Window Size Precision";
-        //         csvWindowSize.setAttribute("style", "");
-        //         csvPointWidth.setAttribute("style", "");
-        //     };
-        // self.find(".csv-querytype-raw").onclick = function () {
-        //         queryType = "raw";
-        //         csvPointWidthDescriptor.innerHTML = "";
-        //         csvWindowSize.setAttribute("style", "display: none;");
-        //         csvPointWidth.setAttribute("style", "display: none;");
-        //     };
-
-        // self.find(".csv-querytype-" + queryType).onclick();
-
         domain = domain.domain();
         $(pwselector).css("display", "");
 
         pwselector.onchange = function () {
-// <<<<<<< HEAD
                 var wt = widthlists[this.value];
                 var m1 = this.nextSibling.nextSibling;
                 //m1.innerHTML = "Window width: "+widthdesc[this.value];
@@ -531,22 +488,8 @@ function buildCSVMenu(self) {
                    statusString += "<br><strong>(Too many to download - choose a longer time per CSV row)</strong>"
                 } else {
                    $submitButton.removeClass("disabled")
-// =======
-//                 var pw = Math.pow(2, 62 - this.value);
-//                 var m1 = pwselectortl.nextSibling.nextSibling;
-//                 var prefix = (queryType === "windows" ? "Maximum error in window size: " : "Window size: ");
-//                 m1.innerHTML = prefix + s3ui.nanosToUnit(pw) + " [exponent = " + (62 - this.value) + "]";
-//                 if (queryType === "windows") {
-//                     m1.nextSibling.nextSibling.innerHTML = "";
-//                 } else {
-//                     var pps = Math.ceil(1000000 * (domain[1] - domain[0]) / pw);
-//                     statusString = "About " + pps + (pps == 1 ? " window per stream" : " windows per stream");
-//                     m1.nextSibling.nextSibling.innerHTML = statusString;
-//>>>>>>> mrpv4
                 }
             };
-// <<<<<<< HEAD
-
         pwselectbox.onchange = function () {
                 var wt = widthlists[this.value];
                 var m1 = this.nextSibling.nextSibling.nextSibling.nextSibling;
@@ -566,14 +509,6 @@ function buildCSVMenu(self) {
         //pwselectbox.value = self.idata.oldData[streams[0].uuid][2];
         //pwselector.onchange();
         pwselectbox.onchange();
-// =======
-//         if (streams.length == 0 || self.idata.oldData[streams[0].uuid] === undefined) {
-//             self.idata.csvpwestimate = 0;
-//         } else {
-//             self.idata.csvpwestimate = self.idata.oldData[streams[0].uuid][2];
-//         }
-//         setPWSelectorValue(self, pwselector, queryType === "windows");
-// >>>>>>> mrpv4
 
         submitButton.onclick = function () {
                 createCSVDownload(self, streams, settingsObj, domain, widthlists[parseInt(pwselectbox.value)], graphExport);
@@ -593,10 +528,6 @@ function createCSVDownload(self, streams, settingsObj, domain, wt, graphExport) 
     var dataJSON = {
             "StartTime": domain[0] - self.idata.offset,
             "EndTime": domain[1] - self.idata.offset,
-// <<<<<<< HEAD
-//             "UnitOfTime": "ms",
-//             "WindowWidth": wt,
-// =======
             "UUIDS": streams,
             "Labels": streams.map(function (x) { return settingsObj[x]; }),
             "QueryType":  "windows", //getCSVQueryType(self),
@@ -605,7 +536,6 @@ function createCSVDownload(self, streams, settingsObj, domain, wt, graphExport) 
             "UnitofTime": "ms",
             // if omitted the backend assumes a PointWidth of zero for a Windows query
             "PointWidth": 0, // pwe, 
-//>>>>>>> mrpv4
             "_token": self.requester.getToken()
         };
     var csvform = graphExport.querySelector(".csv-form");
