@@ -963,12 +963,6 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
     self.idata.margin.right = Math.max(100, rightMargins[rightMargins.length - 1]);
     updateSize(self, false);
 
-// <<<<<<< HEAD
-//     // color = streamSettings[streams[i].uuid].color;
-//     // console.log(self.idata.streamSettings);
-
-// =======
-// >>>>>>> mrpv4
     // Draw the y-axes
     var update;
 
@@ -1160,12 +1154,8 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
         if (streams.length == 0) {
           $loadingElem.html("No streams are selected.");
         } else {
-// <<<<<<< HEAD
-//             $loadingElem.html("All selected streams have no data.");
-// =======
             /* This should be unreachable. */
             $loadingElem.html("Error: No axes have assigned streams.");
-// >>>>>>> mrpv4
         }
         self.$("g.chartarea > g").remove();
         return;
