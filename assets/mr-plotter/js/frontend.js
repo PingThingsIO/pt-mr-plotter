@@ -381,6 +381,7 @@ function createPermalink(self, return_raw_document) {
     return true;
 }
 
+// Currently not being used because the PSL UI assumes a 'windows' type query
 function getCSVQueryType(self) {
     if ($(self.find(".csv-querytype-aligned")).hasClass("active")) {
         return "aligned";
@@ -598,11 +599,12 @@ function createCSVDownload(self, streams, settingsObj, domain, wt, graphExport) 
 // =======
             "UUIDS": streams,
             "Labels": streams.map(function (x) { return settingsObj[x]; }),
-            "QueryType": getCSVQueryType(self),
-            "WindowText": self.find(".csv-windowsize-text").value,
-            "WindowUnit": self.find(".csv-unit-current").innerHTML,
+            "QueryType":  "windows", //getCSVQueryType(self),
+            "WindowText": wt.toString(), // self.find(".csv-windowsize-text").value,
+            "WindowUnit": "nanoseconds", // self.find(".csv-unit-current").innerHTML,
             "UnitofTime": "ms",
-            "PointWidth": pwe,
+            // if omitted the backend assumes a PointWidth of zero for a Windows query
+            "PointWidth": 0, // pwe, 
 //>>>>>>> mrpv4
             "_token": self.requester.getToken()
         };
