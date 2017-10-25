@@ -42,13 +42,6 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD
-	"gopkg.in/ini.v1"
-
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
-
-=======
 	"golang.org/x/crypto/acme/autocert"
 
 	"gopkg.in/btrdb.v4"
@@ -60,7 +53,6 @@ import (
 	"github.com/SoftwareDefinedBuildings/mr-plotter/permalink"
 
 	etcd "github.com/coreos/etcd/clientv3"
->>>>>>> mrpv4
 	httpHandlers "github.com/gorilla/handlers"
 	ws "github.com/gorilla/websocket"
 	uuid "github.com/pborman/uuid"
@@ -69,28 +61,10 @@ import (
 const (
 	FORWARD_CHUNKSIZE   int    = (4 << 10)  // 4 KiB
 	MAX_REQSIZE         int64  = (16 << 10) // 16 KiB
-<<<<<<< HEAD
-	ERROR_INVALID_TOKEN string = "Invalid token"
-
-	MONGO_ID_LEN int = 12
-)
-
-type CSVRequest struct {
-	StartTime   int64
-	EndTime     int64
-	UUIDs       []string `json:"UUIDS"`
-	Labels      []string
-	UnitofTime  string
-	Token       string `json:"_token,omitempty"`
-	WindowWidth int64
-}
-
-=======
 	SUCCESS             string = "Success"
 	ERROR_INVALID_TOKEN string = "Invalid token"
 )
 
->>>>>>> mrpv4
 var upgrader = ws.Upgrader{}
 
 type RespWrapper struct {
@@ -120,29 +94,6 @@ var permalinkMaxTries int
    doing any atomic operations on these, and regular operations don't have to
    be particularly fast (I'm just parsing a config file, after all). */
 type Config struct {
-<<<<<<< HEAD
-	HttpPort      uint16
-	HttpsPort     uint16
-	UseHttp       bool
-	UseHttps      bool
-	HttpsRedirect bool
-	PlotterDir    string
-	CertFile      string
-	KeyFile       string
-
-	DbAddr             string
-	NumDataConn        uint16
-	NumBracketConn     uint16
-	MaxDataRequests    uint32
-	MaxBracketRequests uint32
-	MetadataServer     string
-	MongoServer        string
-	CsvUrl             string
-
-	SessionExpirySeconds          int64
-	SessionPurgeIntervalSeconds   int64
-	CsvMaxPointsPerStream         int64
-=======
 	HttpPort              uint16
 	HttpsPort             uint16
 	UseHttp               bool
@@ -167,33 +118,10 @@ type Config struct {
 	SessionExpirySeconds          uint64
 	SessionPurgeIntervalSeconds   int64
 	CsvMaxPointsPerStream         uint64
->>>>>>> mrpv4
 	OutstandingRequestLogInterval int64
 	NumGoroutinesLogInterval      int64
 	DbDataTimeoutSeconds          int64
 	DbBracketTimeoutSeconds       int64
-<<<<<<< HEAD
-}
-
-var configRequiredKeys = map[string]bool{
-	"http_port":      true,
-	"https_port":     true,
-	"use_http":       true,
-	"use_https":      true,
-	"https_redirect": true,
-	"plotter_dir":    true,
-	"cert_file":      true,
-	"key_file":       true,
-
-	"db_addr":              true,
-	"num_data_conn":        true,
-	"num_bracket_conn":     true,
-	"max_data_requests":    true,
-	"max_bracket_requests": true,
-	"metadata_server":      true,
-	"mongo_server":         true,
-	"csv_url":              true,
-=======
 	DbCsvTimeoutSeconds           int64
 	DbMetadataTimeoutSeconds      int64
 }
@@ -217,7 +145,6 @@ var configRequiredKeys = map[string]bool{
 
 	"permalink_num_bytes": true,
 	"permalink_max_tries": true,
->>>>>>> mrpv4
 
 	"session_expiry_seconds":           true,
 	"session_purge_interval_seconds":   true,
@@ -226,8 +153,6 @@ var configRequiredKeys = map[string]bool{
 	"num_goroutines_log_interval":      true,
 	"db_data_timeout_seconds":          true,
 	"db_bracket_timeout_seconds":       true,
-<<<<<<< HEAD
-=======
 	"db_csv_timeout_seconds":           true,
 	"db_metadata_timeout_seconds":      true,
 }
@@ -326,7 +251,6 @@ func updateTLSConfig(config *Config) {
 			return &tlsCertificate, nil
 		}
 	}
->>>>>>> mrpv4
 }
 
 func main() {
@@ -334,22 +258,17 @@ func main() {
 	var err error
 	var filename string
 
-<<<<<<< HEAD
-=======
 	if len(os.Args) == 2 && os.Args[1] == "-version" {
 		fmt.Printf("%d.%d.%d\n", VersionMajor, VersionMinor, VersionPatch)
 		os.Exit(0)
 	}
 	fmt.Printf("starting Mr Plotter version %d.%d.%d\n", VersionMajor, VersionMinor, VersionPatch)
->>>>>>> mrpv4
 	if len(os.Args) < 2 {
 		filename = "plotter.ini"
 	} else {
 		filename = os.Args[1]
 	}
 
-<<<<<<< HEAD
-=======
 	var btrdbSeparatorEnvVar = os.Getenv("MR_PLOTTER_PATH_SEP")
 	if btrdbSeparatorEnvVar != "" {
 		if len(btrdbSeparatorEnvVar) != 1 {
@@ -378,7 +297,6 @@ func main() {
 	}
 	defer etcdConn.Close()
 
->>>>>>> mrpv4
 	rawConfig, err := ini.Load(filename)
 	if err != nil {
 		log.Fatalf("Could not parse %s: %v", filename, err)
@@ -475,28 +393,13 @@ func main() {
 
 	csvMaxPoints = config.CsvMaxPointsPerStream
 
-<<<<<<< HEAD
-	mongoConn, err := mgo.Dial(config.MongoServer)
-=======
 	log.Println("Connecting to BTrDB cluster...")
 	btrdbConn, err = btrdb.Connect(context.Background(), config.BtrdbEndpoints...)
->>>>>>> mrpv4
 	if err != nil {
 		log.Fatalf("Error: %v\n", err)
 		os.Exit(1)
 	}
 
-<<<<<<< HEAD
-	plotterDBConn := mongoConn.DB("mr_plotter")
-	permalinkConn = plotterDBConn.C("permalinks")
-	accountConn = plotterDBConn.C("accounts")
-
-	dr = NewDataRequester(config.DbAddr, int(config.NumDataConn), config.MaxDataRequests, time.Duration(config.DbDataTimeoutSeconds)*time.Second, false)
-	if dr == nil {
-		os.Exit(1)
-	}
-	br = NewDataRequester(config.DbAddr, int(config.NumBracketConn), config.MaxBracketRequests, time.Duration(config.DbBracketTimeoutSeconds)*time.Second, true)
-=======
 	dataTimeout = time.Duration(config.DbDataTimeoutSeconds) * time.Second
 	bracketTimeout = time.Duration(config.DbBracketTimeoutSeconds) * time.Second
 	csvTimeout = time.Duration(config.DbCsvTimeoutSeconds) * time.Second
@@ -518,23 +421,10 @@ func main() {
 		os.Exit(1)
 	}
 	br = NewDataRequester(btrdbConn, config.MaxBracketRequests)
->>>>>>> mrpv4
 	if br == nil {
 		os.Exit(1)
 	}
 
-<<<<<<< HEAD
-	go purgeSessionsPeriodically(config.SessionExpirySeconds, config.SessionPurgeIntervalSeconds)
-
-	go logWaitingRequests(os.Stdout, time.Duration(config.OutstandingRequestLogInterval)*time.Second)
-
-	go logNumGoroutines(os.Stdout, time.Duration(config.NumGoroutinesLogInterval)*time.Second)
-
-	token64len = base64.StdEncoding.EncodedLen(TOKEN_BYTE_LEN)
-	token64dlen = base64.StdEncoding.DecodedLen(token64len)
-	permalinklen = base64.URLEncoding.EncodedLen(MONGO_ID_LEN)
-	permalinkdlen = base64.URLEncoding.DecodedLen(permalinklen)
-=======
 	setSessionExpiry(config.SessionExpirySeconds)
 
 	go logWaitingRequests(time.Duration(config.OutstandingRequestLogInterval) * time.Second)
@@ -545,7 +435,6 @@ func main() {
 	permalinklen = base64.URLEncoding.EncodedLen(permalinkNumBytes)
 
 	go permCacheDaemon(context.Background(), etcdConn)
->>>>>>> mrpv4
 
 	http.Handle("/", http.FileServer(http.Dir(config.PlotterDir)))
 	http.HandleFunc("/dataws", datawsHandler)
@@ -564,15 +453,6 @@ func main() {
 	http.HandleFunc("/changepw", changepwHandler)
 	http.HandleFunc("/checktoken", checktokenHandler)
 
-<<<<<<< HEAD
-	var loggedHandler http.Handler = httpHandlers.CompressHandler(httpHandlers.CombinedLoggingHandler(os.Stdout, http.DefaultServeMux))
-
-	var portStrHTTP string = fmt.Sprintf(":%d", config.HttpPort)
-	var portStrHTTPS string = fmt.Sprintf(":%d", config.HttpsPort)
-	if config.UseHttp && config.UseHttps {
-		go func() {
-			log.Fatal(http.ListenAndServeTLS(portStrHTTPS, config.CertFile, config.KeyFile, loggedHandler))
-=======
 	var mrPlotterHandler http.Handler = http.DefaultServeMux
 	if config.LogHttpRequests {
 		mrPlotterHandler = httpHandlers.CombinedLoggingHandler(os.Stdout, mrPlotterHandler)
@@ -594,7 +474,6 @@ func main() {
 	if config.UseHttp && config.UseHttps {
 		go func() {
 			log.Fatal(mrPlotterServer.ListenAndServeTLS("", ""))
->>>>>>> mrpv4
 			os.Exit(1)
 		}()
 
@@ -605,11 +484,7 @@ func main() {
 				url.Host = r.Host + portStrHTTPS
 				http.Redirect(w, r, url.String(), http.StatusFound)
 			})
-<<<<<<< HEAD
-			var loggedRedirect http.Handler = httpHandlers.CompressHandler(httpHandlers.CombinedLoggingHandler(os.Stdout, redirect))
-=======
 			var loggedRedirect = httpHandlers.CompressHandler(httpHandlers.CombinedLoggingHandler(os.Stdout, redirect))
->>>>>>> mrpv4
 			log.Fatal(http.ListenAndServe(portStrHTTP, loggedRedirect))
 		} else {
 			log.Fatal(http.ListenAndServe(portStrHTTP, mrPlotterHandler))
@@ -831,11 +706,7 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	var wrapper RespWrapper = RespWrapper{w}
-=======
 	var wrapper = RespWrapper{w}
->>>>>>> mrpv4
 
 	uuidBytes, startTime, endTime, pw, token, _, success := parseDataRequest(string(payload), wrapper)
 
@@ -984,27 +855,17 @@ func bracketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-<<<<<<< HEAD
-func metadataHandler(w http.ResponseWriter, r *http.Request) {
-=======
 func onlyallowpost(w http.ResponseWriter, r *http.Request) bool {
->>>>>>> mrpv4
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("You must send a POST request to get data."))
 		return true
 	}
-<<<<<<< HEAD
-
-	var n int
-
-=======
 	return false
 }
 
 func readfullbody(w http.ResponseWriter, r *http.Request) ([]byte, bool) {
->>>>>>> mrpv4
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_REQSIZE)
 	request, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -1018,28 +879,6 @@ func treetopHandler(w http.ResponseWriter, r *http.Request) {
 	if onlyallowpost(w, r) {
 		return
 	}
-<<<<<<< HEAD
-
-	var tags string = "public"
-	semicolonindex := bytes.IndexByte(request, ';')
-	if semicolonindex != -1 {
-		tokenencoded := request[semicolonindex+1:]
-		request = request[:semicolonindex+1]
-
-		if len(tokenencoded) == token64len {
-			tokenslice := make([]byte, token64dlen, token64dlen)
-			n, err = base64.StdEncoding.Decode(tokenslice, tokenencoded)
-			if n == TOKEN_BYTE_LEN && err == nil {
-				tagslice := usertags(tokenslice)
-				if tagslice != nil {
-					tags = strings.Join(tagslice, ",")
-				}
-			}
-		}
-	}
-
-	mdReq, err := http.NewRequest("POST", fmt.Sprintf("%s?tags=%s", mdServer, tags), strings.NewReader(string(request)))
-=======
 	request, ok := readfullbody(w, r)
 	if !ok {
 		return
@@ -1061,21 +900,12 @@ func treetopHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	toplevel, err := treetopPaths(ctx, etcdConn, btrdbConn, ls)
 	cancelfunc()
->>>>>>> mrpv4
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("Error: %v\n", err)))
 		return
 	}
-<<<<<<< HEAD
-
-	mdReq.Header.Set("Content-Type", "text")
-	mdReq.Header.Set("Content-Length", fmt.Sprintf("%v", len(request)))
-	resp, err := http.DefaultClient.Do(mdReq)
-
-=======
 	enc := json.NewEncoder(w)
 	err = enc.Encode(toplevel)
->>>>>>> mrpv4
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("Error: %v\n", err)))
 	}
@@ -1085,16 +915,6 @@ func mdDispatch(w http.ResponseWriter, r *http.Request, dispatch func(context.Co
 	if onlyallowpost(w, r) {
 		return
 	}
-<<<<<<< HEAD
-
-	var buffer []byte = make([]byte, FORWARD_CHUNKSIZE) // forward the response
-
-	var bytesRead int
-	var readErr error = nil
-	for readErr == nil {
-		bytesRead, readErr = resp.Body.Read(buffer)
-		w.Write(buffer[:bytesRead])
-=======
 	request, ok := readfullbody(w, r)
 	if !ok {
 		return
@@ -1128,7 +948,6 @@ func mdDispatch(w http.ResponseWriter, r *http.Request, dispatch func(context.Co
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("Error: %v\n", err)))
 		return
->>>>>>> mrpv4
 	}
 	w.Write(toplevel)
 }
@@ -1153,10 +972,6 @@ func treeleafHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-<<<<<<< HEAD
-const PERMALINK_HELP string = "To create a permalink, send the data as a JSON document via a POST request. To retrieve a permalink, set a GET request, specifying \"id=<permalink identifier>\" in the URL."
-const PERMALINK_BAD_ID string = "not found"
-=======
 func metadataleafHandler(w http.ResponseWriter, r *http.Request) {
 	mdDispatch(w, r, func(ctx context.Context, ec *etcd.Client, bc *btrdb.BTrDB, ls *LoginSession, path string) ([]byte, error) {
 		doc, err := treeleafMetadata(ctx, ec, bc, ls, path)
@@ -1184,7 +999,6 @@ func metadatauuidHandler(w http.ResponseWriter, r *http.Request) {
 
 const PERMALINK_HELP = "To create a permalink, send the data as a JSON document via a POST request. To retrieve a permalink, set a GET request, specifying \"id=<permalink identifier>\" in the URL."
 const PERMALINK_BAD_ID = "not found"
->>>>>>> mrpv4
 
 func permalinkHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" && r.Method != "POST" {
@@ -1194,13 +1008,7 @@ func permalinkHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	var err error
-	var jsonPermalink map[string]interface{}
-	var id bson.ObjectId
-=======
 	ctx := r.Context()
->>>>>>> mrpv4
 
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_REQSIZE)
 	if r.Method == "GET" {
@@ -1211,78 +1019,28 @@ func permalinkHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-<<<<<<< HEAD
-		/* For backwards-compatibility with permalinks from the Meteor plotter, only look at the first 16 bytes. */
-		var idslice []byte = make([]byte, permalinkdlen)
-		_, err = base64.URLEncoding.Decode(idslice, []byte(id64str)[:permalinklen])
-
-		if err != nil {
-			w.Write([]byte(PERMALINK_HELP))
-			return
-		}
-
-		id = bson.ObjectId(idslice)
-
-		if !id.Valid() {
-			w.Write([]byte(PERMALINK_BAD_ID))
-			return
-		}
-
-		var query *mgo.Query = permalinkConn.FindId(id)
-
-		err = query.One(&jsonPermalink)
-		if err != nil {
-=======
 		pdata, err := permalink.RetrievePermalinkData(ctx, etcdConn, id64str)
 		if err != nil {
 			w.Write([]byte("Server error"))
 			return
 		} else if pdata == nil {
->>>>>>> mrpv4
 			w.Write([]byte(PERMALINK_BAD_ID))
 			return
 		}
 
-<<<<<<< HEAD
-		// I could do this asynchronously, but I think this is good enough
-		err = permalinkConn.UpdateId(id, map[string]interface{}{
-			"$set": map[string]interface{}{
-				"lastAccessed": bson.Now(),
-			},
-		})
-
-		if err != nil {
-			// In the future I could try something like restarting the connection
-			fmt.Printf("Could not update permalink record: %v\n", err)
-		}
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-		var permalinkEncoder *json.Encoder = json.NewEncoder(w)
-		err = permalinkEncoder.Encode(jsonPermalink)
-
-=======
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Write(pdata)
 	} else {
 		var jsonPermalink map[string]interface{}
 
 		jsonLiteral, err := ioutil.ReadAll(r.Body)
->>>>>>> mrpv4
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("Could not read received POST payload: %v", err)))
 			return
 		}
-<<<<<<< HEAD
-	} else {
-		var permalinkDecoder *json.Decoder = json.NewDecoder(r.Body)
-
-		err = permalinkDecoder.Decode(&jsonPermalink)
-=======
 
 		err = json.Unmarshal(jsonLiteral, &jsonPermalink)
->>>>>>> mrpv4
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("Received invalid JSON: %v", err)))
@@ -1296,17 +1054,6 @@ func permalinkHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-<<<<<<< HEAD
-		id = bson.NewObjectId()
-		jsonPermalink["_id"] = id
-		jsonPermalink["lastAccessed"] = bson.Now()
-
-		err = permalinkConn.Insert(jsonPermalink)
-
-		if err == nil {
-			id64len := base64.URLEncoding.EncodedLen(len(id))
-			id64buf := make([]byte, id64len, id64len)
-=======
 		id := make([]byte, permalinkNumBytes)
 		id64buf := make([]byte, permalinklen)
 
@@ -1318,7 +1065,6 @@ func permalinkHandler(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte(fmt.Sprintf("Could not generate new permalink ID: %v\n", err)))
 				return
 			}
->>>>>>> mrpv4
 			base64.URLEncoding.Encode(id64buf, []byte(id))
 
 			success, err = permalink.InsertPermalinkData(ctx, etcdConn, string(id64buf), jsonLiteral)
@@ -1372,11 +1118,7 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	var jsonCSVReq CSVRequest
-=======
 	var jsonCSVReq RawCSVRequest
->>>>>>> mrpv4
 	var jsonCSVReqDecoder *json.Decoder = json.NewDecoder(r.Body)
 	err = jsonCSVReqDecoder.Decode(&jsonCSVReq)
 	if err != nil {
@@ -1385,18 +1127,6 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	if jsonCSVReq.WindowWidth < 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("Invalid window width: %d", jsonCSVReq.WindowWidth)))
-		return
-	}
-
-	/* Check the number of points per stream to see if this request is reasonable. */
-	var deltaT int64 = jsonCSVReq.EndTime - jsonCSVReq.StartTime
-
-	/* Taken from the BTrDB HTTP interface bindings, to make sure I handle the units in the same way. */
-=======
 	if jsonCSVReq.PointWidth > 62 {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Invalid point width: %d", jsonCSVReq.PointWidth)
@@ -1411,7 +1141,6 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		Labels:    jsonCSVReq.Labels,
 	}
 
->>>>>>> mrpv4
 	switch jsonCSVReq.UnitofTime {
 	case "s":
 		cq.StartTime *= 1000000000
@@ -1431,16 +1160,6 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	var pps int64 = deltaT / jsonCSVReq.WindowWidth
-	if pps > csvMaxPoints {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("CSV file too big: estimated %d points", pps)))
-		return
-	}
-
-=======
->>>>>>> mrpv4
 	var loginsession *LoginSession
 	if jsonCSVReq.Token != "" {
 		loginsession = validateToken(jsonCSVReq.Token)
@@ -1452,8 +1171,6 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	switch jsonCSVReq.QueryType {
 	case "aligned":
 		cq.QueryType = csvquery.AlignedWindowsQuery
@@ -1529,7 +1246,6 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		defer cancelfunc()
 	}
 
->>>>>>> mrpv4
 	for _, uuidstr := range jsonCSVReq.UUIDs {
 		uuidobj := uuid.Parse(uuidstr)
 		if uuidobj == nil {
@@ -1560,43 +1276,14 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		cq.Streams = append(cq.Streams, s)
 	}
 
-<<<<<<< HEAD
-	// Don't send the token to BTrDB
-	jsonCSVReq.Token = ""
-
-=======
->>>>>>> mrpv4
 	w.Header().Set("Content-Disposition", "attachment; filename=data.csv")
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Transfer-Encoding", "chunked")
 
-<<<<<<< HEAD
-	var csvJSON []byte
-	csvJSON, err = json.Marshal(&jsonCSVReq)
-	fmt.Printf("forwarded json: %s\n",string(csvJSON))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Could not forward request: %v", err)))
-		return
-	}
-
-	var csvReq *http.Request
-	csvReq, err = http.NewRequest("POST", csvURL, bytes.NewReader(csvJSON))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("Could not perform HTTP request to database: %v", err)))
-		return
-	}
-
-	csvReq.Header.Set("Content-Type", "application/json")
-	resp, err := http.DefaultClient.Do(csvReq)
-
-=======
 	cw := csv.NewWriter(w)
 	cw.UseCRLF = true
 
 	err = csvquery.MakeCSVQuery(ctx, btrdbConn, cq, cw)
->>>>>>> mrpv4
 	if err != nil {
 		goto printerror
 	} else {
@@ -1606,25 +1293,12 @@ func csvHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-<<<<<<< HEAD
-	var buffer []byte = make([]byte, FORWARD_CHUNKSIZE) // forward the response in 4 KiB chunks
-
-	var bytesRead int
-	var readErr error = nil
-	for readErr == nil {
-		bytesRead, readErr = resp.Body.Read(buffer)
-		w.Write(buffer[:bytesRead])
-	}
-
-	resp.Body.Close()
-=======
 	return
 
 printerror:
 	msg := fmt.Sprintf("Could not complete CSV query: %s", err.Error())
 	w.Write([]byte(msg))
 	log.Println(msg)
->>>>>>> mrpv4
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -1676,11 +1350,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	tokenarr := userlogin(accountConn, username, []byte(password))
-	if tokenarr != nil {
-		token64buf := make([]byte, token64len)
-=======
 	tokenarr, err := userlogin(context.TODO(), etcdConn, username, []byte(password))
 	if err != nil {
 		fmt.Printf("Could not verify login: %v\n", err)
@@ -1690,31 +1359,17 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	} else if tokenarr != nil {
 		// login was successful, so respond with the token
 		token64buf := make([]byte, base64.StdEncoding.EncodedLen(len(tokenarr)))
->>>>>>> mrpv4
 		base64.StdEncoding.Encode(token64buf, tokenarr)
 		w.Write(token64buf)
 	}
 	// else: invalid credentials, so respond with nothing
 }
 
-<<<<<<< HEAD
-func parseToken(reader io.Reader) []byte {
-	tokenencoded := make([]byte, token64len, token64len)
-	tokenslice := make([]byte, token64dlen, token64dlen)
-
-	n, err := io.ReadFull(reader, tokenencoded)
-	if err == nil && n == token64len {
-		n, err = base64.StdEncoding.Decode(tokenslice, tokenencoded)
-		if n == TOKEN_BYTE_LEN && err == nil {
-			return tokenslice
-		}
-=======
 func parseToken(tokenencoded []byte) []byte {
 	tokenslice := make([]byte, base64.StdEncoding.DecodedLen(len(tokenencoded)))
 	n, err := base64.StdEncoding.Decode(tokenslice, tokenencoded)
 	if err == nil {
 		return tokenslice[:n]
->>>>>>> mrpv4
 	}
 
 	return nil
@@ -1728,10 +1383,6 @@ func logoffHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	// parseToken doesn't buffer the whole request in memory, so we don't need to use http.MaxBytesReader
-	tokenslice := parseToken(r.Body)
-=======
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_REQSIZE)
 	tokenencoded, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -1739,7 +1390,6 @@ func logoffHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tokenslice := parseToken(tokenencoded)
->>>>>>> mrpv4
 
 	if tokenslice != nil && userlogoff(tokenslice) {
 		w.Write([]byte("Logoff successful."))
@@ -1812,25 +1462,13 @@ func changepwHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	if len(token) != token64len {
-		w.Write([]byte(ERROR_INVALID_TOKEN))
-		return
-	}
-
-=======
->>>>>>> mrpv4
 	tokenslice, err = base64.StdEncoding.DecodeString(token)
 	if err != nil {
 		w.Write([]byte(ERROR_INVALID_TOKEN))
 		return
 	}
 
-<<<<<<< HEAD
-	success := userchangepassword(accountConn, tokenslice, []byte(oldpassword), []byte(newpassword))
-=======
 	success := userchangepassword(context.TODO(), etcdConn, tokenslice, []byte(oldpassword), []byte(newpassword))
->>>>>>> mrpv4
 	w.Write([]byte(success))
 }
 
@@ -1842,9 +1480,6 @@ func checktokenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	tokenslice := parseToken(r.Body)
-=======
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_REQSIZE)
 	tokenencoded, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -1852,7 +1487,6 @@ func checktokenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tokenslice := parseToken(tokenencoded)
->>>>>>> mrpv4
 
 	if tokenslice != nil && getloginsession(tokenslice) != nil {
 		w.Write([]byte("ok"))
