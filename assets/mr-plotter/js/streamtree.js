@@ -478,7 +478,7 @@ function selectNode(self, tree, select, node) { // unfortunately there's no simp
       hidePlotter();
     }
     if (select && !self.idata.selectedStreamsBuffer.length) {
-      setTimeout( function() { $( ".showAll" ).click(); }, 400);
+      setTimeout( function() { $( ".showAll" ).click(); }, 1000);
       showPlotter();
     }
         node.data.selected = select;
