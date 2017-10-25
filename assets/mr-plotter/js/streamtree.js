@@ -271,7 +271,7 @@ function makeSelectHandler(self, streamTree, selectAllChildren) {
         };
 
         $( ".streamTree" ).ready(function() {
-          if ( self.idata.selectedStreamsBuffer.length == 0 ) { setTimeout ( function() { streamTree.toggle_node("root_0"); }, 400); };
+          if ( self.idata.selectedStreamsBuffer.length == 0 ) { setTimeout ( function() { streamTree.toggle_node("root_0"); }, 800); };
         });
 
     return handler;
