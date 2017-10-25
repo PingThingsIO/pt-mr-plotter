@@ -308,7 +308,7 @@
                 if (freqOpt) freqOpt.click();
 
                 //initialize sortable legend
-                var legendTable = document.getElementsByClassName('legend')[0];
+                var legendTable = document.querySelector('.legend.sortable');
                 Sortable.create(legendTable, {
                   handle: '.reorder-legend',
                   draggable: 'tr',
@@ -798,7 +798,7 @@ $('#err-alert').hide();
                                         <th data-localize='progress'>Progress</th>
                                       </tr>
                                     </thead>
-                                    <tbody class="legend"></tbody>
+                                    <tbody class="legend sortable"></tbody>
                                   </table>
                                 </div>
                               </div>
