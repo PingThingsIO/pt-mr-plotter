@@ -53,8 +53,7 @@ function mr_plotter(parent, storagekey, options, cb1, cb2, backend) {
     var template = document.getElementById("mrplotter");
     var container = document.createElement("div");
     if (backend == undefined) {
-        backend = "localhost:8080/https://viz.predictivegrid.com";
-        // backend = window.location.hostname + (window.location.port ? ":" + window.location.port : "");
+        backend = window.location.hostname + (window.location.port ? ":" + window.location.port : "");
     }
     try {
         a.b();
