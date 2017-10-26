@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -92,7 +92,6 @@ function init_plot(self) {
     self.idata.xStart = undefined;
     self.idata.xEnd = undefined;
     self.idata.xLegend = undefined;
-
 
     self.idata.zoom = d3.behavior.zoom()
         .on("zoomstart", function () { repaintZoomNewData(self, function () {}, true); })
@@ -750,7 +749,6 @@ function drawPlot(self) {
 //        return;
     }
 
-
     /* Used for optimization; GET request is not sent if same time range and streams are used. */
     var sameTimeRange = ((startDate == self.idata.oldStartDate) && (endDate == self.idata.oldEndDate));
 
@@ -858,10 +856,10 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
                 startIndex++; // make sure we only look at data in the specified range
             }
             endIndex = s3ui.binSearchCmp(streamdata, [endTime, 0], s3ui.cmpTimes);
-            if (endIndex < streamdata.length && s3ui.cmpTimes(streamdata[endIndex], endTime)) {
+            if (endIndex < streamdata.length && s3ui.cmpTimes(streamdata[endIndex], endTime) > 0) {
                 endIndex--; // make sure we only look at data in the specified range
             }
-            for (k = startIndex; k < endIndex; k++) {
+            for (k = startIndex; k <= endIndex; k++) {
                 datapointmin = streamdata[k][2];
                 datapointmax = streamdata[k][4];
                 if (!(totalmin <= datapointmin)) {
@@ -896,9 +894,6 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
     self.idata.oldAxisData = axisData;
 
     numstreams = streams.length;
-
-
-
 
     var yScales = $.map(toDraw, function (elem) {
             var scale;
@@ -968,9 +963,6 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
     self.idata.margin.right = Math.max(100, rightMargins[rightMargins.length - 1]);
     updateSize(self, false);
 
-    // color = streamSettings[streams[i].uuid].color;
-    // console.log(self.idata.streamSettings);
-
     // Draw the y-axes
     var update;
 
@@ -1019,7 +1011,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
                     .attr("text-anchor", "end")
                     .attr("fill", self.idata.streamSettings[legend_array[i].uuid].color)
                     .attr("transform", "translate(" + column * 240 + ", " + ( i%2 ) * 22  + ")rotate(0)")
-                    .text(legend_array[i].Path + " —" );
+                    .text(legend_array[i].path + " —" );
               }
         });
 
@@ -1091,9 +1083,6 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .each(function (yAxis) { d3.select(this).call(yAxis.orient("left")); });
     update.exit().remove();
 
-
-
-
     update = d3.select(self.find("svg.chart g.y-axes-right"))
       .selectAll("g.y-axis-right")
       .data(rightYAxes);
@@ -1105,10 +1094,7 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .each(function (yAxis) { d3.select(this).call(yAxis.orient("right")); });
     update.exit().remove();
 
-
-
-
-    // Draw the y-axis titles on left side
+    // Draw the y-axis titles
     update = d3.select(self.find("svg.chart g.y-axes-left"))
       .selectAll("text.ytitle")
       .data(leftYObjs);
@@ -1145,16 +1131,12 @@ function drawYAxes(self, data, streams, streamSettings, startDate, endDate, xSca
         .text(function (d) { return d.axisname; });
     update.exit().remove();
 
-
     s3ui.updateHorizCursorStats(self);
-
-
 
     for (var i = 0; i < toDraw.length; i++) {
         s3ui.applyDisplayColor(self, toDraw[i], streamSettings);
 
     }
-
 
     self.find(".permalink").innerHTML = "";
     drawStreams(self, data, streams, streamSettings, xScale, yScales, yAxisArray, axisData, $loadingElem, false);
@@ -1172,7 +1154,8 @@ function drawStreams (self, data, streams, streamSettings, xScale, yScales, yAxi
         if (streams.length == 0) {
           $loadingElem.html("No streams are selected.");
         } else {
-            $loadingElem.html("All selected streams have no data.");
+            /* This should be unreachable. */
+            $loadingElem.html("Error: No axes have assigned streams.");
         }
         self.$("g.chartarea > g").remove();
         return;

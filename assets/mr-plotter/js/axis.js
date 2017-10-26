@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -47,7 +47,8 @@ function init_axis(self) {
    STREAM is simply removed from FROMAXISID or added to TOAXISID.
    This updates the "Axes" box, but not the select menu in the "Legend" box. */
 function changeAxis(self, stream, fromAxisID, toAxisID, updateGraph) {
-    var unit = stream.Properties.UnitofMeasure;
+    // Used to be stream.Properties.UnitofMeasure but I changed the schema a bit
+    var unit = s3ui.getUnit(stream);
     if (fromAxisID != null) {
         var streamList = self.idata.axisMap[fromAxisID].streams;
         for (var i = 0; i < streamList.length; i++) {
@@ -352,7 +353,8 @@ function guessYAxis(self, stream) {
 
     /* Fall back to normal logic if PSL's logic fails. */
     var axis;
-    var unit = stream.Properties.UnitofMeasure;
+    // Used to be stream.Properties.UnitofMeasure but I changed the schema a bit
+    var unit = s3ui.getUnit(stream);
     var backupIndex;
     for (var i = 0; i < yAxes.length; i++) {
         axisUnits = yAxes[i].units;

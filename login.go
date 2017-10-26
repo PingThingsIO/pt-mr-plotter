@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -24,145 +24,220 @@
 package main
 
 import (
+	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha512"
+	"encoding/json"
 	"fmt"
-	"math/big"
-	"sync"
+	"io"
+	"log"
 	"time"
-	
-	"golang.org/x/crypto/bcrypt"
-	
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
+
+	"github.com/SoftwareDefinedBuildings/mr-plotter/accounts"
+	etcd "github.com/coreos/etcd/clientv3"
 )
 
-/* 16 bytes should be longer than anyone can guess. */
-const TOKEN_BYTE_LEN = 16
-var MAX_TOKEN_BYTES = []byte{ 1,
-							  0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-							  0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 }
+var sessionExpirySeconds uint64
+
+var aes_encrypt_cipher cipher.Block
+var hmac_key []byte
 
 type LoginSession struct {
-	lastUsed int64
-	user string
-	token [TOKEN_BYTE_LEN]byte
-	tags []string
+	Issued int64
+	Tags   map[string]struct{}
+	User   string
 }
 
-// Monotonically increasing identifier
-var useid uint64
-
-/* Initialized to the above byte value on use. */
-var MAX_TOKEN big.Int = big.Int{}
-
-// Maps ID to session
-var sessionsbyid map[[TOKEN_BYTE_LEN]byte]*LoginSession = make(map[[TOKEN_BYTE_LEN]byte]*LoginSession)
-var sessionsbyidlock sync.Mutex = sync.Mutex{} // also protects session contents
-// Maps user to session
-var sessionsbyuser map[string]*LoginSession = make(map[string]*LoginSession)
-var sessionsbyuserlock sync.RWMutex = sync.RWMutex{}
-
-func checkpassword(passwordConn *mgo.Collection, user string, password []byte) (userdoc map[string]interface{}, err error) {
-	userquery := bson.M{ "user": user }
-	err = passwordConn.Find(userquery).One(&userdoc)
-	if err != nil {
-		return
+func (loginsession *LoginSession) TagSlice() []string {
+	taglist := make([]string, len(loginsession.Tags))
+	for tag := range loginsession.Tags {
+		taglist = append(taglist, tag)
 	}
-	hashedpasswordbinary := userdoc["password"].(bson.Binary)
-	hashedpassword := hashedpasswordbinary.Data
-	
-	err = bcrypt.CompareHashAndPassword(hashedpassword, password)
-	return
+	return taglist
+}
+
+func setSessionExpiry(seconds uint64) {
+	sessionExpirySeconds = seconds
+}
+
+func setEncryptKey(key []byte) error {
+	var keylen = len(key)
+	if keylen != 16 && keylen != 24 && keylen != 32 {
+		return fmt.Errorf("Key length is invalid: must be 16, 24, or 32 bytes (got %d bytes)", keylen)
+	}
+	cipher, err := aes.NewCipher(key)
+	if err == nil {
+		aes_encrypt_cipher = cipher
+	}
+	return err
+}
+
+func setMACKey(key []byte) error {
+	var keylen int = len(key)
+	if keylen < 16 {
+		return fmt.Errorf("Key length must be at least 16 bytes (got %d bytes)", keylen)
+	}
+	hmac_key = key
+	return nil
+}
+
+func checkpassword(ctx context.Context, etcdConn *etcd.Client, user string, password []byte) (*accounts.MrPlotterAccount, error) {
+	acc, err := accounts.RetrieveAccount(ctx, etcdConn, user)
+	if err != nil {
+		return nil, err
+	}
+
+	var correct bool
+	if acc != nil {
+		correct, err = acc.CheckPassword(password)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if correct {
+		return acc, nil
+	}
+
+	return nil, nil
 }
 
 /* Writing to the returned slice results in undefined behavior.
    The returned slice is guaranteed to have a length of TOKEN_BYTE_LEN. */
-func userlogin(passwordConn *mgo.Collection, user string, password []byte) []byte {
-	var userdoc map[string]interface{}
-	var loginsession *LoginSession
-	var err error
-	
-	userdoc, err = checkpassword(passwordConn, user, password)
+func userlogin(ctx context.Context, etcdConn *etcd.Client, user string, password []byte) ([]byte, error) {
+	acc, err := checkpassword(ctx, etcdConn, user, password)
 	if err != nil {
+		return nil, err
+	} else if acc == nil {
+		/* Wrong password */
+		return nil, nil
+	}
+
+	// Create a new session
+	loginsession := &LoginSession{
+		Issued: time.Now().Unix(),
+		Tags:   acc.Tags,
+		User:   user,
+	}
+
+	// Construct the JSON plaintext for this login session
+	var plaintext []byte
+	plaintext, err = json.Marshal(loginsession)
+	if err != nil {
+		log.Fatalf("Could not JSON-encode login session: %v", err)
+	}
+	var blocksize = aes_encrypt_cipher.BlockSize()
+	var paddinglen = (blocksize - (len(plaintext) % blocksize)) % blocksize
+	var padding = make([]byte, paddinglen)
+	plaintext = append(plaintext, padding...)
+
+	// Encrypt and MAC the plaintext to get the token
+	// The token consists of the IV, ciphertext, and HMAC concatenated
+	var hmac_hash = hmac.New(sha512.New, hmac_key)
+	var macsize = hmac_hash.Size()
+	var token = make([]byte, blocksize+len(plaintext), blocksize+len(plaintext)+macsize)
+	var iv = token[:blocksize]
+	var ciphertext = token[blocksize:]
+
+	_, err = io.ReadFull(rand.Reader, iv)
+	if err != nil {
+		log.Fatalf("Could not generate IV: %v", err)
+	}
+
+	var encrypter = cipher.NewCBCEncrypter(aes_encrypt_cipher, iv)
+	encrypter.CryptBlocks(ciphertext, plaintext)
+
+	_, err = hmac_hash.Write(plaintext)
+	if err != nil {
+		log.Fatalf("Could not compute HMAC of plaintext token: %v", err)
+	}
+	token = hmac_hash.Sum(token)
+
+	return token, nil
+}
+
+func decodetoken(token []byte) []byte {
+	var hmac_hash = hmac.New(sha512.New, hmac_key)
+
+	var blocksize = aes_encrypt_cipher.BlockSize()
+	var macsize = hmac_hash.Size()
+
+	if len(token) <= blocksize+macsize {
 		return nil
 	}
-	
-	tagintlist, ok := userdoc["tags"].([]interface{})
-	if !ok {
-		fmt.Println("Corrupt Mongo document: required key \"tags\" does not refer to an object")
+
+	var iv = token[:blocksize]
+	var ciphertext = token[blocksize : len(token)-macsize]
+	var mac = token[len(token)-macsize:]
+
+	if (len(ciphertext) % blocksize) != 0 {
 		return nil
 	}
-	
-	taglist := make([]string, len(tagintlist))
-	for i := 0; i < len(taglist); i++ {
-		taglist[i], ok = tagintlist[i].(string)
-		if !ok {
-			fmt.Printf("Corrupt Mongo document: tag at index %d for user %s is not a string\n", i, user)
-			return nil
-		}
+
+	var plaintext = make([]byte, len(ciphertext))
+	var decrypter = cipher.NewCBCDecrypter(aes_encrypt_cipher, iv)
+	decrypter.CryptBlocks(plaintext, ciphertext)
+
+	_, err := hmac_hash.Write(plaintext)
+	if err != nil {
+		log.Fatalf("Could not compute HMAC of plaintext token: %v", err)
 	}
-	
-	// Check if we already have a session for this user
-	sessionsbyuserlock.RLock()
-	loginsession = sessionsbyuser[user]
-	sessionsbyuserlock.RUnlock()
-	if loginsession == nil {
-		// Need to create a new session
-		if MAX_TOKEN.Sign() == 0 {
-			(&MAX_TOKEN).SetBytes(MAX_TOKEN_BYTES)
-		}
-		var token *big.Int
-		var tokenarr [TOKEN_BYTE_LEN]byte
-		for true {
-			token, err = rand.Int(rand.Reader, &MAX_TOKEN)
-			if err != nil {
-				fmt.Println("Could not generate session key")
-				return nil
-			}
-			tokenbytes := token.Bytes()
-		
-			copy(tokenarr[TOKEN_BYTE_LEN - len(tokenbytes):], tokenbytes)
-			
-			sessionsbyidlock.Lock()
-			if sessionsbyid[tokenarr] == nil {
-				break
-			} else {
-				sessionsbyidlock.Unlock()
-			}
-		}
-		
-		loginsession = &LoginSession{
-			lastUsed: time.Now().Unix(),
-			user: user,
-			token: tokenarr,
-			tags: taglist,
-		}
-		
-		sessionsbyid[tokenarr] = loginsession
-		sessionsbyidlock.Unlock()
-		
-		sessionsbyuserlock.Lock()
-		sessionsbyuser[user] = loginsession
-		sessionsbyuserlock.Unlock()
-		
-		return tokenarr[:]
-	} else {
-		return loginsession.token[:]
+	var computedmac = hmac_hash.Sum(make([]byte, 0, macsize))
+
+	if !hmac.Equal(computedmac, mac) {
+		log.Printf("Invalid MAC detected: someone is trying to forge a token!")
+		return nil
 	}
+
+	return plaintext
+}
+
+func stolenkeys() {
+	log.Println("THE MAC KEY HAS BEEN STOLEN, AND THE ENCRYPT KEY PROBABLY TOO. CHANGE THE KEYS AND RESTART THIS PROGRAM.")
 }
 
 func getloginsession(token []byte) *LoginSession {
-	var tokenarr [TOKEN_BYTE_LEN]byte
-	copy(tokenarr[:], token)
-	
-	var loginsession *LoginSession
-	var now int64 = time.Now().Unix()
-	sessionsbyidlock.Lock()
-	loginsession = sessionsbyid[tokenarr]
-	if loginsession != nil {
-		loginsession.lastUsed = now
+	var plaintext = decodetoken(token)
+	if plaintext == nil {
+		return nil
 	}
-	sessionsbyidlock.Unlock()
+
+	var i int
+	for i = len(plaintext) - 1; i >= 0; i-- {
+		if plaintext[i] != 0 {
+			break
+		}
+	}
+
+	if len(plaintext)-i-1 >= aes_encrypt_cipher.BlockSize() {
+		log.Println("Invalid padding on token is correctly MAC'ed")
+		stolenkeys()
+		return nil
+	}
+
+	var rawjson = plaintext[:i+1]
+	var loginsession *LoginSession
+	var err = json.Unmarshal(rawjson, &loginsession)
+	if err != nil {
+		log.Printf("Correctly MAC'ed token is incorrect JSON: %v", err)
+		stolenkeys()
+		return nil
+	}
+	if loginsession == nil {
+		log.Println("Correctly MAC'ed token is null")
+		stolenkeys()
+		return nil
+	}
+
+	var now = time.Now().Unix()
+	if uint64(now-loginsession.Issued) >= sessionExpirySeconds {
+		log.Printf("Session expired: (issued at %v, expired at %v, now is %v)", loginsession.Issued, loginsession.Issued+int64(sessionExpirySeconds), now)
+		return nil
+	}
+
 	return loginsession
 }
 
@@ -171,13 +246,7 @@ func userlogoff(token []byte) bool {
 	if loginsession == nil {
 		return false
 	}
-	
-	sessionsbyidlock.Lock()
-	delete(sessionsbyid, loginsession.token)
-	sessionsbyidlock.Unlock()
-	sessionsbyuserlock.Lock()
-	delete(sessionsbyuser, loginsession.user)
-	sessionsbyuserlock.Unlock()
+
 	return true
 }
 
@@ -186,63 +255,43 @@ func usertags(token []byte) []string {
 	if loginsession == nil {
 		return nil
 	}
-	
-	return loginsession.tags	
+
+	return loginsession.TagSlice()
 }
 
-func userchangepassword(passwordConn *mgo.Collection, token []byte, oldpw []byte, newpw []byte) string {
+func userchangepassword(ctx context.Context, etcdConn *etcd.Client, token []byte, oldpw []byte, newpw []byte) string {
 	loginsession := getloginsession(token)
 	if loginsession == nil {
 		return ERROR_INVALID_TOKEN
 	}
-	
-	var hash []byte
-	var err error
-	
-	user := loginsession.user
-	_, err = checkpassword(passwordConn, user, oldpw)
-	if err != nil {
-		return "Bad password"
-	}
-	
-	hash, err = bcrypt.GenerateFromPassword(newpw, bcrypt.DefaultCost)
+
+	acc, err := accounts.RetrieveAccount(ctx, etcdConn, loginsession.User)
 	if err != nil {
 		return "Server error"
 	}
-	
-	updatepasssel := bson.M{ "user": user }
-	updatepasscom := bson.M{ "$set": bson.M{ "password": bson.Binary{ Kind: 0x80, Data: hash } } }
-	
-	err = passwordConn.Update(updatepasssel, updatepasscom)
-	if err == nil {
-		return "Success"
+
+	correct, err := acc.CheckPassword(oldpw)
+	if err != nil {
+		return "Server error"
+	}
+
+	if !correct {
+		return "Incorrect password"
+	}
+
+	err = acc.SetPassword(newpw)
+	if err != nil {
+		return "Server error"
+	}
+
+	success, err := accounts.UpsertAccountAtomically(ctx, etcdConn, acc)
+	if err != nil {
+		return "Server error"
+	}
+
+	if success {
+		return SUCCESS
 	} else {
-		return "Server error"
-	}
-}
-
-/* Periodically purges sessions. */
-func purgeSessionsPeriodically(maxAge int64, periodSeconds int64) {
-	var period = time.Duration(periodSeconds) * time.Second
-	for {
-		time.Sleep(period)
-		purgeSessions(maxAge)
-	}
-}
-
-/* Removes sessions that are older than MAXAGE seconds. */
-func purgeSessions(maxAge int64) {
-	sessionsbyidlock.Lock()
-	sessionsbyuserlock.Lock()
-	defer sessionsbyidlock.Unlock()
-	defer sessionsbyuserlock.Unlock()
-	
-	var now int64 = time.Now().Unix()
-	
-	for _, session := range sessionsbyid {
-		if now - session.lastUsed > maxAge {
-			delete(sessionsbyid, session.token)
-			delete(sessionsbyuser, session.user)
-		}
+		return "Transaction failed; try again"
 	}
 }

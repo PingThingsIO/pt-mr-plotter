@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -223,13 +223,15 @@ function toggleEmbedMetadata() {
    before the tree is loaded. */
 function selectStreams(data_lst) {
      var node;
+     var srcpath;
      var source;
      var path;
      var streamTree = this.idata.streamTree;
      var loadingRootNodes = this.idata.loadingRootNodes;
      for (var i = 0; i < data_lst.length; i++) {
-         source = data_lst[i].Metadata.SourceName;
-         path = data_lst[i].Path;
+         srcpath = s3ui.splitPath(data_lst[i].path);
+         source = srcpath[0];
+         path = srcpath[1];
          node = this.idata.leafNodes[source + path];
          if (node != undefined) {
              node = streamTree.get_node(node);
@@ -237,10 +239,9 @@ function selectStreams(data_lst) {
          if (node == undefined || node === false) { // check if it appears in the tree. if not ...
              if (this.idata.initiallySelectedStreams.hasOwnProperty(source)) {
                  var entry = this.idata.initiallySelectedStreams[source];
-                 entry.count++;
                  entry[path] = data_lst[i];
              } else {
-                 var newObj = { count: 1 };
+                 var newObj = {};
                  newObj[path] = data_lst[i];
                  this.idata.initiallySelectedStreams[source] = newObj;
              }
@@ -272,20 +273,19 @@ function deselectStreams(data_lst) {
     var streamTree = this.idata.streamTree;
     var initiallySelectedStreams = this.idata.initiallySelectedStreams;
     for (var i = 0; i < data_lst.length; i++) {
-        node = this.idata.leafNodes[data_lst[i].Metadata.SourceName + data_lst[i].Path];
+        node = this.idata.leafNodes[data_lst[i].path];
         if (node != undefined) {
             node = streamTree.get_node(node);
         }
         if (node == undefined || node === false || node.data.streamdata == undefined) { // check if it has been *loaded* in the tree; if so, it's checked state is correct
             node = data_lst[i];
-            var sourceName = node.Metadata.SourceName;
-            var path = node.Path;
+            var snpath = s3ui.splitPath(node.path);
+            var sourceName = snpath[0];
+            var path = snpath[1];
             if (initiallySelectedStreams.hasOwnProperty(sourceName) && initiallySelectedStreams[sourceName].hasOwnProperty(path)) {
-                initiallySelectedStreams[sourceName].count--;
-                if (initiallySelectedStreams[sourceName].count == 0) {
+                delete initiallySelectedStreams[sourceName][path];
+                if (Object.keys(initiallySelectedStreams[sourceName]).length == 0) {
                     delete initiallySelectedStreams[sourceName];
-                } else {
-                    delete initiallySelectedStreams[sourceName][path];
                 }
             }
             s3ui.toggleLegend(this, false, node, false);
@@ -361,9 +361,8 @@ function executePermalink(self, args, set_streams_only) {
     var streamObjs = [];
     var stream;
     var colors = [];
-    var noRequest = true;
     var uuidMap = {}; // Maps uuid to an index in the array
-    var query = 'select * where';
+    var uuids = []
     var toSelect = undefined;
     for (i = 0; i < streams.length; i++) {
         stream = streams[i];
@@ -378,20 +377,15 @@ function executePermalink(self, args, set_streams_only) {
             if (stream.selected) {
                 toSelect = stream.stream;
             }
-            if (!noRequest) {
-                query += ' or';
-            }
-            query += ' uuid = "' + stream.stream + '"';
-            noRequest = false;
+            uuids.push(stream.stream);
         }
     }
-    
-    if (noRequest) {
+
+    if (uuids.length == 0) {
         setTimeout(function () { finishExecutingPermalink(self, streamObjs, colors, args, set_streams_only); }, 50);
     } else {
-        query += ";"; // semicolon is needed to separate tag
-        self.requester.makeMetadataRequest(query, function (data) {
-                var receivedStreamObjs = JSON.parse(data);
+        self.requester.makeMetadataFromUUIDRequest(uuids, function (data) {
+                var receivedStreamObjs = data;
                 for (i = 0; i < receivedStreamObjs.length; i++) {
                     streamObjs[uuidMap[receivedStreamObjs[i].uuid]] = receivedStreamObjs[i];
                 }
@@ -402,6 +396,8 @@ function executePermalink(self, args, set_streams_only) {
                     }
                 }
                 finishExecutingPermalink(self, streamObjs, colors, args, toSelect, set_streams_only);
+            }, function (jqXHR) {
+                alert("Could not fetch metadata for permalink resolution: " + jqXHR.responseText);
             });
     }
 }
@@ -532,7 +528,7 @@ function setTimeZoom(self, start, end, resetStart, resetEnd, tz, dst) {
     }
     self.idata.inittrans = (resetStart - start) / (end - start) * self.idata.WIDTH;
     self.idata.initzoom = (resetEnd - resetStart) / (end - start);
-    
+
     var naiveStart = new Date(resetStart);
     var naiveEnd = new Date(resetEnd);
     var offset;

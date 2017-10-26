@@ -1,15 +1,33 @@
+<!--
+    Copyright (C) 2016 Sam Kumar, Michael Andersen, and the University
+    of California, Berkeley.
+
+    This file is part of Mr. Plotter (the Multi-Resolution Plotter).
+
+    Mr. Plotter is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Mr. Plotter is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
-        <title>PSL uPMU Plotting Application</title>
+        <title>uPMU Plotting Application</title>
 
         <link rel="stylesheet" type="text/css" href="anytime/css/anytime.5.0.3.css">
         <link rel="stylesheet" type="text/css" href="jquery-simplecolorpicker/css/jquery.simplecolorpicker.css">
         <link rel="stylesheet" type="text/css" href="vakata-jstree/themes/default/style.min.css">
         <link rel="stylesheet" type="text/css" href="bootstrap-3.3.6/css/bootstrap.css">
         <link rel="stylesheet" type="text/css" href="mr-plotter/css/s3ui.css">
-
     </head>
 
     <body>
@@ -290,7 +308,7 @@
                 if (freqOpt) freqOpt.click();
 
                 //initialize sortable legend
-                var legendTable = document.getElementsByClassName('legend')[0];
+                var legendTable = document.querySelector('.legend.sortable');
                 Sortable.create(legendTable, {
                   handle: '.reorder-legend',
                   draggable: 'tr',
@@ -436,6 +454,14 @@ $('#err-alert').hide();
 
         <footer>
 
+            <div class="container" style="width: 100%;">
+                <p class="text-muted">
+                    The Multi-Resolution Plotter "Mr. Plotter"&nbsp;&nbsp;Copyright &copy; 2016 Sam Kumar, Michael Andersen, and the University of California, Berkeley.<br>
+                    This program comes with ABSOLUTELY NO WARRANTY.<br>
+                    This is free software and you are welcome to redistribute it under certain conditions. Click
+                    <a href="http://www.gnu.org/licenses/agpl.html" target="_blank">here</a> for details.
+                </p>
+            </div>
         </footer>
     </body>
 </html>
@@ -647,7 +673,7 @@ $('#err-alert').hide();
 
                     </div>
 
-                    <div id="plotter-rows">
+                    <div id="plotter-rows" style="display: none;">
 
                     <!-- EXPORT TO CSV -->                    
                     <div class="row">
@@ -772,7 +798,7 @@ $('#err-alert').hide();
                                         <th data-localize='progress'>Progress</th>
                                       </tr>
                                     </thead>
-                                    <tbody class="legend"></tbody>
+                                    <tbody class="legend sortable"></tbody>
                                   </table>
                                 </div>
                               </div>

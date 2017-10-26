@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2016 Sam Kumar, Michael Andersen, and the University
+ * of California, Berkeley.
+ *
+ * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
+ *
+ * Mr. Plotter is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Mr. Plotter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 s3ui = {instances: [], instanceid: -1}; // stores functions used in multiple files
 
 function MrPlotter(container, storagekey, backend, options, cb1, cb2) {
@@ -20,25 +40,6 @@ MrPlotter.prototype.find = function (expr) {
 MrPlotter.prototype.$ = function (expr) {
         return $(this.domelem.querySelectorAll(expr));
     };
-/*
- * Copyright (C) 2016 Sam Kumar, Michael Andersen, and the University
- * of California, Berkeley.
- *
- * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
- *
- * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Mr. Plotter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 /** Instantiates Mr. Plotter as a child of the provided DOM element.
     BACKEND is the hostname/port of the backend (ex. localhost:8080).
@@ -52,7 +53,8 @@ function mr_plotter(parent, storagekey, options, cb1, cb2, backend) {
     var template = document.getElementById("mrplotter");
     var container = document.createElement("div");
     if (backend == undefined) {
-        backend = window.location.hostname + (window.location.port ? ":" + window.location.port : "");
+        backend = "localhost:8080/https://viz.predictivegrid.com";
+        // backend = window.location.hostname + (window.location.port ? ":" + window.location.port : "");
     }
     try {
         a.b();
@@ -111,7 +113,6 @@ s3ui.exec_permalink = function (self, link_id) {
                 s3ui.executePermalink(self, permalinkJSON);
             });
     };
-
 
 s3ui.__init__ = function (self) {
         s3ui.instances.push(self);
@@ -227,12 +228,16 @@ function setCSSRule(self, options, rule, attr) {
 
 function init_graph(self, c1, c2) {
     // Finish building the graph components
+// <<<<<<< HEAD
 
     /* PSL wants there to be 9 default axes. */
     for (var i = 0; i < s3ui.pslaxisnames.length; i++) {
         var axisid = s3ui.addYAxis(self, true);
         self.imethods.renameAxis(axisid, s3ui.pslaxisnames[i]);
     }
+// =======
+//     s3ui.addYAxis(self);
+// >>>>>>> mrpv4
 
     // first callback
     c1(self);
@@ -241,6 +246,7 @@ function init_graph(self, c1, c2) {
     self.imethods.updateGraphSize();
     $(window).resize(self.imethods.updateGraphSize);
 
+// <<<<<<< HEAD
 
     $("#toggler").click(function ( ) { // missing the ( !!
         self.imethods.updateGraphSize();
@@ -249,6 +255,8 @@ function init_graph(self, c1, c2) {
     });
 
 
+// =======
+// >>>>>>> mrpv4
     // For some reason, Any+Time requires the text elements to have IDs.
     // So, I'm going to give them IDs that are unique across all instances
     self.find(".startdate").id = "start" + self.idata.instanceid;
@@ -269,6 +277,10 @@ function init_graph(self, c1, c2) {
         };
     var csvForm = self.find(".csv-form");
     csvForm.setAttribute("action", window.location.protocol + "//" + self.backend + "/csv");
+    var csvUnitCurrent = self.find(".csv-unit-current");
+    self.$(".csv-unit-option").click(function () {
+                csvUnitCurrent.innerHTML = this.innerHTML;
+        });
     self.find(".makecsv").onclick = function () {
             s3ui.buildCSVMenu(self);
             $(self.find(".csv-modal")).modal("toggle");
@@ -294,7 +306,9 @@ function init_graph(self, c1, c2) {
                 var uuids = self.idata.selectedStreamsBuffer.map(function (s) { return s.uuid; });
                 self.requester.makeBracketRequest(uuids, function (range) {
                         if (typeof(range) === "string") {
-                            console.log("Autozoom error: " + range);
+                            var errmsg = "Error: " + range;
+                            self.find(".plotLoading").innerHTML = errmsg;
+                            console.log(errmsg);
                             return;
                         }
                         if (range == undefined || range.Merged == undefined || range.Brackets == undefined) {
@@ -306,8 +320,20 @@ function init_graph(self, c1, c2) {
                         try {
                             var tz = s3ui.getSelectedTimezone(self);
                             var offset = 60000 * ((new Date()).getTimezoneOffset() - s3ui.getTimezoneOffsetMinutes(tz[0], tz[1]));
-                            var naiveStart = new Date(range[0][0]);
-                            var naiveEnd = new Date(range[1][0] + (range[1][1] > 0 ? 1 : 0));
+                            var startms = range[0][0];
+                            var endms = range[1][0] + (range[1][1] > 0 ? 1 : 0);
+
+                            /* If start and end are within a second, we get an error when plotting this. */
+                            if (startms <= endms && (endms - startms) < 1000) {
+                                endms = startms + 1000;
+                            }
+
+                            var naiveStart = new Date(startms);
+                            var naiveEnd = new Date(endms);
+                            if (naiveEnd <= naiveStart) {
+                                self.find(".plotLoading").innerHTML = "Error: All selected streams have no data.";
+                                return;
+                            }
                             self.imethods.setStartTime(new Date(naiveStart.getTime() + 60000 * (naiveStart.getTimezoneOffset() - s3ui.getTimezoneOffsetMinutes(tz[0], tz[1]))));
                             self.imethods.setEndTime(new Date(naiveEnd.getTime() + 60000 * (naiveEnd.getTimezoneOffset() - s3ui.getTimezoneOffsetMinutes(tz[0], tz[1]))));
                             self.imethods.applyAllSettings();

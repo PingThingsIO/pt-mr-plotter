@@ -5,16 +5,16 @@
  * This file is part of Mr. Plotter (the Multi-Resolution Plotter).
  *
  * Mr. Plotter is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Mr. Plotter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -87,11 +87,11 @@ Requester.prototype.setToken = function (token) {
             this.token = token;
         }
     };
-    
+
 Requester.prototype.getToken = function (token) {
         return this.token;
     };
-    
+
 Requester.prototype.checkErrorInvalidToken = function (errorText) {
         if (errorText == s3ui.ERROR_INVALID_TOKEN) {
             s3ui.sessionExpired(this.plotter);
@@ -109,7 +109,7 @@ Requester.prototype.makeLoginRequest = function (username, password, success_cal
             error: error_callback = undefined ? function () {} : error_callback
         });
     };
-    
+
 Requester.prototype.makeLogoffRequest = function (success_callback, error_callback) {
         return $.ajax({
             type: "POST",
@@ -120,7 +120,7 @@ Requester.prototype.makeLogoffRequest = function (success_callback, error_callba
             error: error_callback = undefined ? function () {} : error_callback
         });
     };
-    
+
 Requester.prototype.makeCheckTokenRequest = function (token, success_callback, error_callback) {
         return $.ajax({
             type: "POST",
@@ -131,7 +131,7 @@ Requester.prototype.makeCheckTokenRequest = function (token, success_callback, e
             error: error_callback = undefined ? function () {} : error_callback
         });
     };
-    
+
 Requester.prototype.makeChangePasswordRequest = function (old_password, new_password, success_callback, error_callback) {
         var changepwjsonstr = JSON.stringify({"token": this.token, "oldpassword": old_password, "newpassword": new_password});
         return $.ajax({
@@ -144,17 +144,91 @@ Requester.prototype.makeChangePasswordRequest = function (old_password, new_pass
         });
     };
 
-Requester.prototype.makeMetadataRequest = function (query, success_callback, error_callback) {
+Requester.prototype.makeTreeTopRequest = function (success_callback, error_callback) {
+        var self = this;
         return $.ajax({
                 type: "POST",
-                url: location.protocol + "//" + this.backend + "/metadata",
-                data: query.concat(this.token),
+                url: location.protocol + "//" + this.backend + "/treetop",
+                data: this.token,
                 success: success_callback,
-                dataType: "text",
-                error: error_callback == undefined ? function () {} : error_callback
+                dataType: "json",
+                error: function (jqXHR, textStatus, errorThrown) {
+                        self.checkErrorInvalidToken(jqXHR.responseText);
+                        if (error_callback !== undefined) {
+                            error_callback(jqXHR, textStatus, errorThrown)
+                        }
+                    }
             });
     };
-    
+
+Requester.prototype.makeTreeBranchRequest = function (toplevel, success_callback, error_callback) {
+        var self = this;
+        return $.ajax({
+                type: "POST",
+                url: location.protocol + "//" + this.backend + "/treebranch",
+                data: this.token + ";" + toplevel,
+                success: success_callback,
+                dataType: "json",
+                error: function (jqXHR, textStatus, errorThrown) {
+                        self.checkErrorInvalidToken(jqXHR.responseText);
+                        if (error_callback !== undefined) {
+                            error_callback(jqXHR, textStatus, errorThrown)
+                        }
+                    }
+            });
+    };
+
+    Requester.prototype.makeTreeLeafRequest = function (branchpath, success_callback, error_callback) {
+            var self = this;
+            return $.ajax({
+                    type: "POST",
+                    url: location.protocol + "//" + this.backend + "/treeleaf",
+                    data: this.token + ";" + branchpath,
+                    success: success_callback,
+                    dataType: "json",
+                    error: function (jqXHR, textStatus, errorThrown) {
+                            self.checkErrorInvalidToken(jqXHR.responseText);
+                            if (error_callback !== undefined) {
+                                error_callback(jqXHR, textStatus, errorThrown)
+                            }
+                        }
+                });
+        };
+
+Requester.prototype.makeMetadataFromLeafRequest = function (fullpath, success_callback, error_callback) {
+        var self = this;
+        return $.ajax({
+                type: "POST",
+                url: location.protocol + "//" + this.backend + "/metadataleaf",
+                data: this.token + ";" + fullpath,
+                success: success_callback,
+                dataType: "json",
+                error: function (jqXHR, textStatus, errorThrown) {
+                        self.checkErrorInvalidToken(jqXHR.responseText);
+                        if (error_callback !== undefined) {
+                            error_callback(jqXHR, textStatus, errorThrown)
+                        }
+                    }
+            });
+    };
+
+Requester.prototype.makeMetadataFromUUIDRequest = function (uuidlist, success_callback, error_callback) {
+        var self = this;
+        return $.ajax({
+                type: "POST",
+                url: location.protocol + "//" + this.backend + "/metadatauuid",
+                data: this.token + ";" + uuidlist.join(),
+                success: success_callback,
+                dataType: "json",
+                error: function (jqXHR, textStatus, errorThrown) {
+                        self.checkErrorInvalidToken(jqXHR.responseText);
+                        if (error_callback !== undefined) {
+                            error_callback(jqXHR, textStatus, errorThrown)
+                        }
+                    }
+            });
+    };
+
 Requester.prototype.makePermalinkInsertRequest = function (permalinkObj, success_callback, error_callback) {
         var permalinkjsonstr = JSON.stringify(permalinkObj)
         return $.ajax({
@@ -166,7 +240,7 @@ Requester.prototype.makePermalinkInsertRequest = function (permalinkObj, success
                 error: error_callback = undefined ? function () {} : error_callback
             });
     };
-    
+
 Requester.prototype.makePermalinkRetrievalRequest = function (permalinkStr, success_callback, error_callback) {
         return $.ajax({
                 type: "GET",
@@ -177,10 +251,10 @@ Requester.prototype.makePermalinkRetrievalRequest = function (permalinkStr, succ
                 error: error_callback = undefined ? function () {} : error_callback
             });
     };
-    
+
 Requester.prototype.makeDataRequest = function (request, callback) {
         var request_str = request.join(',') + "," + this.token;
-        
+
         var lst = this.reqs[request_str];
         if (lst === undefined) {
             this.reqs[request_str] = [callback];
@@ -188,7 +262,7 @@ Requester.prototype.makeDataRequest = function (request, callback) {
             lst.push(callback);
             return;
         }
-        
+
         var self = this;
         if (s3ui.USE_WEBSOCKETS) {
             if (!this.dconnections[this.currDConnection].ready) {
@@ -224,7 +298,7 @@ Requester.prototype.makeDataRequest = function (request, callback) {
                 });
         }
     };
-    
+
 /** REQUEST should be an array of UUIDs whose brackets we want. */
 Requester.prototype.makeBracketRequest = function (request, callback) {
         var request_str = request.join(',') + "," + this.token;

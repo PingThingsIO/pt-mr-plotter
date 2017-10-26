@@ -10,13 +10,21 @@ import string
 import sys
 import urllib
 
+if len(sys.argv) != 4:
+	print "usage metadata mongohost mongoport tagconfig"
+	sys.exit(1)
+
+mongohost = sys.argv[1]
+mongoport = int(sys.argv[2])
+
+client = pymongo.MongoClient(mongohost, mongoport)
+
 def doc_matches_path(stream_doc, pathstarts):
     for start in pathstarts:
         if stream_doc['Path'].startswith(start):
             return True
     return False
 
-client = pymongo.MongoClient()
 mongo_collection = client.qdf.metadata
 try:
     configfile = open(sys.argv[-1], 'r')
