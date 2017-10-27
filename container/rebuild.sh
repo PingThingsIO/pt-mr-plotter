@@ -14,7 +14,7 @@ go build -v
 popd
 cp ../tools/hardcodecert/hardcodecert .
 cp ../tools/setsessionkeys/setsessionkeys .
-docker build --no-cache -t btrdb/mrplotter:${ver} .
-docker push btrdb/mrplotter:${ver}
-docker tag btrdb/dev-mrplotter:${ver} btrdb/dev-mrplotter:latest
-docker push btrdb/dev-mrplotter:latest
+docker build --no-cache -t pingthings/mrplotter:${ver} .
+docker push pingthings/mrplotter:${ver}
+docker tag pingthings/dev-mrplotter:${ver} pingthings/dev-mrplotter:latest
+docker push pingthings/dev-mrplotter:latest
