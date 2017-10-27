@@ -3,9 +3,9 @@ set -ex
 
 pushd ..
 go build -v
-ver=$(./mr-plotter -version)
+ver=$(./pt-mr-plotter -version)
 popd
-cp ../mr-plotter .
+cp ../pt-mr-plotter .
 pushd ../tools/hardcodecert
 go build -v
 popd
@@ -16,5 +16,5 @@ cp ../tools/hardcodecert/hardcodecert .
 cp ../tools/setsessionkeys/setsessionkeys .
 docker build --no-cache -t pingthings/mrplotter:${ver} .
 docker push pingthings/mrplotter:${ver}
-docker tag pingthings/dev-mrplotter:${ver} pingthings/dev-mrplotter:latest
-docker push pingthings/dev-mrplotter:latest
+#docker tag pingthings/dev-mrplotter:${ver} pingthings/dev-mrplotter:latest
+#docker push pingthings/dev-mrplotter:latest
