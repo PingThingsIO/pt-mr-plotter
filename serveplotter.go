@@ -47,10 +47,10 @@ import (
 	"gopkg.in/btrdb.v4"
 	"gopkg.in/ini.v1"
 
-	"github.com/pingthingsio/pt-mr-plotter/accounts"
-	"github.com/pingthingsio/pt-mr-plotter/csvquery"
-	"github.com/pingthingsio/pt-mr-plotter/keys"
-	"github.com/pingthingsio/pt-mr-plotter/permalink"
+	"github.com/PingThingsIO/pt-mr-plotter/accounts"
+	"github.com/PingThingsIO/pt-mr-plotter/csvquery"
+	"github.com/PingThingsIO/pt-mr-plotter/keys"
+	"github.com/PingThingsIO/pt-mr-plotter/permalink"
 
 	etcd "github.com/coreos/etcd/clientv3"
 	httpHandlers "github.com/gorilla/handlers"
