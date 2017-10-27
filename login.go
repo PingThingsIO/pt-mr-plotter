@@ -36,7 +36,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/pingthingsIO/mr-plotter/accounts"
+	"github.com/pingthingsIO/pt-mr-plotter/accounts"
 	etcd "github.com/coreos/etcd/clientv3"
 )
 
