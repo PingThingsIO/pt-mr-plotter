@@ -16,7 +16,7 @@ ENV GOGC=40
 RUN go get github.com/maruel/panicparse/cmd/pp
 RUN mkdir -p $GOPATH/src/github.com/PingThingsIO && \
     cd $GOPATH/src/github.com/PingThingsIO && \
-    git clone https://github.com/PingThingsIO/mr-plotter.git && \
+    git clone https://github.com/PingThingsIO/pt-mr-plotter.git && \
     cd mr-plotter && \
     git checkout v4 && \
     go get -d ./... && \
