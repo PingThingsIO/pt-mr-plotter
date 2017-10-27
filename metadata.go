@@ -30,7 +30,7 @@ import (
 
 	"gopkg.in/btrdb.v4"
 
-	"github.com/pingthingsio/pt-mr-plotter/accounts"
+	"github.com/PingThingsIO/pt-mr-plotter/accounts"
 	etcd "github.com/coreos/etcd/clientv3"
 	"github.com/pborman/uuid"
 )
