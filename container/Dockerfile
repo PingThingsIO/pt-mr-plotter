@@ -18,7 +18,7 @@ RUN mkdir -p $GOPATH/src/github.com/PingThingsIO && \
     cd $GOPATH/src/github.com/PingThingsIO && \
     git clone https://github.com/PingThingsIO/pt-mr-plotter.git && \
     cd pt-mr-plotter && \
-    git checkout v4 && \
+    git checkout pingthings && \
     go get -d ./... && \
     go install .
 ADD entrypoint.sh /
