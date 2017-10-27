@@ -10,7 +10,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: mrplotter-bootstrap
-        image: btrdb/mrplotter:latest
+        image: pingthings/mrplotter:latest
         args: [ "init" ]
         env:
           - name: ETCD_ENDPOINT
