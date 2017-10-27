@@ -17,12 +17,12 @@ RUN go get github.com/maruel/panicparse/cmd/pp
 RUN mkdir -p $GOPATH/src/github.com/PingThingsIO && \
     cd $GOPATH/src/github.com/PingThingsIO && \
     git clone https://github.com/PingThingsIO/pt-mr-plotter.git && \
-    cd mr-plotter && \
+    cd pt-mr-plotter && \
     git checkout v4 && \
     go get -d ./... && \
     go install .
 ADD entrypoint.sh /
-ADD mr-plotter $GOPATH/bin/
+ADD pt-mr-plotter $GOPATH/bin/
 ADD hardcodecert $GOPATH/bin/
 ADD setsessionkeys $GOPATH/bin/
 RUN chmod a+x /entrypoint.sh
