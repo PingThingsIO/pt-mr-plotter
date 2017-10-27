@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/SoftwareDefinedBuildings/mr-plotter/keys"
+	"github.com/PingThingsIO/pt-mr-plotter/keys"
 	etcd "github.com/coreos/etcd/clientv3"
 )
 
