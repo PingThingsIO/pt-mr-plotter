@@ -123,6 +123,26 @@ div.timeSelection {
 psl css additions
 **/
 
+/* Export button styling */
+.btn-group-horizontal div.btn {
+    margin-right: 10px;
+}
+
+.modal label span {
+    margin-left: 10px;
+    font-weight: normal;
+}
+/* Hide the export csv modal footers until they're shown programmatically  */
+.modal-footer.export-type {
+    display: none;
+}
+.modal-footer.export-jupyter {
+    text-align: left;
+}
+.export-jupyter pre code {
+    white-space: unset;
+}
+
 #err-overlay {
     z-index: 1000;
     position: fixed;

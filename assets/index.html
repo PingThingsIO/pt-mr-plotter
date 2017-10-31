@@ -688,7 +688,7 @@ $('#err-alert').hide();
 
                                   <div class="graphExport">
                                     <div class="btn-group-horizontal">
-                                      <div class="makecsv btn btn-success" data-localize='export_csv'>Export Graph to CSV File</div>&nbsp;&nbsp;
+                                      <div class="makecsv btn btn-success" data-localize='export_csv'>Export Graph Data</div>
                                       <div id="makeG" class="makeGraph btn btn-success" data-localize='export_svg'>Export Graph to SVG Image</div>
                                     </div>
                                     <div class="download-graph"></div>
@@ -701,15 +701,15 @@ $('#err-alert').hide();
                                               <!-- <h4>1. Select the streams to include in the CSV file.</h4> //-->
                                               <div class="csv-streams"></div>
 
-                                              <h4>Export to CSV File</h4>
+                                              <h4>Export Data</h4>
 
                                               <div class="csv-pointwidth">
                                                 <p>
                                                   Data frequency:<br>
-                                                  <input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();"> 50Hz</input><br>
-                                                  <input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();"> 60Hz</input>
+                                                  <label><input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();"><span>50hz</span></input></label><br>
+                                                  <label><input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();"><span>60hz</span></input></label>
                                                 </p>
-                                                Time per row in your CSV file:
+                                                One data point for every:
                                                 <select class="resolutions" oninput="updateInput(this.value)" onchange="updateInput(this.value)">
                                                   <option id="half-cycle-resolution">1/2 cycle</option>
                                                   <option id="full-cycle-resolution">1 cycle</option>
@@ -724,6 +724,12 @@ $('#err-alert').hide();
                                                 <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
                                                 <div class="selected-windowwidth"></div>
                                                 <div class="selected-window-desc"></div>
+                                                <p>
+                                                  <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
+                                                  <div>Export data to:</div>
+                                                  <label><input id="export-type-csv" type="radio" name="export-type" value="CSV"><span>CSV</span></input></label><br>
+                                                  <label><input id="export-type-jupyter" type="radio" name="export-type" value="Jupyter"><span>Jupyter</span></input></label>
+                                                </p>
                                               </div>
 
 
