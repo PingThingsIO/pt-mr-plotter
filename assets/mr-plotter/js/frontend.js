@@ -528,10 +528,10 @@ function buildCSVMenu(self) {
                 var m1 = this.nextSibling.nextSibling;
                 //m1.innerHTML = "Window width: "+widthdesc[this.value];
                 var pps = Math.ceil(1000000 * (domain[1] - domain[0]) / wt);
-                var statusString = "(There will be " + pps + (pps == 1 ? " row in your CSV file)" : " rows in your CSV file)");
+                var statusString = "(Your data will contain " + pps + (pps == 1 ? "row)" : " rows)");
                 if (pps > 100000) {
                    $submitButton.addClass("disabled")
-                   statusString += "<br><strong>(Too many to download - choose a longer time per CSV row)</strong>"
+                   statusString += "<br><strong>(Too many to download - choose a longer time per data point)</strong>"
                 } else {
                    $submitButton.removeClass("disabled")
                 }
@@ -541,10 +541,10 @@ function buildCSVMenu(self) {
                 var m1 = this.nextSibling.nextSibling.nextSibling.nextSibling;
                 //m1.innerHTML = "Window width: "+widthdesc[this.value];
                 var pps = Math.ceil(1000000 * (domain[1] - domain[0]) / wt);
-                var statusString = "(There will be " + pps + (pps == 1 ? " row in your CSV file)" : " rows in your CSV file)");
+                var statusString = "(Your data will contain " + pps + (pps == 1 ? "row)" : " rows)");
                 if (pps > 100000) {
                    $submitButton.addClass("disabled")
-                   statusString += "<br><strong>(Too many to download - choose a longer time per CSV row)</strong>"
+                   statusString += "<br><strong>(Too many to download - choose a longer time per data point)</strong>"
                 } else {
                    $submitButton.removeClass("disabled")
                 }
