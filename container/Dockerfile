@@ -1,7 +1,7 @@
 FROM ubuntu:xenial
 
 # we install etcdctl so that you can exec etcd commands inside the container
-ENV ETCDCTL_VERSION v3.1.7
+ENV ETCDCTL_VERSION v3.1.10
 ENV ETCDCTL_ARCH linux-amd64
 ENV GO_VERSION 1.9.2
 
