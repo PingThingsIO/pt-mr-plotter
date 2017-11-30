@@ -293,8 +293,28 @@ function createPlotDownload(self) {
   var plotHeight = chartElem.getAttribute("height"); //Math.max(, legend.getAttribute("height") + 100);
     var xmlData = '<svg xmlns="http://www.w3.org/2000/svg" width="' + plotWidth + '" height="' + plotHeight + '" font-family="serif" font-size="16px">'
         + '<defs><style type="text/css"><![CDATA[' + graphStyle + ']]></style></defs>' + chartData + '</svg>';
+
+var canvas = document.createElement('canvas');
+var context = canvas.getContext('2d');
+var image = new Image;
+image.src = "data:image/svg+xml," + xmlData;
+image.onload = function() {
+    debugger;
+    canvas.height = plotHeight;
+    canvas.width = plotWidth;
+    context.drawImage(image, 0, 0);
+    var a = document.createElement("a");
+    a.download = "graph.png";
+    a.href = canvas.toDataURL("image/png");
+    a.innerHTML = "Download as PNG";
+    var wrapper = document.createElement('div');
+    wrapper.appendChild(a);
+    downloadAnchor.insertAdjacentHTML('beforeBegin', "<div>(created " + (new Date()).toLocaleString() + ", local time)</div>");
+    downloadAnchor.insertAdjacentElement('beforeBegin', wrapper);
+};
+
     var downloadAnchor = document.createElement("a");
-    downloadAnchor.innerHTML = "Download Image (created " + (new Date()).toLocaleString() + ", local time)";
+    downloadAnchor.innerHTML = "Download as SVG";
     downloadAnchor.setAttribute("href", 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(xmlData));
     downloadAnchor.setAttribute("download", "graph.svg");
     // var da = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(xmlData);
