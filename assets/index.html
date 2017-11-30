@@ -217,30 +217,6 @@
                     height: 20px;
                     width: inherit;
             }
-
-                /*   DISK USAGE UPDATES HERE */
-
-                .progress .prgbar {
-                        background: #A7C6FF;
-                        width: 70%;
-                        position: relative;
-                        height: 20px;
-                        z-index: 999;
-                }
-                .progress .prgtext {
-                        color: #000;
-                        text-align: center;
-                        font-size: 12px;
-                        margin-left: 3px;
-                        padding: 1px 0 0;
-                        position: absolute;
-                        z-index: 1000;
-                }
-                .progress .prginfo {
-                        margin: 3px 0;
-                }
-
-
         </style>
 
         <div id="plotter">
@@ -397,46 +373,6 @@
                 });
               });
 
-                $.getJSON( "disk_usage.json", function( data_usage ) {
-                  var items = [];
-                  for (disk in data_usage['diskarray']) {
-                      if (data_usage['diskarray'][disk]['mount'] == "/ssd") {
-                          var space_available = data_usage['diskarray'][disk]['spaceavail'];
-                          var space_total = data_usage['diskarray'][disk]['spacetotal'];
-                      }
-                  }
-                  var space_remaining = space_available/space_total;
-                  var space_free = space_total - space_available;
-                  var space_remaining_gb = space_available/1024/1024;
-
-                  function bytesToSize(bytes) {
-                       var sizes = ['KB', 'MB', 'GB', 'TB'];
-                       if (bytes == 0) return '0 Byte';
-                       var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-                       return Math.round(bytes / Math.pow(1024, i), 2) + '' + sizes[i];
-                    };
-
-                  $(".prgbar").width( 100 - (space_remaining).toFixed(2)*100 +"%");
-                  // $(".prgbar").width( (100) +"%");
-                  $(".prgtext").html(Math.round(100 - (space_remaining * 100)).toString().substring(0,5) +"% <span data-localize='space_used'>used</span> ( " + bytesToSize(space_total - space_available) + " of " + bytesToSize(space_total) + " )" );
-                  if (Math.round(100 - (space_remaining * 100)) >= 90) {
-                      $(".prgbar").css("background", "#ff0000");
-                      $(".progress").css("border-color", "#990000");
-                  } else if (Math.round(100 - (space_remaining * 100)) >= 85) {
-                      $(".prgbar").css("background", "#ffa500");
-                      $(".progress").css("border-color", "#996300");
-                  } else if (Math.round(100 - (space_remaining * 100)) >= 80) {
-                      $(".prgbar").css("background", "#ffd700");
-                      $(".progress").css("border-color", "#998100");
-                  }
-
-                  if ((space_remaining_gb) <= 20) {
-                      $("<p>No longer accepting new data</p><p>Drive is full</p>").insertAfter(".progress");
-                  }
-
-$('#err-alert').hide();
-                });
-
             </script>
 
         </div>
@@ -555,16 +491,6 @@ $('#err-alert').hide();
                           </div></h3>                        
                         <div class="streamTree" style="background: white; padding-top:5px;"></div>
                         <hr>
-                        <div class='progress'>
-                          <div class='prgtext'>Disk Usage</div>
-                          <div class='prgbar'></div>
-                          <div class='prginfo'>
-                            <span style='float: left;'></span>
-                            <span style='float: right;'></span>
-                            <span style='clear: both;'></span>
-                          </div>
-                        </div>
-                        <div style='clear: both;'></div>                    
                         <div class="infoBar">
                           <div class="plotLoading" style="width: 100%; margin-top: 20px; font-size: 1.25em;"></div> <!-- Displays details about how the plot is loading -->
                         </div>
