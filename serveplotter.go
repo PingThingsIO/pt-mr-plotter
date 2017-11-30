@@ -51,6 +51,7 @@ import (
 	"github.com/PingThingsIO/pt-mr-plotter/csvquery"
 	"github.com/PingThingsIO/pt-mr-plotter/keys"
 	"github.com/PingThingsIO/pt-mr-plotter/permalink"
+	"github.com/PingThingsIO/pt-mr-plotter/tools/version"
 
 	etcd "github.com/coreos/etcd/clientv3"
 	httpHandlers "github.com/gorilla/handlers"
@@ -259,10 +260,10 @@ func main() {
 	var filename string
 
 	if len(os.Args) == 2 && os.Args[1] == "-version" {
-		fmt.Printf("%d.%d.%d\n", VersionMajor, VersionMinor, VersionPatch)
+		fmt.Printf("%d.%d.%d\n", version.Major, version.Minor, version.Patch)
 		os.Exit(0)
 	}
-	fmt.Printf("starting Mr Plotter version %d.%d.%d\n", VersionMajor, VersionMinor, VersionPatch)
+	fmt.Printf("starting Mr Plotter version %d.%d.%d\n", version.Major, version.Minor, version.Patch)
 	if len(os.Args) < 2 {
 		filename = "plotter.ini"
 	} else {

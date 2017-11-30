@@ -217,30 +217,6 @@
                     height: 20px;
                     width: inherit;
             }
-
-                /*   DISK USAGE UPDATES HERE */
-
-                .progress .prgbar {
-                        background: #A7C6FF;
-                        width: 70%;
-                        position: relative;
-                        height: 20px;
-                        z-index: 999;
-                }
-                .progress .prgtext {
-                        color: #000;
-                        text-align: center;
-                        font-size: 12px;
-                        margin-left: 3px;
-                        padding: 1px 0 0;
-                        position: absolute;
-                        z-index: 1000;
-                }
-                .progress .prginfo {
-                        margin: 3px 0;
-                }
-
-
         </style>
 
         <div id="plotter">
@@ -397,46 +373,6 @@
                 });
               });
 
-                $.getJSON( "disk_usage.json", function( data_usage ) {
-                  var items = [];
-                  for (disk in data_usage['diskarray']) {
-                      if (data_usage['diskarray'][disk]['mount'] == "/ssd") {
-                          var space_available = data_usage['diskarray'][disk]['spaceavail'];
-                          var space_total = data_usage['diskarray'][disk]['spacetotal'];
-                      }
-                  }
-                  var space_remaining = space_available/space_total;
-                  var space_free = space_total - space_available;
-                  var space_remaining_gb = space_available/1024/1024;
-
-                  function bytesToSize(bytes) {
-                       var sizes = ['KB', 'MB', 'GB', 'TB'];
-                       if (bytes == 0) return '0 Byte';
-                       var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-                       return Math.round(bytes / Math.pow(1024, i), 2) + '' + sizes[i];
-                    };
-
-                  $(".prgbar").width( 100 - (space_remaining).toFixed(2)*100 +"%");
-                  // $(".prgbar").width( (100) +"%");
-                  $(".prgtext").html(Math.round(100 - (space_remaining * 100)).toString().substring(0,5) +"% <span data-localize='space_used'>used</span> ( " + bytesToSize(space_total - space_available) + " of " + bytesToSize(space_total) + " )" );
-                  if (Math.round(100 - (space_remaining * 100)) >= 90) {
-                      $(".prgbar").css("background", "#ff0000");
-                      $(".progress").css("border-color", "#990000");
-                  } else if (Math.round(100 - (space_remaining * 100)) >= 85) {
-                      $(".prgbar").css("background", "#ffa500");
-                      $(".progress").css("border-color", "#996300");
-                  } else if (Math.round(100 - (space_remaining * 100)) >= 80) {
-                      $(".prgbar").css("background", "#ffd700");
-                      $(".progress").css("border-color", "#998100");
-                  }
-
-                  if ((space_remaining_gb) <= 20) {
-                      $("<p>No longer accepting new data</p><p>Drive is full</p>").insertAfter(".progress");
-                  }
-
-$('#err-alert').hide();
-                });
-
             </script>
 
         </div>
@@ -555,16 +491,6 @@ $('#err-alert').hide();
                           </div></h3>                        
                         <div class="streamTree" style="background: white; padding-top:5px;"></div>
                         <hr>
-                        <div class='progress'>
-                          <div class='prgtext'>Disk Usage</div>
-                          <div class='prgbar'></div>
-                          <div class='prginfo'>
-                            <span style='float: left;'></span>
-                            <span style='float: right;'></span>
-                            <span style='clear: both;'></span>
-                          </div>
-                        </div>
-                        <div style='clear: both;'></div>                    
                         <div class="infoBar">
                           <div class="plotLoading" style="width: 100%; margin-top: 20px; font-size: 1.25em;"></div> <!-- Displays details about how the plot is loading -->
                         </div>
@@ -702,8 +628,13 @@ $('#err-alert').hide();
 
                                   <div class="graphExport">
                                     <div class="btn-group-horizontal">
+
                                       <div class="makecsv btn btn-success" data-localize='export_csv'>Export Graph to CSV File</div>&nbsp;&nbsp;
                                       <div id="makeG" class="makeGraph btn btn-success" data-localize='export_svg'>Save Graph as Image</div>
+
+                                      <div class="makecsv btn btn-success" data-localize='export_csv'>Export Graph Data</div>
+                                      <div id="makeG" class="makeGraph btn btn-success" data-localize='export_svg'>Export Graph to SVG Image</div>
+
                                     </div>
                                     <div class="download-graph"></div>
                                     <div class="modal fade csv-modal" role="dialog" tabindex="-1" aria-hidden="true">
@@ -715,15 +646,15 @@ $('#err-alert').hide();
                                               <!-- <h4>1. Select the streams to include in the CSV file.</h4> //-->
                                               <div class="csv-streams"></div>
 
-                                              <h4>Export to CSV File</h4>
+                                              <h4>Export Data</h4>
 
                                               <div class="csv-pointwidth">
                                                 <p>
                                                   Data frequency:<br>
-                                                  <input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();"> 50Hz</input><br>
-                                                  <input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();"> 60Hz</input>
+                                                  <label><input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();"><span>50hz</span></input></label><br>
+                                                  <label><input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();"><span>60hz</span></input></label>
                                                 </p>
-                                                Time per row in your CSV file:
+                                                One data point for every:
                                                 <select class="resolutions" oninput="updateInput(this.value)" onchange="updateInput(this.value)">
                                                   <option id="half-cycle-resolution">1/2 cycle</option>
                                                   <option id="full-cycle-resolution">1 cycle</option>
@@ -738,6 +669,12 @@ $('#err-alert').hide();
                                                 <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
                                                 <div class="selected-windowwidth"></div>
                                                 <div class="selected-window-desc"></div>
+                                                <p>
+                                                  <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
+                                                  <div>Export data to:</div>
+                                                  <label><input id="export-type-csv" type="radio" name="export-type" value="CSV"><span>CSV</span></input></label><br>
+                                                  <label><input id="export-type-jupyter" type="radio" name="export-type" value="Jupyter"><span>Jupyter</span></input></label>
+                                                </p>
                                               </div>
 
 
@@ -747,11 +684,113 @@ $('#err-alert').hide();
                                               </form>
                                             </div>
                                           </div>
-                                          <div class="modal-footer">
-                                            <div class="btn btn-default" data-dismiss="modal">Cancel</div>
-                                            <div class="csv-button btn btn-primary" data-dismiss="modal">Create CSV File</div>
+                                          <div class="modal-footer export-type export-csv">
+                                              <div class="btn btn-default" data-dismiss="modal">Cancel</div>
+                                              <div class="csv-button btn btn-primary" data-dismiss="modal">Download CSV File</div>
                                           </div>
-                                        </div>
+                                          <div class="modal-footer export-type export-jupyter">
+                                              <h4>Copy and paste the following text into a Jupyter Lab Notebook with a Python3 kernel:</h4>
+                                              <pre><code class="csvCodeBlock">
+import pandas as pd
+import requests
+import json
+import os
+
+def warn_for_large_dl(opts_dict, threshold=100000, sample_rate_hz=60):
+  total_time = opts_dict["EndTime"] - opts_dict["StartTime"]
+  to_ns = {
+    's': 1000000000,
+    'seconds': 1000000000,
+    'ms': 1000000,
+    'milliseconds': 1000000,
+    '': 1000000,
+    'us': 1000,
+    'microseconds': 1000,
+    'ns': 1,
+    'nanoseconds': 1
+  }
+
+  total_time_ns = total_time * to_ns[opts_dict["UnitofTime"]]
+
+  query_type = opts_dict["QueryType"]
+  if query_type == 'windows':
+    ns_per_point = int(opts_dict['WindowText']) * int(to_ns[opts_dict['WindowUnit']])
+    total_rows = total_time_ns // ns_per_point
+
+  total_obs_at_sample_rate = total_time_ns // (1/sample_rate_hz * to_ns['s'])
+
+  if query_type == 'aligned':
+    total_rows = total_time_ns // (2 ** opts_dict.get("PointWidth", 0))
+    total_rows = min(total_rows, total_obs_at_sample_rate)
+  elif query_type == 'raw':
+    total_rows = total_obs_at_sample_rate
+  
+  print('Assuming {}hz sampling, you are downloading approximately {} rows.'.format(sample_rate_hz, int(total_rows)))
+  if (total_rows > threshold):
+    print('This exceeds your threshold of {}'.format(threshold))
+    print('''
+Either increase your threshold or choose closer start and end times.
+If you are using QueryType: 'raw' then you must choose a closer start and end time.
+If you are using QueryType: 'aligned' you may also increase PointWidth to sample less frequently.
+If you are using QueryType: 'windows' you may also increase WindowText to sample less frequently.
+      ''')
+    return True
+  return False
+    
+def download_pmu_data(opts_dict, domain=None, filename=None):
+  if domain is None:
+    raise ValueError("You must supply a domain to download_pmu_data (e.g. https://viz.predictivegrid.com)")
+  if filename is None:
+    filename = 'pmu_data.csv'
+  url = domain + '/csv'
+  payload = "json=" + json.dumps(opts_dict)
+  print("Starting download...")
+  r = requests.post(url, data=payload, stream=True)
+  with open(filename, 'wb') as f:
+    for chunk in r.iter_content(chunk_size=1024): 
+        if chunk: # filter out keep-alive new chunks
+            f.write(chunk)
+  print("Download finished")
+  return filename
+
+def make_df(csv_filename=None, max_size=100):
+  if csv_filename is None:
+    csv_filename = 'pmu_data.csv'
+  file_size_mb = os.path.getsize(csv_filename) / 1024 / 1024
+  if file_size_mb > max_size:
+    print('The file is {:.2f}mb, which is larger than your threshold of {}mb. You may want to process it manually instead.'.format(file_size_mb, max_size))
+    print('It is located at: {}/{}'.format(os.getcwd(), csv_filename))
+    df = pd.read_csv(csv_filename, chunksize=10000)
+    print('Returning a {} instead'.format(type(df)))
+  else:
+    df = pd.read_csv(csv_filename)
+    print("Created dataframe of shape:", df.shape)
+  return df
+
+# The following dict's values determine the data downloaded. Some fields behave differently depending on QueryType.
+#   "StartTime" : Int    - Represents the start time expressed in Epoch. Units determined by "UnitofTime"
+#   "EndTime"   : Int    - Represents the end time expressed in Epoch. Units determined by "UnitofTime"
+#   "UnitofTime": String - enum represents the unit of time applied to the "StartTime" and "EndTime" fields. One of "s", "ms", "us", "ns", "". "" is an alias for "ms".
+#   "UUIDS"     : List   - list of UUID strings for the streams being downloaded
+#   "Labels"    : List   - list of label strings to use for each stream in the outputted data
+#   "QueryType" : String - enum with one of three values (windows, aligned, raw)
+#   "WindowText": String - Valid only for QueryType "windows." Together with WindowUnit represents the amount of time per data point
+#   "WindowUnit": String - Valid only for QueryType "windows." enum representing the unit of time to use for WindowText. One of "years","weeks","days","hours","minutes","seconds","milliseconds","microseconds","nanoseconds"
+#   "PointWidth": Int    - The point width exponent for AlignedWindows queries, and the maximum depth for Windows queries. It is ignored for QueryType: "raw"
+#   "_token"    : String - The token string issued by the server granting a user access for the current session.
+                                             </code>
+                                             <code class="csvJsonObject"></code>
+                                             <code class="runCommands">
+too_big = warn_for_large_dl(opts_dict, threshold=20000, sample_rate_hz=60)
+if (not too_big):
+  csv_filename = download_pmu_data(opts_dict, domain=domain)
+  df = make_df(csv_filename, max_size=1)
+  print("Done")
+else:
+  print("Aborted download.")
+                                              </code>
+                                              </pre>
+                                          </div>
                                       </div>
                                     </div>                                    
                                   </div>

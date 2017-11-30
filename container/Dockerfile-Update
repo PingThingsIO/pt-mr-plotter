@@ -1,0 +1,9 @@
+# This dockerfile assumes it is being run with a build context at the repos root directory (not inside ./container)
+FROM localdev/mrplotter:latest
+
+ADD ./pt-mr-plotter $GOPATH/bin/
+ADD ./ $GOPATH/src/github.com/PingThingsIO/pt-mr-plotter 
+ADD ./container/entrypoint.sh /entrypoint.sh
+RUN chmod a+x /entrypoint.sh
+# RUN go get -u github.com/derekparker/delve/cmd/dlv
+ENTRYPOINT ["/entrypoint.sh"]
