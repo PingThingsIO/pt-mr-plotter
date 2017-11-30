@@ -227,16 +227,12 @@ function setCSSRule(self, options, rule, attr) {
 
 function init_graph(self, c1, c2) {
     // Finish building the graph components
-// <<<<<<< HEAD
 
     /* PSL wants there to be 9 default axes. */
     for (var i = 0; i < s3ui.pslaxisnames.length; i++) {
         var axisid = s3ui.addYAxis(self, true);
         self.imethods.renameAxis(axisid, s3ui.pslaxisnames[i]);
     }
-// =======
-//     s3ui.addYAxis(self);
-// >>>>>>> mrpv4
 
     // first callback
     c1(self);
@@ -245,17 +241,13 @@ function init_graph(self, c1, c2) {
     self.imethods.updateGraphSize();
     $(window).resize(self.imethods.updateGraphSize);
 
-// <<<<<<< HEAD
-
+    // show/hide toggle for the left sidebar / stream tree
     $("#toggler").click(function ( ) { // missing the ( !!
         self.imethods.updateGraphSize();
         // console.log("resized!");
         // $(window).trigger('resize');
     });
 
-
-// =======
-// >>>>>>> mrpv4
     // For some reason, Any+Time requires the text elements to have IDs.
     // So, I'm going to give them IDs that are unique across all instances
     self.find(".startdate").id = "start" + self.idata.instanceid;

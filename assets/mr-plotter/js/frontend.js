@@ -477,15 +477,61 @@ function buildCSVMenu(self) {
         domain = domain.domain();
         $(pwselector).css("display", "");
 
+        var exportCSV = self.find('input#export-type-csv');
+        var exportJupyter = self.find('input#export-type-jupyter');
+
+        function changeExportType(exportType) {
+            var exportFooters = document.querySelectorAll('.modal-footer.export-type');
+            exportFooters.forEach(function toggleFooterViz(node) {
+                if (node.className.indexOf(exportType) >= 0) {
+                    node.style.display = "block";
+                } else {
+                    node.style.display = "none";
+                }
+            });
+        }
+        function updateCSVoptionsHTML() {
+            function selectElementText(el, win) {
+                win = win || window;
+                var doc = win.document, sel, range;
+                if (win.getSelection && doc.createRange) {
+                    sel = win.getSelection();
+                    range = doc.createRange();
+                    range.selectNodeContents(el);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                } else if (doc.body.createTextRange) {
+                    range = doc.body.createTextRange();
+                    range.moveToElementText(el);
+                    range.select();
+                }
+            }
+            var csvOptions = prepareCSVDownloadOptions(
+                self, streams, settingsObj, domain, widthlists[parseInt(pwselectbox.value)], graphExport
+            );
+            var csvOptionCodeBlockEl = self.find('code.csvJsonObject');
+            csvOptionCodeBlockEl.innerHTML = "\n" +
+                `opts_dict = ${JSON.stringify(csvOptions, null, 4)}\n\n` +
+                `domain = "${window.location.protocol}//${self.backend}"`;
+            selectElementText(document.querySelector('.export-jupyter pre'));
+        }
+        var resolutionSelect = document.querySelector('select.resolutions');
+        resolutionSelect.addEventListener('change', updateCSVoptionsHTML, false);
+        exportCSV.onchange = function chooseCSV() { changeExportType('export-csv'); }
+        exportJupyter.onchange = function chooseJupyter() {
+            updateCSVoptionsHTML();
+            changeExportType('export-jupyter');
+        }
+
         pwselector.onchange = function () {
                 var wt = widthlists[this.value];
                 var m1 = this.nextSibling.nextSibling;
                 //m1.innerHTML = "Window width: "+widthdesc[this.value];
                 var pps = Math.ceil(1000000 * (domain[1] - domain[0]) / wt);
-                var statusString = "(There will be " + pps + (pps == 1 ? " row in your CSV file)" : " rows in your CSV file)");
+                var statusString = "(Your data will contain " + pps + (pps == 1 ? "row)" : " rows)");
                 if (pps > 100000) {
                    $submitButton.addClass("disabled")
-                   statusString += "<br><strong>(Too many to download - choose a longer time per CSV row)</strong>"
+                   statusString += "<br><strong>(Too many to download - choose a longer time per data point)</strong>"
                 } else {
                    $submitButton.removeClass("disabled")
                 }
@@ -495,10 +541,10 @@ function buildCSVMenu(self) {
                 var m1 = this.nextSibling.nextSibling.nextSibling.nextSibling;
                 //m1.innerHTML = "Window width: "+widthdesc[this.value];
                 var pps = Math.ceil(1000000 * (domain[1] - domain[0]) / wt);
-                var statusString = "(There will be " + pps + (pps == 1 ? " row in your CSV file)" : " rows in your CSV file)");
+                var statusString = "(Your data will contain " + pps + (pps == 1 ? "row)" : " rows)");
                 if (pps > 100000) {
                    $submitButton.addClass("disabled")
-                   statusString += "<br><strong>(Too many to download - choose a longer time per CSV row)</strong>"
+                   statusString += "<br><strong>(Too many to download - choose a longer time per data point)</strong>"
                 } else {
                    $submitButton.removeClass("disabled")
                 }
@@ -522,22 +568,26 @@ function buildCSVMenu(self) {
     }
 }
 
+function prepareCSVDownloadOptions(self, streams, settingsObj, domain, wt, graphExport) {
+    streamUUIDs = streams.filter(function (x) { return settingsObj.hasOwnProperty(x.uuid); }).map(function (x) { return x.uuid; });
+    var dataJSON = {
+        "StartTime": domain[0] - self.idata.offset,
+        "EndTime": domain[1] - self.idata.offset,
+        "UUIDS": streamUUIDs,
+        "Labels": streamUUIDs.map(function (x) { return settingsObj[x].replace(/\/\s/g, "/") }),
+        "QueryType":  "windows", //getCSVQueryType(self),
+        "WindowText": wt.toString(), // self.find(".csv-windowsize-text").value,
+        "WindowUnit": "nanoseconds", // self.find(".csv-unit-current").innerHTML,
+        "UnitofTime": "ms",
+        // if omitted the backend assumes a PointWidth of zero for a Windows query
+        "PointWidth": 0, // pwe, 
+        "_token": self.requester.getToken()
+    };
+    return dataJSON;
+}
 
 function createCSVDownload(self, streams, settingsObj, domain, wt, graphExport) {
-    streams = streams.filter(function (x) { return settingsObj.hasOwnProperty(x.uuid); }).map(function (x) { return x.uuid; });
-    var dataJSON = {
-            "StartTime": domain[0] - self.idata.offset,
-            "EndTime": domain[1] - self.idata.offset,
-            "UUIDS": streams,
-            "Labels": streams.map(function (x) { return settingsObj[x]; }),
-            "QueryType":  "windows", //getCSVQueryType(self),
-            "WindowText": wt.toString(), // self.find(".csv-windowsize-text").value,
-            "WindowUnit": "nanoseconds", // self.find(".csv-unit-current").innerHTML,
-            "UnitofTime": "ms",
-            // if omitted the backend assumes a PointWidth of zero for a Windows query
-            "PointWidth": 0, // pwe, 
-            "_token": self.requester.getToken()
-        };
+    var dataJSON = prepareCSVDownloadOptions(self, streams, settingsObj, domain, wt, graphExport);
     var csvform = graphExport.querySelector(".csv-form");
     csvform.querySelector(".csv-form-data").value = JSON.stringify(dataJSON);
     csvform.submit();
