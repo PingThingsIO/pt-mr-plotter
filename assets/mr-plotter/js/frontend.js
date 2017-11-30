@@ -299,7 +299,6 @@ var context = canvas.getContext('2d');
 var image = new Image;
 image.src = "data:image/svg+xml," + xmlData;
 image.onload = function() {
-    debugger;
     canvas.height = plotHeight;
     canvas.width = plotWidth;
     context.drawImage(image, 0, 0);
