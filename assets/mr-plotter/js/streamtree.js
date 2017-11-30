@@ -393,8 +393,26 @@ function pathsToTree(self, pathPrefix, streamList, loadNext) {
 function getContextMenu(self, node, callback) {
     if (node.data.child) {
         return {
-                showInfo: {
-                        label: "Show Info",
+            showInfo: {
+                label: "Show Info",
+                action: function () {
+                        if (node.data.streamdata == undefined) {
+                            self.requester.makeMetadataFromLeafRequest(node.data.sourceName + node.data.path, function (data) {
+                                     if (node.data.streamdata == undefined) {
+                                         // Used to be data = JSON.parse(data)[0] but I removed the extra list around it
+                                         node.data.streamdata = data;
+                                     }
+                                     alert(s3ui.getInfo(node.data.streamdata, "\n", false));
+                                 }, function (jqXHR) {
+                                     handleFailedLoad(jqXHR.responseText);
+                                 });
+                        } else {
+                            alert(s3ui.getInfo(node.data.streamdata, "\n", false));
+                        }
+                    }
+            },
+            "Copy UUID": {
+                        label: "Copy UUID",
                         action: function () {
                                 if (node.data.streamdata == undefined) {
                                     self.requester.makeMetadataFromLeafRequest(node.data.sourceName + node.data.path, function (data) {
@@ -402,7 +420,7 @@ function getContextMenu(self, node, callback) {
                                                  // Used to be data = JSON.parse(data)[0] but I removed the extra list around it
                                                  node.data.streamdata = data;
                                              }
-                                             alert(s3ui.getInfo(node.data.streamdata, "\n", false));
+                                             prompt("Copy to clipboard: Ctrl+C, Enter", node.data.streamdata.uuid);
                                          }, function (jqXHR) {
                                              handleFailedLoad(jqXHR.responseText);
                                          });
@@ -411,7 +429,7 @@ function getContextMenu(self, node, callback) {
                                 }
                             }
                     }
-            };
+    };
     } else {
         return {
                 expandcontract: {
