@@ -80,13 +80,8 @@ s3ui.parsePixelsToInt = function (q) {
     };
 
 s3ui.default_cb1 = function (inst) {
-        $(inst.find(".dispTable")).colResizable({
-                    hoverCursor: "ew-resize",
-                    dragCursor: "ew-resize",
-                    minWidth: 0,
-                    onResize: inst.imethods.updateGraphSize
-                });
-    };
+    // cb1 and cb2 run after all code in __init__
+};
 
 s3ui.default_cb2 = function (inst) {
         if (window.location.search.length > 0) {
@@ -244,8 +239,6 @@ function init_graph(self, c1, c2) {
     // show/hide toggle for the left sidebar / stream tree
     $("#toggler").click(function ( ) { // missing the ( !!
         self.imethods.updateGraphSize();
-        // console.log("resized!");
-        // $(window).trigger('resize');
     });
 
     // For some reason, Any+Time requires the text elements to have IDs.

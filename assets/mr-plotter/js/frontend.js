@@ -38,10 +38,22 @@ function init_frontend(self) {
     self.idata.chart = self.find("svg.chart");
     self.idata.widthFunction = function () {
       var $parent = $(self.find('.chartContainer'));
-            var width = $parent.css("width");
+            // Check to see if sidebar is showing. We need to use the outermost container
+            // for width calculations because if we check the charts own width then 
+            // the chart expands when the viewport increases, but won't shrink when the
+            // viewport becomes smaller
+            var sidebarHidden = $('#toggle_column').css("display") == "none";
+            var widthDispTable = $('table.dispTable').css("width");
+            var widthDT = parseInt(widthDispTable);
+            var width = sidebarHidden ? widthDT : widthDT * .8;
             var leftpadding = $parent.css("padding-left");
             var rightpadding = $parent.css("padding-right");
-            return s3ui.parsePixelsToInt(width) - s3ui.parsePixelsToInt(leftpadding) - s3ui.parsePixelsToInt(rightpadding);
+            var leftborder = $parent.css("border-left-width");
+            var rightborder = $parent.css("border-right-width");
+            var totalNonContentWidth = [leftpadding, rightpadding, leftborder, rightborder]
+                .map(s3ui.parsePixelsToInt)
+                .reduce(function(pv, cv) {return pv + cv});
+            return width - totalNonContentWidth;
     };
 
     self.idata.changingpw = false;
@@ -49,6 +61,20 @@ function init_frontend(self) {
   self.idata.prevLoginMenuText = self.idata.defaultLoginMenuText;
 
 }
+
+function toggle_visibility(id) {
+    var e = document.getElementById(id);
+    if(e.style.display == "block") {
+       $("#toggler").html( "&rarr; Show" );
+       e.style.display = "none";
+       e.style.width = "0%";
+     } else {
+       $("#toggler").html( "&larr; Hide" );
+       e.style.display = "block";
+       $("#toggle_column").animate({"width" : "99%"}, 100);
+     }
+ };
+
 
 /* Adds or removes (depending on the value of SHOW) the stream
     described by STREAMDATA to or from the legend. UPDATE is true if
@@ -66,13 +92,6 @@ function toggleLegend (self, show, streamdata, update) {
             return;
         }
         self.idata.selectedStreamsBuffer.push(streamdata);
-         
-
-
-
-
-
-
 
         var row = d3.select(self.find("tbody.legend"))
           .append("tr")

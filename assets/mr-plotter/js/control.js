@@ -304,8 +304,17 @@ function applySettings() {
 }
 
 function updateGraphSize() {
-    this.idata.TARGETWIDTH = this.idata.widthFunction();
-    s3ui.updateSize(this, true);
+    // when updateSize() runs, it mutates items widthFunction() uses
+    // for its own calculations. As a result, these functions will keep
+    // changing the result of each other's next invocation until they
+    // eventually converge.
+    // While it would be preferable to fix this dependency, at the least
+    // we can re-run until the answer stabilizes
+    for (var i = 0; i < 10; i++) {
+        this.idata.TARGETWIDTH = this.idata.widthFunction();        
+        s3ui.updateSize(this, true);
+        if (this.idata.TARGETWIDTH == this.idata.widthFunction()) break;
+    }
 }
 
 function createVerticalCursor(xCoord) {

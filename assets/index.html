@@ -77,20 +77,6 @@
      $("#plotter-rows").fadeOut(150);
      $("#plot-directions").fadeIn(150)
    }
-            function toggle_visibility(id) {
-               var e = document.getElementById(id);
-               if(e.style.display == "block") {
-                  $("#toggler").html( "&rarr; Show" );
-                  e.style.display = "none";
-                  $("#toggle_column").animate({"width" : "0%"}, 500);
-                  $("#chartDiv").animate({"width" : "100%"}, 500);
-                } else {
-                  $("#toggler").html( "&larr; Hide" );
-                  e.style.display = "block";
-                  $("#toggle_column").animate({"width" : "100%"}, 500);
-                  $("#container-fluid").animate({"width" : "100%"}, 500);
-                }
-            };
 
             function legend_toggler(id) {
               var toggler = $("#legend_toggler");
@@ -234,9 +220,6 @@
             <script src="timezone-js/js/init.js"></script>
             <script src="vakata-jstree/js/jstree.min.js"></script>
             <script src="jquery-localize/jquery.localize.min.js"></script>
-
-            <!-- <script src="col-resizable/js/colResizable-1.3.med.js"></script>  //-->
-            <script src="col-resizable/js/colResizable-1.3.source.js"></script>
 
             <script src="bootstrap-3.3.6/js/bootstrap.min.js"></script>
             <script src="mr-plotter/js/s3ui.js"></script>
