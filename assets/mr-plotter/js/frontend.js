@@ -530,8 +530,8 @@ function buildCSVMenu(self) {
             );
             var csvOptionCodeBlockEl = self.find('code.csvJsonObject');
             csvOptionCodeBlockEl.innerHTML = "\n" +
-                `opts_dict = ${JSON.stringify(csvOptions, null, 4)}\n\n` +
-                `domain = "${window.location.protocol}//${self.backend}"`;
+                "opts_dict = " + JSON.stringify(csvOptions, null, 4) + "\n\n" +
+                "domain = \"" + window.location.protocol + "//" + self.backend + "\"";
             selectElementText(document.querySelector('.export-jupyter pre'));
         }
         var resolutionSelect = document.querySelector('select.resolutions');
