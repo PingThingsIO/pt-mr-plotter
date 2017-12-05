@@ -1,23 +1,22 @@
-<!--
-    Copyright (C) 2016 Sam Kumar, Michael Andersen, and the University
-    of California, Berkeley.
-
-    This file is part of Mr. Plotter (the Multi-Resolution Plotter).
-
-    Mr. Plotter is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published
-    by the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Mr. Plotter is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-    You should have received a copy of the GNU Affero General Public License
-    along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
--->
-
 <!DOCTYPE html>
+  <!--
+      Copyright (C) 2016 Sam Kumar, Michael Andersen, and the University
+      of California, Berkeley.
+  
+      This file is part of Mr. Plotter (the Multi-Resolution Plotter).
+  
+      Mr. Plotter is free software: you can redistribute it and/or modify
+      it under the terms of the GNU Affero General Public License as published
+      by the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+  
+      Mr. Plotter is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU Affero General Public License for more details.
+      You should have received a copy of the GNU Affero General Public License
+      along with Mr. Plotter.  If not, see <http://www.gnu.org/licenses/>.
+  -->
 <html>
     <head>
         <meta charset="utf-8">
@@ -35,33 +34,33 @@
     <div class="navbar-header">
       <a class="navbar-brand" href="/"><img src="images/psl_20px.png" width="auto" height="20px" style="float: left; margin-right: 5px;"> Power Sensors Ltd.</a>
     </div>
-    <div class="navbar-collapse collapse" style='height: 50px;'>
+    <div class="navbar-collapse collapse" style="height: 50px;">
 
       <ul class="nav navbar-nav" style="height:50px;">
           <li style="margin:15px;">
-              <a id="helpbtn" tabindex="0" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>View the <a href='/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%2014.pdf' target='_blank'>First Steps</a> manual</p><p>View the <a href='/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%2017.pdf' target='_blank'>Administrator</a> manual</p><p>View the <a href='/documents/microPMU%20Installation%20and%20User%27s%20Manual%20-%20v2.0.pdf' target='_blank'>microPMU</a> user's manual</p><p>PSL assistance contact information:</p><ul><li>Office: +1-510-522-4400</li><li>Fax: +1-510-522-4455</li><li>Email: <a href='mailto:support@powerstandards.com' target='_top'>support@powersensorsltd.com</a></li></ul>">Help</a>
+              <a id="helpbtn" tabindex="0" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-html="true" data-content="<p>View the <a href="/documents/Quickstart%20Kit%20-%20First%20Steps%20-%20Revision%2014.pdf" target="_blank">First Steps</a> manual</p><p>View the <a href="/documents/Quickstart%20Kit%20-%20Administrator%20Manual%20-%20Revision%2017.pdf" target="_blank">Administrator</a> manual</p><p>View the <a href="/documents/microPMU%20Installation%20and%20User%27s%20Manual%20-%20v2.0.pdf" target="_blank">microPMU</a> user"s manual</p><p>PSL assistance contact information:</p><ul><li>Office: +1-510-522-4400</li><li>Fax: +1-510-522-4455</li><li>Email: <a href="mailto:support@powerstandards.com" target="_top">support@powersensorsltd.com</a></li></ul>">Help</a>
           </li>
       </ul>
       <ul class="nav navbar-nav" style="height:50px;">
           <li>
-                <select id='language-picker' onchange="updateLanguage(this.value)" style='margin: 18px;'>
-                    <option value='en'>English</option>
-                    <!-- <option value='es'>Español</option> //-->
-                    <option value='fr'>Français</option> <!--
-                    <option value='de'>Deutsch</option>
-                    <option value='ko'>한국어</option>
-                    <option value='ja'>日本語</option>
-                    <option value='zh'>中文</option>
-                    <option value='pt'>Português</option>
-                    <option value='vi'>Tiếng Việt</option> //-->
+                <select id="language-picker" onchange="updateLanguage(this.value)" style="margin: 18px;">
+                    <option value="en">English</option>
+                    <!-- <option value="es">Español</option> //-->
+                    <option value="fr">Français</option> <!--
+                    <option value="de">Deutsch</option>
+                    <option value="ko">한국어</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">中文</option>
+                    <option value="pt">Português</option>
+                    <option value="vi">Tiếng Việt</option> //-->
                 </select>
           </li>
       </ul>
 
       <div style="float: right;">
       <ul class="nav navbar-nav">
-          <li style='padding: 15px;'>
-            <i>BTrDB &amp; uPMU Plotter </i><i data-localize='developed_by'>developed by</i> <i>U.C. Berkeley</i>
+          <li style="padding: 15px;">
+            <i>BTrDB &amp; uPMU Plotter </i><i data-localize="developed_by">developed by</i> <i>U.C. Berkeley</i>
           </li>
       </ul>
       </div>
@@ -71,31 +70,31 @@
 
   <script type="text/javascript">
    function showPlotter () {
-     $('#plotter-rows').fadeIn();
-     $('#plot-directions').fadeOut();      
+     $("#plotter-rows").fadeIn();
+     $("#plot-directions").fadeOut();      
    }
    function hidePlotter () {
-     $('#plotter-rows').fadeOut(150);
-     $('#plot-directions').fadeIn(150)
+     $("#plotter-rows").fadeOut(150);
+     $("#plot-directions").fadeIn(150)
    }
             function toggle_visibility(id) {
                var e = document.getElementById(id);
-               if(e.style.display == 'block') {
+               if(e.style.display == "block") {
                   $("#toggler").html( "&rarr; Show" );
-                  e.style.display = 'none';
+                  e.style.display = "none";
                   $("#toggle_column").animate({"width" : "0%"}, 500);
                   $("#chartDiv").animate({"width" : "100%"}, 500);
                 } else {
                   $("#toggler").html( "&larr; Hide" );
-                  e.style.display = 'block';
+                  e.style.display = "block";
                   $("#toggle_column").animate({"width" : "100%"}, 500);
                   $("#container-fluid").animate({"width" : "100%"}, 500);
                 }
             };
 
             function legend_toggler(id) {
-              var toggler = $('#legend_toggler');
-              var legendVisible = toggler.data('visible');
+              var toggler = $("#legend_toggler");
+              var legendVisible = toggler.data("visible");
                if(legendVisible) {
                  $("#legend_toggler").html( "Show" );
                } else {
@@ -103,22 +102,22 @@
                  if (selectedLegend) selectedLegend.click();
                  $("#legend_toggler").html( "Hide" );
                }
-              toggler.data('visible', !legendVisible);
+              toggler.data("visible", !legendVisible);
               if (plotterSelf.idata.selectedStreams.length)
                 s3ui.updatePlot(plotterSelf);
             };
             function changeResolutionFreq() {
-              var freq = $('input[name=frequency]:checked').val();
-              if (freq) createCookie('frequency', freq, 365);
-              if (freq == '60') {
-                $('#half-cycle-resolution').val(0);
-                $('#full-cycle-resolution').val(2);
+              var freq = $("input[name=frequency]:checked").val();
+              if (freq) createCookie("frequency", freq, 365);
+              if (freq == "60") {
+                $("#half-cycle-resolution").val(0);
+                $("#full-cycle-resolution").val(2);
               }
-              else if (freq == '50') {
-                $('#half-cycle-resolution').val(1);
-                $('#full-cycle-resolution').val(3);
+              else if (freq == "50") {
+                $("#half-cycle-resolution").val(1);
+                $("#full-cycle-resolution").val(3);
               }
-              updateInput($('.resolutions').val());
+              updateInput($(".resolutions").val());
             };
             function updateInput(p){
                 // $("#resolutions").val(p);
@@ -166,10 +165,10 @@
 
                 function readCookie(name) {
                     var nameEQ = name + "=";
-                    var ca = document.cookie.split(';');
+                    var ca = document.cookie.split(";");
                     for(var i=0;i < ca.length;i++) {
                         var c = ca[i];
-                        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                        while (c.charAt(0)==" ") c = c.substring(1,c.length);
                         if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
                     }
                     return null;
@@ -184,7 +183,7 @@
 
         </script>
 
-        <style type='text/css'>
+        <style type="text/css">
             .legend_item { display: inline; margin-left: 40px; }
 
             .legend {
@@ -271,23 +270,23 @@
 
                plotterSelf = mr_plotter(document.getElementById("plotter"), "mrplotter", undefined, undefined);
 
-               $('#plotter-rows').hide();
+               $("#plotter-rows").hide();
                 //set default frequency from cookie
-                var defaultFreq = readCookie('frequency');
+                var defaultFreq = readCookie("frequency");
 
                 if (!defaultFreq) {
                   defaultFreq = 60;
-                  createCookie('frequency', defaultFreq, 365);
+                  createCookie("frequency", defaultFreq, 365);
                 }
 
-                var freqOpt = $('#freq-'+defaultFreq+'hz');
+                var freqOpt = $("#freq-"+defaultFreq+"hz");
                 if (freqOpt) freqOpt.click();
 
                 //initialize sortable legend
-                var legendTable = document.querySelector('.legend.sortable');
+                var legendTable = document.querySelector(".legend.sortable");
                 Sortable.create(legendTable, {
-                  handle: '.reorder-legend',
-                  draggable: 'tr',
+                  handle: ".reorder-legend",
+                  draggable: "tr",
                   onEnd: function (e) {
                     const streams = plotterSelf.idata.selectedStreams;
                     if (e.newIndex >= streams.length) {
@@ -303,71 +302,71 @@
                 });
 
                 //init tabs
-                $('#plotter-tabs').tab();
-                $('#plotter-tabs-nav a').click(function (e) {
+                $("#plotter-tabs").tab();
+                $("#plotter-tabs-nav a").click(function (e) {
                   e.preventDefault();
-                  $(this).tab('show');
+                  $(this).tab("show");
                 });
 
                 //init timezone
                 function autoTimezone () {
                   var defaultTz = jstz.determine().name();
-                  createCookie('timezone', defaultTz, 365);
-                  document.getElementById('timezone-dropdown').value = defaultTz;
+                  createCookie("timezone", defaultTz, 365);
+                  document.getElementById("timezone-dropdown").value = defaultTz;
                 }
 
                function autoDST () {
                  var dst = (new Date()).dst();
-                 $('#dst-checkbox')[0].checked = dst;
-                 createCookie('dst', dst, 365);
+                 $("#dst-checkbox")[0].checked = dst;
+                 createCookie("dst", dst, 365);
                }
                 
-                var defaultTz = readCookie('timezone');
+                var defaultTz = readCookie("timezone");
 
-                if (defaultTz) document.getElementById('timezone-dropdown').value = defaultTz;
+                if (defaultTz) document.getElementById("timezone-dropdown").value = defaultTz;
                else autoTimezone();
 
-               var defaultDST = readCookie('dst');
-               if (defaultDST) $('#dst-checkbox')[0].checked = (defaultDST != 'false') ? true : false;
+               var defaultDST = readCookie("dst");
+               if (defaultDST) $("#dst-checkbox")[0].checked = (defaultDST != "false") ? true : false;
                else autoDST();
                 
-                $('#timezone-dropdown').change(function (e) {
+                $("#timezone-dropdown").change(function (e) {
                     if (plotterSelf.idata.selectedStreams.length) {
-                        $('.plotButton').click();
-                        createCookie('timezone', e.currentTarget.value, 365);
+                        $(".plotButton").click();
+                        createCookie("timezone", e.currentTarget.value, 365);
                         $(".showAll").click();
                     }
                 });
 
-                $('#auto-timezone').click(function(e) {
+                $("#auto-timezone").click(function(e) {
                     e.preventDefault();
                     autoTimezone();
                     autoDST();
                     if (plotterSelf.idata.selectedStreams.length) {
-                        $('.plotButton').click();
+                        $(".plotButton").click();
                         $(".showAll").click();
                     }
                 });
 
                 //size streamtree
-               var streamWell = $('.streamSelection');
-               var streamTree = $('.streamTree');
-               var chartWell = $('#chartDiv');
+               var streamWell = $(".streamSelection");
+               var streamTree = $(".streamTree");
+               var chartWell = $("#chartDiv");
                var streamTreeHeight = chartWell.height() - streamWell.height() - 15;
 
-                streamTree.css('min-height', streamTreeHeight);
+                streamTree.css("min-height", streamTreeHeight);
 
                 //init buttons
-                $('[data-toggle="popover"]').popover();
+                $("[data-toggle='popover']").popover();
 
                 $( "div#all_scale" ).click(function() {
-                  $('div[class^="autoscalebutton"]').click()
+                  $("div[class^='autoscalebutton']").click()
                   // $( ".autoscalebutton" ).click();
                   // console.log("autoscale!");
                 });
 
                 $( "div#all_scale1" ).click(function() {
-                  $('div[class^="autoscalebutton"]').click()
+                  $("div[class^='autoscalebutton']").click()
                   // $( ".autoscalebutton" ).click();
                   // console.log("autoscale!");
                 });
@@ -378,7 +377,7 @@
         </div>
         <script type="text/javascript">
          closeOverlayAlert = function () {
-           $('#err-overlay').removeClass('visible');
+           $("#err-overlay").removeClass("visible");
          };
         </script>        
         <div id="err-overlay" onclick="closeOverlayAlert()">
@@ -404,14 +403,14 @@
         </footer>
         <script type="text/javascript">
           window.doorbellOptions = {
-              appKey: 'eqRSDF7RF4A6ywtFtmQsA751EX7UuL9nQB2DZqMO4PJYSFlYqmYYgGDIRiQyghqo'
+              appKey: "eqRSDF7RF4A6ywtFtmQsA751EX7UuL9nQB2DZqMO4PJYSFlYqmYYgGDIRiQyghqo"
           };
           (function(w, d, t) {
               var hasLoaded = false;
-              function l() { if (hasLoaded) { return; } hasLoaded = true; window.doorbellOptions.windowLoaded = true; var g = d.createElement(t);g.id = 'doorbellScript';g.type = 'text/javascript';g.async = true;g.src = 'https://embed.doorbell.io/button/7313?t='+(new Date().getTime());(d.getElementsByTagName('head')[0]||d.getElementsByTagName('body')[0]).appendChild(g); }
-              if (w.attachEvent) { w.attachEvent('onload', l); } else if (w.addEventListener) { w.addEventListener('load', l, false); } else { l(); }
-              if (d.readyState == 'complete') { l(); }
-          }(window, document, 'script'));
+              function l() { if (hasLoaded) { return; } hasLoaded = true; window.doorbellOptions.windowLoaded = true; var g = d.createElement(t);g.id = "doorbellScript";g.type = "text/javascript";g.async = true;g.src = "https://embed.doorbell.io/button/7313?t="+(new Date().getTime());(d.getElementsByTagName("head")[0]||d.getElementsByTagName("body")[0]).appendChild(g); }
+              if (w.attachEvent) { w.attachEvent("onload", l); } else if (w.addEventListener) { w.addEventListener("load", l, false); } else { l(); }
+              if (d.readyState == "complete") { l(); }
+          }(window, document, "script"));
         </script>    
     </body>
 </html>
@@ -423,33 +422,33 @@
 
 
     <div class="login">
-                        <div id="toggler" class="btn btn-link" style='float: left; margin-left: 10px; margin-right: 10px;' onclick="toggle_visibility('toggle_column');">&larr; Hide</div>
+                        <div id="toggler" class="btn btn-link" style="float: left; margin-left: 10px; margin-right: 10px;" onclick="toggle_visibility('toggle_column');">&larr; Hide</div>
 
-                        <h3 style='float: left; margin-left: 10px; margin-right: 10px; padding-top: 0px; padding-bottom: none; margin-top: 4px;'>Multi Resolution Plotter v1.4.7</h3>
+                        <h3 style="float: left; margin-left: 10px; margin-right: 10px; padding-top: 0px; padding-bottom: none; margin-top: 4px;">Multi Resolution Plotter v1.4.7</h3>
 
                         <!--
-                        <div class="btn btn btn-primary" style='float: left; margin-right: 10px;' onclick='$( ".showAll" ).click();'>Plot all Data</div>
+                        <div class="btn btn btn-primary" style="float: left; margin-right: 10px;" onclick="$( ".showAll" ).click();">Plot all Data</div>
                             //-->
 
-                        <div id="all_scale" data-localize='autoscale_all' class="btn btn-info" style='float: right; margin-right: 25px;' onclick='$( ".autoscalebutton" ).click();'>&varr; Autoscale All &varr;</div>
+                        <div id="all_scale" data-localize="autoscale_all" class="btn btn-info" style="float: right; margin-right: 25px;" onclick="$( '.autoscalebutton' ).click();">&varr; Autoscale All &varr;</div>
 
-                        <!-- <div id="all_scale1" class="btn btn-success" style='float: left; margin-right: 25px;' onclick='$( ".autoscalebutton" ).click();'>Autoscale All</div>
+                        <!-- <div id="all_scale1" class="btn btn-success" style="float: left; margin-right: 25px;" onclick="$( ".autoscalebutton" ).click();">Autoscale All</div>
                             //-->
 
 
-                        <div class="showAll btn btn-primary" style='float: right; margin-right: 10px;' data-localize='zoom_all'>&harr; Zoom Out Time &harr;</div>
+                        <div class="showAll btn btn-primary" style="float: right; margin-right: 10px;" data-localize="zoom_all">&harr; Zoom Out Time &harr;</div>
 
 
                         <div class="logindiv btn-group" style="width: 100px; float: left; margin-right: 10px;">
                             <div class="loginMenu btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="loginButtonText" data-localize='login'></span><span class="caret"></span>
+                                <span class="loginButtonText" data-localize="login"></span><span class="caret"></span>
                             </div>
                             <ul class="dropdown-menu loginList" style="width: 257px;">
-                                <li><input type="text" class="loginstate-start loginbox form-control username" placeholder="Username"></input></li>
-                                <li><input type="password" class="loginstate-start loginbox form-control password" placeholder="Password"></input></li>
-                                <li><input type="password" class="loginstate-changepw loginbox form-control oldpassword" placeholder="Current Password"></input></li>
-                                <li><input type="password" class="loginstate-changepw loginbox form-control newpassword1" placeholder="New Password"></input></li>
-                                <li><input type="password" class="loginstate-changepw loginbox form-control newpassword2" placeholder="New Password (Again)"></input></li>
+                                <li><input type="text" class="loginstate-start loginbox form-control username" placeholder="Username" /></li>
+                                <li><input type="password" class="loginstate-start loginbox form-control password" placeholder="Password" /></li>
+                                <li><input type="password" class="loginstate-changepw loginbox form-control oldpassword" placeholder="Current Password" /></li>
+                                <li><input type="password" class="loginstate-changepw loginbox form-control newpassword1" placeholder="New Password" /></li>
+                                <li><input type="password" class="loginstate-changepw loginbox form-control newpassword2" placeholder="New Password (Again)" /></li>
 
                                 <li><div class="loginmessage"></div></li>
                                 <li role="separator" class="divider loginstate-start"></li>
@@ -466,14 +465,14 @@
                                 <li><div class="loginstate-changepw changepwButton btn btn-success" style="width: 100%;">Confirm Change</div></li>
                             </ul>
                         </div>
-                        <div style='clear: both;'></div>
+                        <div style="clear: both;"></div>
                         <hr>
     </div>
 
 
     <table class="dispTable" width="99%">
         <tr valign="top">
-            <td width="18%" id='toggle_column' style='width: 100%; display: block;'>
+            <td width="18%" id="toggle_column" style="width: 100%; display: block;">
                 <div class="leftColumn" id="leftColumn">
                     <!-- STREAM SELECTION MENU -->
 
@@ -482,11 +481,11 @@
                     <div class="streamSelection">
 
                       <div class="well">
-                        <h3 style="margin-top:0px;" data-localize='select_streams'>Select Streams
-                          <div style='float: right; margin-top: -4px; margin-bottom: 10px;' class="streamTreeOptions btn-group">
-                            <div style='display: none;' class="refreshStreamTree btn btn-default">Refresh</div>
-                            <div onClick="window.location.reload();" class="btn btn-default">Deselect All</div>
-                            <div style='display: none;' class="deselectStreamTree btn btn-default">Deselect All</div>
+                        <h3 style="margin-top:0px;" data-localize="select_streams">Select Streams
+                          <div style="float: right; margin-top: -4px; margin-bottom: 10px;" class="streamTreeOptions btn-group">
+                            <div style="display: none;" class="refreshStreamTree btn btn-default">Refresh</div>
+                            <div onclick="window.location.reload();" class="btn btn-default">Deselect All</div>
+                            <div style="display: none;" class="deselectStreamTree btn btn-default">Deselect All</div>
                             <!-- <div class="deselectStreamTree btn btn-default">Deselect All</div> //-->
                           </div></h3>                        
                         <div class="streamTree" style="background: white; padding-top:5px;"></div>
@@ -500,15 +499,13 @@
 
 
 
-                        <!-- <div class="btn btn-primary" style='float: right; margin-right: 10px;' onclick='$( ".showAll" ).click();'>Plot all Data</div> //-->
+                        <!-- <div class="btn btn-primary" style="float: right; margin-right: 10px;" onclick="$( ".showAll" ).click();">Plot all Data</div> //-->
 
 
                 </div>
             </td>
             <td width="80%">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-12" id='chartDiv' style=''>
+              <div id="chartDiv" style="">
                           <div class="well chartContainer" id="chart_interface">                                    
                                 <!-- THE ACTUAL CHART -->
                                 <svg class="chart" width="800" height="430" background="white">
@@ -584,7 +581,7 @@
                                 </style>
 
 
-                                <script type='text/javascript'>
+                                <script type="text/javascript">
                                     function GetIEVersion() {
                                       var sAgent = window.navigator.userAgent;
                                       var Idx = sAgent.indexOf("MSIE");
@@ -600,8 +597,8 @@
                                         return 0; //It is not IE
 
                                     }
-                                    if ((GetIEVersion() > 0) || (navigator.userAgent.toLowerCase().indexOf('firefox') > -1)){
-                                      document.write("<style type='text/css'>#makeG { display: none; }</style>");
+                                    if ((GetIEVersion() > 0) || (navigator.userAgent.toLowerCase().indexOf("firefox") > -1)){
+                                      document.write("<style type=\"text/css\">#makeG { display: none; }</style>");
                                       // alert("This is IE " + GetIEVersion());
                                     } else {
                                       // alert("This is not IE ");
@@ -611,8 +608,6 @@
          
                         </div>
 
-                    </div>
-
                     <div id="plotter-rows" style="display: none;">
 
                     <!-- EXPORT TO CSV -->                    
@@ -621,16 +616,16 @@
                         <div class=" col-md-12">
                           <div class="well">
                             <h3 data-localize="export" style="margin-top:0px;">Export</h3>
-                            <table width='100%'>
+                            <table width="100%">
                               <tr>
-                                <td width='50%'>
+                                <td width="50%">
 
 
                                   <div class="graphExport">
                                     <div class="btn-group-horizontal">
 
-                                      <div id="makeG" class="makeGraph btn btn-success" data-localize='export_svg'>Save Graph as Image</div>
-                                      <div class="makecsv btn btn-success" data-localize='export_csv'>Export Graph Data</div>
+                                      <div id="makeG" class="makeGraph btn btn-success" data-localize="export_svg">Save Graph as Image</div>
+                                      <div class="makecsv btn btn-success" data-localize="export_csv">Export Graph Data</div>
                                     <div class="download-graph"></div>
                                     <div class="modal fade csv-modal" role="dialog" tabindex="-1" aria-hidden="true">
                                       <div class="modal-dialog">
@@ -646,8 +641,8 @@
                                               <div class="csv-pointwidth">
                                                 <p>
                                                   Data frequency:<br>
-                                                  <label><input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();"><span>50hz</span></input></label><br>
-                                                  <label><input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();"><span>60hz</span></input></label>
+                                                  <label><input id="freq-50hz" type="radio" name="frequency" value="50" onchange="changeResolutionFreq();" /><span>50hz</span></label><br>
+                                                  <label><input id="freq-60hz" type="radio" name="frequency" value="60" onchange="changeResolutionFreq();" /><span>60hz</span></label>
                                                 </p>
                                                 One data point for every:
                                                 <select class="resolutions" oninput="updateInput(this.value)" onchange="updateInput(this.value)">
@@ -661,14 +656,13 @@
                                                   <option value="9">1 day</option>
                                                 </select>
 
-                                                <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
+                                                <input type="hidden" id="resolutions" min="0" max="9" class="windowwidth-selector" value="7"/>
                                                 <div class="selected-windowwidth"></div>
                                                 <div class="selected-window-desc"></div>
                                                 <p>
-                                                  <input type="hidden" id="resolutions" min='0' max='9' class="windowwidth-selector" value="7"/>
                                                   <div>Export data to:</div>
-                                                  <label><input id="export-type-csv" type="radio" name="export-type" value="CSV"><span>CSV</span></input></label><br>
-                                                  <label><input id="export-type-jupyter" type="radio" name="export-type" value="Jupyter"><span>Jupyter</span></input></label>
+                                                  <label><input id="export-type-csv" type="radio" name="export-type" value="CSV" /><span>CSV</span></label><br>
+                                                  <label><input id="export-type-jupyter" type="radio" name="export-type" value="Jupyter" /><span>Jupyter</span></label>
                                                 </p>
                                               </div>
 
@@ -694,41 +688,41 @@ import os
 def warn_for_large_dl(opts_dict, threshold=100000, sample_rate_hz=60):
   total_time = opts_dict["EndTime"] - opts_dict["StartTime"]
   to_ns = {
-    's': 1000000000,
-    'seconds': 1000000000,
-    'ms': 1000000,
-    'milliseconds': 1000000,
-    '': 1000000,
-    'us': 1000,
-    'microseconds': 1000,
-    'ns': 1,
-    'nanoseconds': 1
+    "s": 1000000000,
+    "seconds": 1000000000,
+    "ms": 1000000,
+    "milliseconds": 1000000,
+    "": 1000000,
+    "us": 1000,
+    "microseconds": 1000,
+    "ns": 1,
+    "nanoseconds": 1
   }
 
   total_time_ns = total_time * to_ns[opts_dict["UnitofTime"]]
 
   query_type = opts_dict["QueryType"]
-  if query_type == 'windows':
-    ns_per_point = int(opts_dict['WindowText']) * int(to_ns[opts_dict['WindowUnit']])
+  if query_type == "windows":
+    ns_per_point = int(opts_dict["WindowText"]) * int(to_ns[opts_dict["WindowUnit"]])
     total_rows = total_time_ns // ns_per_point
 
-  total_obs_at_sample_rate = total_time_ns // (1/sample_rate_hz * to_ns['s'])
+  total_obs_at_sample_rate = total_time_ns // (1/sample_rate_hz * to_ns["s"])
 
-  if query_type == 'aligned':
+  if query_type == "aligned":
     total_rows = total_time_ns // (2 ** opts_dict.get("PointWidth", 0))
     total_rows = min(total_rows, total_obs_at_sample_rate)
-  elif query_type == 'raw':
+  elif query_type == "raw":
     total_rows = total_obs_at_sample_rate
   
-  print('Assuming {}hz sampling, you are downloading approximately {} rows.'.format(sample_rate_hz, int(total_rows)))
+  print("Assuming {}hz sampling, you are downloading approximately {} rows.".format(sample_rate_hz, int(total_rows)))
   if (total_rows > threshold):
-    print('This exceeds your threshold of {}'.format(threshold))
-    print('''
+    print("This exceeds your threshold of {}".format(threshold))
+    print("""
 Either increase your threshold or choose closer start and end times.
-If you are using QueryType: 'raw' then you must choose a closer start and end time.
-If you are using QueryType: 'aligned' you may also increase PointWidth to sample less frequently.
-If you are using QueryType: 'windows' you may also increase WindowText to sample less frequently.
-      ''')
+If you are using QueryType: "raw" then you must choose a closer start and end time.
+If you are using QueryType: "aligned" you may also increase PointWidth to sample less frequently.
+If you are using QueryType: "windows" you may also increase WindowText to sample less frequently.
+      """)
     return True
   return False
     
@@ -736,12 +730,12 @@ def download_pmu_data(opts_dict, domain=None, filename=None):
   if domain is None:
     raise ValueError("You must supply a domain to download_pmu_data (e.g. https://viz.predictivegrid.com)")
   if filename is None:
-    filename = 'pmu_data.csv'
-  url = domain + '/csv'
+    filename = "pmu_data.csv"
+  url = domain + "/csv"
   payload = "json=" + json.dumps(opts_dict)
   print("Starting download...")
   r = requests.post(url, data=payload, stream=True)
-  with open(filename, 'wb') as f:
+  with open(filename, "wb") as f:
     for chunk in r.iter_content(chunk_size=1024): 
         if chunk: # filter out keep-alive new chunks
             f.write(chunk)
@@ -750,19 +744,19 @@ def download_pmu_data(opts_dict, domain=None, filename=None):
 
 def make_df(csv_filename=None, max_size=100):
   if csv_filename is None:
-    csv_filename = 'pmu_data.csv'
+    csv_filename = "pmu_data.csv"
   file_size_mb = os.path.getsize(csv_filename) / 1024 / 1024
   if file_size_mb > max_size:
-    print('The file is {:.2f}mb, which is larger than your threshold of {}mb. You may want to process it manually instead.'.format(file_size_mb, max_size))
-    print('It is located at: {}/{}'.format(os.getcwd(), csv_filename))
+    print("The file is {:.2f}mb, which is larger than your threshold of {}mb. You may want to process it manually instead.".format(file_size_mb, max_size))
+    print("It is located at: {}/{}".format(os.getcwd(), csv_filename))
     df = pd.read_csv(csv_filename, chunksize=10000)
-    print('Returning a {} instead'.format(type(df)))
+    print("Returning a {} instead".format(type(df)))
   else:
     df = pd.read_csv(csv_filename)
     print("Created dataframe of shape:", df.shape)
   return df
 
-# The following dict's values determine the data downloaded. Some fields behave differently depending on QueryType.
+# The following dict"s values determine the data downloaded. Some fields behave differently depending on QueryType.
 #   "StartTime" : Int    - Represents the start time expressed in Epoch. Units determined by "UnitofTime"
 #   "EndTime"   : Int    - Represents the end time expressed in Epoch. Units determined by "UnitofTime"
 #   "UnitofTime": String - enum represents the unit of time applied to the "StartTime" and "EndTime" fields. One of "s", "ms", "us", "ns", "". "" is an alias for "ms".
@@ -789,17 +783,18 @@ else:
                                       </div>
                                     </div>                                    
                                   </div>
-
+                                </div>
+                                </div>
                                 </td>
-                                <td width='50%'>
+                                <td width="50%">
 
                                   <!-- PERMALINK -->
-                                  <div class="permalinkGenerate" style='float: right;'>
-                                    <div class="getPermalink btn btn-success" data-localize='gen_permalink'>Generate Permalink</div>
+                                  <div class="permalinkGenerate" style="float: right;">
+                                    <div class="getPermalink btn btn-success" data-localize="gen_permalink">Generate Permalink</div>
                                     <input type="checkbox" class="includeMetadata" />
-                                    <span data-localize='embed_metadata'>Embed Stream Metadata</span>
+                                    <span data-localize="embed_metadata">Embed Stream Metadata</span>
                                     <div class="permalink"></div>
-                                    <!-- <input type='text' class="permalink" /> //-->
+                                    <!-- <input type="text" class="permalink" /> //-->
                                   </div>
                                 </td>
                               </tr>
@@ -840,10 +835,10 @@ else:
                                     <thead>
                                       <tr>
                                         <th></th>
-                                        <th data-localize='color'>Color</th>
-                                        <th data-localize='stream'>Stream</th>
-                                        <th data-localize='axis_name'>Axis Name</th>
-                                        <th data-localize='progress'>Progress</th>
+                                        <th data-localize="color">Color</th>
+                                        <th data-localize="stream">Stream</th>
+                                        <th data-localize="axis_name">Axis Name</th>
+                                        <th data-localize="progress">Progress</th>
                                       </tr>
                                     </thead>
                                     <tbody class="legend sortable"></tbody>
@@ -856,17 +851,17 @@ else:
                             <div role="tabpanel" id="y-axes-tab" class="tab-pane fade col-md-12">
                               <div class="well">
                                 <div class="axisLegend">
-                                  <div class="addAxis btn btn-success" style='float: right; margin-top: -2px; margin-bottom: 10px;' data-localize='add_y_axis'>Add a Y-Axis</div>
+                                  <div class="addAxis btn btn-success" style="float: right; margin-top: -2px; margin-bottom: 10px;" data-localize="add_y_axis">Add a Y-Axis</div>
                                   <table class="table table-striped">
                                     <thead>
                                       <tr>
-                                        <th data-localize='axis_name'>Axis Name</th>
-                                        <th data-localize='stream'>Stream</th>
-                                        <th data-localize='units'>Units</th>
-                                        <th data-localize='axis_position'>&nbsp;Axis Position</th>
-                                        <th data-localize='axis_scale'>&nbsp;Axis Scale</th>
+                                        <th data-localize="axis_name">Axis Name</th>
+                                        <th data-localize="stream">Stream</th>
+                                        <th data-localize="units">Units</th>
+                                        <th data-localize="axis_position">&nbsp;Axis Position</th>
+                                        <th data-localize="axis_scale">&nbsp;Axis Scale</th>
                                         <th></th>
-                                        <th data-localize='remove'>Remove</th>
+                                        <th data-localize="remove">Remove</th>
                                       </tr>
                                     </thead>
                                     <tbody class="axes"></tbody>
@@ -875,7 +870,7 @@ else:
                                 <div class="row">
                                   &nbsp;&nbsp;
                                   <!-- AUTOMATIC UPDATE OPTION -->
-                                  <span class="automaticUpdate" style='display: none;' >
+                                  <span class="automaticUpdate" style="display: none;" >
                                     <input type="checkbox" class="automaticAxisSetting" checked />
                                     <span>Automatically apply changes to settings</span>
                                   </span>
@@ -897,7 +892,7 @@ else:
                                       <br>
                                       <form class="form-inline">
                                         <div class="form-group">
-                                          <label for="start-date" data-localize='start_date'>Start Date</label>                                        
+                                          <label for="start-date" data-localize="start_date">Start Date</label>                                        
                                           <div class="input-group">
 
                                             <input id="start-date" type="text" class="form-control datefield startdate" />
@@ -908,7 +903,7 @@ else:
                                       <br>                                      
                                       <form class="form-inline">
                                         <div class="form-group">
-                                          <label for="end-date" data-localize='end_date'>End Date</label>
+                                          <label for="end-date" data-localize="end_date">End Date</label>
                                           <div class="input-group">
                                             <input id="end-date" type="text" class="form-control datefield enddate">
                                             <div class="nowButton  input-group-addon" style="width:4em">Now</div>
@@ -917,13 +912,13 @@ else:
                                         </div>
                                       </form>
                                       <br>
-                                        <div class="btn btn-primary" data-localize='manual_zoom' onclick="$( '.plotButton' ).click();">&larr; Manual Zoom &rarr; </div>
+                                        <div class="btn btn-primary" data-localize="manual_zoom" onclick="$( '.plotButton' ).click();">&larr; Manual Zoom &rarr; </div>
                                
                                     </div>
                                     <div class="col-md-6">
                                       <form class="form">
                                       <div class="form-group">
-                                        <h3 data-localize='timezone'>Timezone</h3>
+                                        <h3 data-localize="timezone">Timezone</h3>
                                         <br>
                                         <div class="input-group " style="width: 100%;">
                                           <div class="col-md-6 col-md-offset-2">
@@ -1026,8 +1021,8 @@ else:
 
 
                                 <div class="row">
-                                  <div class="plotButton btn btn-primary" style='visibility: hidden;'>Apply Date Range and Plot</div>
-                                  <div class="resetZoom btn btn-default" style='visibility: hidden;'>Reset Zoom</div>
+                                  <div class="plotButton btn btn-primary" style="visibility: hidden;">Apply Date Range and Plot</div>
+                                  <div class="resetZoom btn btn-default" style="visibility: hidden;">Reset Zoom</div>
                                 </div>
                               </div>
                             </div>
@@ -1041,7 +1036,6 @@ else:
 
                     </div>
                     </div>
-                </div>
             </td>
         </tr>
     </table>
