@@ -581,10 +581,22 @@
 
                                     }
                                     if ((GetIEVersion() > 0) || (navigator.userAgent.toLowerCase().indexOf("firefox") > -1)){
-                                      document.write("<style type=\"text/css\">#makeG { display: none; }</style>");
-                                      // alert("This is IE " + GetIEVersion());
-                                    } else {
-                                      // alert("This is not IE ");
+                                      //Load helper libraries and polyfills to deal with IE
+                                      console.log('This is IE');
+                                      var body = document.querySelector('body');
+                                      var ieScripts = [
+                                        "canvg/rgbcolor.js", // helps save as PNG
+                                        "canvg/StackBlur.js", // helps save as PNG
+                                        "canvg/canvg.js", // helps save as PNG
+                                        "innersvg-polyfill/innersvg.js" // helps save as SVG/PNG
+                                      ];
+                                      ieScripts.forEach(function(scriptsrc) {
+                                        // script tags will only be loaded if they're directly appended to the DOM
+                                        // they may not be wrapped inside other elements
+                                        var script = document.createElement('script');
+                                        script.src = scriptsrc;
+                                        document.body.appendChild(script);
+                                      });
                                     }
                                 </script>
                             </div>

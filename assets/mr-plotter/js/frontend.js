@@ -313,35 +313,65 @@ function createPlotDownload(self) {
     var xmlData = '<svg xmlns="http://www.w3.org/2000/svg" width="' + plotWidth + '" height="' + plotHeight + '" font-family="serif" font-size="16px">'
         + '<defs><style type="text/css"><![CDATA[' + graphStyle + ']]></style></defs>' + chartData + '</svg>';
 
-var canvas = document.createElement('canvas');
-var context = canvas.getContext('2d');
-var image = new Image;
-image.src = "data:image/svg+xml," + xmlData;
-image.onload = function() {
-    canvas.height = plotHeight;
-    canvas.width = plotWidth;
-    context.drawImage(image, 0, 0);
-    var a = document.createElement("a");
-    a.download = "graph.png";
-    a.href = canvas.toDataURL("image/png");
-    a.innerHTML = "Download as PNG";
-    var wrapper = document.createElement('div');
-    wrapper.appendChild(a);
-    downloadAnchor.insertAdjacentHTML('beforeBegin', "<div>(created " + (new Date()).toLocaleString() + ", local time)</div>");
-    downloadAnchor.insertAdjacentElement('beforeBegin', wrapper);
-};
-
     var downloadAnchor = document.createElement("a");
     downloadAnchor.innerHTML = "Download as SVG";
     downloadAnchor.setAttribute("href", 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(xmlData));
     downloadAnchor.setAttribute("download", "graph.svg");
-    // var da = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(xmlData);
-    // downloadAnchor.setAttribute("onclick", "window.open('" + da + "')" );
 
     var linkLocation = self.find(".download-graph");
     linkLocation.innerHTML = ""; // Clear what was there before...
     linkLocation.insertBefore(downloadAnchor, null); // ... and replace it with this download link
     //downloadAnchor.click();
+
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+    var image = new Image();
+    var imageLoadedRan = false;
+    var imageLoaded = function() {
+        if (imageLoadedRan) return
+        imageLoadedRan = true;
+        canvas.height = plotHeight;
+        canvas.width = plotWidth;
+
+        // this uses a library as a workaround for IE
+        if (canvg) canvg(canvas, xmlData)
+        // this works everywhere else
+        else context.drawImage(image, 0, 0);
+
+        var a = document.createElement("a");
+        a.download = "graph.png";
+        a.href = canvas.toDataURL("image/png");
+        a.innerHTML = "Download as PNG";
+        var wrapper = document.createElement('div');
+        
+        // IE also does not support using anchor tags to download images
+        // so this is another work around
+        if (canvg) { // from a library conditionally loaded only for IE
+            // replace the href with click handlers that download blobs for both links
+            a.href = "";
+            downloadAnchor.href = "";
+            a.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.navigator.msSaveBlob(canvas.msToBlob(), 'mrplotter-graph.png');
+            });
+            downloadAnchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.navigator.msSaveBlob(new Blob([xmlData]), 'mrplotter-graph.svg');
+            });
+        }
+        wrapper.appendChild(a);
+        downloadAnchor.insertAdjacentHTML('beforeBegin', "<div>(created " + (new Date()).toLocaleString() + ", local time)</div>");
+        downloadAnchor.insertAdjacentElement('beforeBegin', wrapper);
+    };
+    image.src = "data:image/svg+xml," + xmlData;
+    if(image.complete) imageLoaded();
+    else image.addEventListener('load', imageLoaded);
+
+
+    //IE has issues with the onload event for images so as a backstop
+    //I'm running the handler on a setTimeout. If it's already run it will return early
+    setTimeout(imageLoaded, 1);
+    
     if (!('download' in downloadAnchor)) {
         console.log("No download attribute");
     }
