@@ -562,22 +562,33 @@ function buildCSVMenu(self) {
                 }
             );
         }
-        function updateCSVoptionsHTML() {
-            function selectElementText(el, win) {
-                win = win || window;
-                var doc = win.document, sel, range;
-                if (win.getSelection && doc.createRange) {
-                    sel = win.getSelection();
-                    range = doc.createRange();
-                    range.selectNodeContents(el);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                } else if (doc.body.createTextRange) {
-                    range = doc.body.createTextRange();
-                    range.moveToElementText(el);
-                    range.select();
-                }
+        function selectText(el) {
+            if (typeof el === "string") {
+                //you may also pass in a CSS selector
+                el = document.querySelector(el)
             }
+            if (!el) {
+                console.warn('selectText did not receive a valid element to copy');
+                return;
+            }
+            var doc = window.document, sel, range;
+            if (window.getSelection && doc.createRange) {
+                sel = window.getSelection();
+                range = doc.createRange();
+                range.selectNodeContents(el);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else if (doc.body.createTextRange) {
+                range = doc.body.createTextRange();
+                range.moveToElementText(el);
+                range.select();
+            }
+        }
+        function copyToClipboard(el) {
+            selectText(el);
+            document.execCommand("Copy");
+        }
+        function updateCSVoptionsHTML() {
             var csvOptions = prepareCSVDownloadOptions(
                 self, streams, settingsObj, domain, widthlists[parseInt(pwselectbox.value)], graphExport
             );
@@ -585,16 +596,18 @@ function buildCSVMenu(self) {
             csvOptionCodeBlockEl.innerHTML = "\n" +
                 "opts_dict = " + JSON.stringify(csvOptions, null, 4) + "\n\n" +
                 "domain = \"" + window.location.protocol + "//" + self.backend + "\"";
-            selectElementText(document.querySelector('.export-jupyter pre'));
+            selectText(document.querySelector('.export-jupyter pre'));
         }
         var resolutionSelect = document.querySelector('select.resolutions');
         resolutionSelect.addEventListener('change', updateCSVoptionsHTML, false);
         exportCSV.onchange = function chooseCSV() { changeExportType('export-csv'); }
         exportJupyter.onchange = function chooseJupyter() {
-            updateCSVoptionsHTML();
             changeExportType('export-jupyter');
+            updateCSVoptionsHTML();
         }
+        var copyCodeButton = document.querySelector('#copyJupyterCode');
 
+        copyCodeButton.addEventListener('click', copyToClipboard.bind(null, '.export-jupyter pre'));
         pwselector.onchange = function () {
                 var wt = widthlists[this.value];
                 var m1 = this.nextSibling.nextSibling;

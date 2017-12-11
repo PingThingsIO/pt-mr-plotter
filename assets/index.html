@@ -116,29 +116,6 @@
                 console.log("language changed to" + " " + l);
             };
 
-
-            function copyToClipboard(elementId) {
-
-                  // Create a "hidden" input
-                  var aux = document.createElement("input");
-
-                  // Assign it the value of the specified element
-                  aux.setAttribute("value", document.getElementById(elementId).value);
-
-                  // Append it to the body
-                  document.body.appendChild(aux);
-
-                  // Highlight its content
-                  aux.select();
-
-                  // Copy the highlighted text
-                  document.execCommand("copy");
-
-                  // Remove it from the body
-                  document.body.removeChild(aux);
-
-                }
-
                 function createCookie(name,value,days) {
                     if (days) {
                         var date = new Date();
@@ -597,6 +574,10 @@
                                         script.src = scriptsrc;
                                         document.body.appendChild(script);
                                       });
+                                      // Copy to clipboard not functioning in IE11
+                                      var style = document.createElement('style');
+                                      style.innerHTML = "#copyJupyterCode { display: none; }";
+                                      document.body.appendChild(style);
                                     }
                                 </script>
                             </div>
@@ -674,6 +655,7 @@
                                           </div>
                                           <div class="modal-footer export-type export-jupyter">
                                               <h4>Copy and paste the following text into a Jupyter Lab Notebook with a Python3 kernel:</h4>
+                                              <button id="copyJupyterCode">Copy code to clipboard</button>
                                               <pre><code class="csvCodeBlock">
 import pandas as pd
 import requests
