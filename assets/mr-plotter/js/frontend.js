@@ -550,13 +550,17 @@ function buildCSVMenu(self) {
 
         function changeExportType(exportType) {
             var exportFooters = document.querySelectorAll('.modal-footer.export-type');
-            exportFooters.forEach(function toggleFooterViz(node) {
-                if (node.className.indexOf(exportType) >= 0) {
-                    node.style.display = "block";
-                } else {
-                    node.style.display = "none";
+            // IE is missing forEach on NodeList objects so steal it from the Array Prototype
+            Array.prototype.forEach.call(
+                exportFooters, 
+                function toggleFooterViz(node) {
+                    if (node.className.indexOf(exportType) >= 0) {
+                        node.style.display = "block";
+                    } else {
+                        node.style.display = "none";
+                    }
                 }
-            });
+            );
         }
         function updateCSVoptionsHTML() {
             function selectElementText(el, win) {
