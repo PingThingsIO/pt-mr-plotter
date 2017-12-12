@@ -87,6 +87,9 @@ input.thin-margin-text {
     padding-left: 5px;
     padding-right: 5px;
 }
+table.dispTable {
+    table-layout: fixed;
+}
 table.dispTable > tr > td, tbody.axes > tr > td {
     vertical-align: top;
 }
@@ -196,7 +199,7 @@ psl css additions
 }
 
 body {
-    overflow-x: hidden;
+
 }
 
 #legend_toggler {
@@ -207,6 +210,10 @@ body {
 
 .checkbox.skinny {
     margin: 0;
+}
+
+.chartContainer {
+    position: relative;
 }
 
 #plot-directions {

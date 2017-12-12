@@ -38,10 +38,22 @@ function init_frontend(self) {
     self.idata.chart = self.find("svg.chart");
     self.idata.widthFunction = function () {
       var $parent = $(self.find('.chartContainer'));
-            var width = $parent.css("width");
+            // Check to see if sidebar is showing. We need to use the outermost container
+            // for width calculations because if we check the charts own width then 
+            // the chart expands when the viewport increases, but won't shrink when the
+            // viewport becomes smaller
+            var sidebarHidden = $('#toggle_column').css("display") == "none";
+            var widthDispTable = $('table.dispTable').css("width");
+            var widthDT = parseInt(widthDispTable);
+            var width = sidebarHidden ? widthDT : widthDT * .8;
             var leftpadding = $parent.css("padding-left");
             var rightpadding = $parent.css("padding-right");
-            return s3ui.parsePixelsToInt(width) - s3ui.parsePixelsToInt(leftpadding) - s3ui.parsePixelsToInt(rightpadding);
+            var leftborder = $parent.css("border-left-width");
+            var rightborder = $parent.css("border-right-width");
+            var totalNonContentWidth = [leftpadding, rightpadding, leftborder, rightborder]
+                .map(s3ui.parsePixelsToInt)
+                .reduce(function(pv, cv) {return pv + cv});
+            return width - totalNonContentWidth;
     };
 
     self.idata.changingpw = false;
@@ -49,6 +61,20 @@ function init_frontend(self) {
   self.idata.prevLoginMenuText = self.idata.defaultLoginMenuText;
 
 }
+
+function toggle_visibility(id) {
+    var e = document.getElementById(id);
+    if(e.style.display == "block") {
+       $("#toggler").html( "&rarr; Show" );
+       e.style.display = "none";
+       e.style.width = "0%";
+     } else {
+       $("#toggler").html( "&larr; Hide" );
+       e.style.display = "block";
+       $("#toggle_column").animate({"width" : "99%"}, 100);
+     }
+ };
+
 
 /* Adds or removes (depending on the value of SHOW) the stream
     described by STREAMDATA to or from the legend. UPDATE is true if
@@ -66,13 +92,6 @@ function toggleLegend (self, show, streamdata, update) {
             return;
         }
         self.idata.selectedStreamsBuffer.push(streamdata);
-         
-
-
-
-
-
-
 
         var row = d3.select(self.find("tbody.legend"))
           .append("tr")
@@ -294,35 +313,65 @@ function createPlotDownload(self) {
     var xmlData = '<svg xmlns="http://www.w3.org/2000/svg" width="' + plotWidth + '" height="' + plotHeight + '" font-family="serif" font-size="16px">'
         + '<defs><style type="text/css"><![CDATA[' + graphStyle + ']]></style></defs>' + chartData + '</svg>';
 
-var canvas = document.createElement('canvas');
-var context = canvas.getContext('2d');
-var image = new Image;
-image.src = "data:image/svg+xml," + xmlData;
-image.onload = function() {
-    canvas.height = plotHeight;
-    canvas.width = plotWidth;
-    context.drawImage(image, 0, 0);
-    var a = document.createElement("a");
-    a.download = "graph.png";
-    a.href = canvas.toDataURL("image/png");
-    a.innerHTML = "Download as PNG";
-    var wrapper = document.createElement('div');
-    wrapper.appendChild(a);
-    downloadAnchor.insertAdjacentHTML('beforeBegin', "<div>(created " + (new Date()).toLocaleString() + ", local time)</div>");
-    downloadAnchor.insertAdjacentElement('beforeBegin', wrapper);
-};
-
     var downloadAnchor = document.createElement("a");
     downloadAnchor.innerHTML = "Download as SVG";
     downloadAnchor.setAttribute("href", 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(xmlData));
     downloadAnchor.setAttribute("download", "graph.svg");
-    // var da = 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(xmlData);
-    // downloadAnchor.setAttribute("onclick", "window.open('" + da + "')" );
 
     var linkLocation = self.find(".download-graph");
     linkLocation.innerHTML = ""; // Clear what was there before...
     linkLocation.insertBefore(downloadAnchor, null); // ... and replace it with this download link
     //downloadAnchor.click();
+
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+    var image = new Image();
+    var imageLoadedRan = false;
+    var imageLoaded = function() {
+        if (imageLoadedRan) return
+        imageLoadedRan = true;
+        canvas.height = plotHeight;
+        canvas.width = plotWidth;
+
+        // this uses a library as a workaround for IE
+        if (canvg) canvg(canvas, xmlData)
+        // this works everywhere else
+        else context.drawImage(image, 0, 0);
+
+        var a = document.createElement("a");
+        a.download = "graph.png";
+        a.href = canvas.toDataURL("image/png");
+        a.innerHTML = "Download as PNG";
+        var wrapper = document.createElement('div');
+        
+        // IE also does not support using anchor tags to download images
+        // so this is another work around
+        if (canvg) { // from a library conditionally loaded only for IE
+            // replace the href with click handlers that download blobs for both links
+            a.href = "";
+            downloadAnchor.href = "";
+            a.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.navigator.msSaveBlob(canvas.msToBlob(), 'mrplotter-graph.png');
+            });
+            downloadAnchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.navigator.msSaveBlob(new Blob([xmlData]), 'mrplotter-graph.svg');
+            });
+        }
+        wrapper.appendChild(a);
+        downloadAnchor.insertAdjacentHTML('beforeBegin', "<div>(created " + (new Date()).toLocaleString() + ", local time)</div>");
+        downloadAnchor.insertAdjacentElement('beforeBegin', wrapper);
+    };
+    image.src = "data:image/svg+xml," + xmlData;
+    if(image.complete) imageLoaded();
+    else image.addEventListener('load', imageLoaded);
+
+
+    //IE has issues with the onload event for images so as a backstop
+    //I'm running the handler on a setTimeout. If it's already run it will return early
+    setTimeout(imageLoaded, 1);
+    
     if (!('download' in downloadAnchor)) {
         console.log("No download attribute");
     }
@@ -501,47 +550,64 @@ function buildCSVMenu(self) {
 
         function changeExportType(exportType) {
             var exportFooters = document.querySelectorAll('.modal-footer.export-type');
-            exportFooters.forEach(function toggleFooterViz(node) {
-                if (node.className.indexOf(exportType) >= 0) {
-                    node.style.display = "block";
-                } else {
-                    node.style.display = "none";
+            // IE is missing forEach on NodeList objects so steal it from the Array Prototype
+            Array.prototype.forEach.call(
+                exportFooters, 
+                function toggleFooterViz(node) {
+                    if (node.className.indexOf(exportType) >= 0) {
+                        node.style.display = "block";
+                    } else {
+                        node.style.display = "none";
+                    }
                 }
-            });
+            );
+        }
+        function selectText(el) {
+            if (typeof el === "string") {
+                //you may also pass in a CSS selector
+                el = document.querySelector(el)
+            }
+            if (!el) {
+                console.warn('selectText did not receive a valid element to copy');
+                return;
+            }
+            var doc = window.document, sel, range;
+            if (window.getSelection && doc.createRange) {
+                sel = window.getSelection();
+                range = doc.createRange();
+                range.selectNodeContents(el);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else if (doc.body.createTextRange) {
+                range = doc.body.createTextRange();
+                range.moveToElementText(el);
+                range.select();
+            }
+        }
+        function copyToClipboard(el) {
+            selectText(el);
+            document.execCommand("Copy");
         }
         function updateCSVoptionsHTML() {
-            function selectElementText(el, win) {
-                win = win || window;
-                var doc = win.document, sel, range;
-                if (win.getSelection && doc.createRange) {
-                    sel = win.getSelection();
-                    range = doc.createRange();
-                    range.selectNodeContents(el);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                } else if (doc.body.createTextRange) {
-                    range = doc.body.createTextRange();
-                    range.moveToElementText(el);
-                    range.select();
-                }
-            }
             var csvOptions = prepareCSVDownloadOptions(
                 self, streams, settingsObj, domain, widthlists[parseInt(pwselectbox.value)], graphExport
             );
             var csvOptionCodeBlockEl = self.find('code.csvJsonObject');
             csvOptionCodeBlockEl.innerHTML = "\n" +
-                `opts_dict = ${JSON.stringify(csvOptions, null, 4)}\n\n` +
-                `domain = "${window.location.protocol}//${self.backend}"`;
-            selectElementText(document.querySelector('.export-jupyter pre'));
+                "opts_dict = " + JSON.stringify(csvOptions, null, 4) + "\n\n" +
+                "domain = \"" + window.location.protocol + "//" + self.backend + "\"";
+            selectText(document.querySelector('.export-jupyter pre'));
         }
         var resolutionSelect = document.querySelector('select.resolutions');
         resolutionSelect.addEventListener('change', updateCSVoptionsHTML, false);
         exportCSV.onchange = function chooseCSV() { changeExportType('export-csv'); }
         exportJupyter.onchange = function chooseJupyter() {
-            updateCSVoptionsHTML();
             changeExportType('export-jupyter');
+            updateCSVoptionsHTML();
         }
+        var copyCodeButton = document.querySelector('#copyJupyterCode');
 
+        copyCodeButton.addEventListener('click', copyToClipboard.bind(null, '.export-jupyter pre'));
         pwselector.onchange = function () {
                 var wt = widthlists[this.value];
                 var m1 = this.nextSibling.nextSibling;
