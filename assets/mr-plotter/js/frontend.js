@@ -334,7 +334,7 @@ function createPlotDownload(self) {
         canvas.width = plotWidth;
 
         // this uses a library as a workaround for IE
-        if (canvg) canvg(canvas, xmlData)
+        if (window.canvg) canvg(canvas, xmlData)
         // this works everywhere else
         else context.drawImage(image, 0, 0);
 
@@ -346,7 +346,7 @@ function createPlotDownload(self) {
         
         // IE also does not support using anchor tags to download images
         // so this is another work around
-        if (canvg) { // from a library conditionally loaded only for IE
+        if (window.canvg) { // from a library conditionally loaded only for IE
             // replace the href with click handlers that download blobs for both links
             a.href = "";
             downloadAnchor.href = "";
