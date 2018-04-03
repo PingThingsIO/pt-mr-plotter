@@ -346,7 +346,7 @@ function guessYAxis(self, stream) {
     var yAxes = self.idata.yAxes.filter(s3ui.getPSLAxisFilter(stream));
     for (var i = 0; i < yAxes.length; i++) {
         var axis = yAxes[i];
-        if (axis.fixedaxis && axis.axisname === axisname) {
+        if (axis.fixedaxis && axis.axisname.toLowerCase() === axisname.toLowerCase()) {
             return i;
         }
     }
@@ -356,21 +356,17 @@ function guessYAxis(self, stream) {
     // Used to be stream.Properties.UnitofMeasure but I changed the schema a bit
     var unit = s3ui.getUnit(stream);
     var backupIndex;
+    yAxes = self.idata.yAxes;
     for (var i = 0; i < yAxes.length; i++) {
         axisUnits = yAxes[i].units;
         if (axisUnits.hasOwnProperty(unit) && axisUnits[unit] > 0) {
             return i;
             // yAxes[i].axisname = unit;
             // yAxes[i].truename = unit;
-        } else if (backupIndex == undefined && yAxes[i].streams.length == 0) {
-            backupIndex = i;
-            // yAxes[backupIndex].axisname = unit;
-            // yAxes[backupIndex].truename = unit;
-            // yAxes[i].axisname = unit;
-            // console.log(yAxes[backupIndex]);
-        }
+        } 
     }
-    return backupIndex;
+    //return undefined if no PSL match or normal match. We'll need to create another axis
+    return; 
 }
 
 s3ui.init_axis = init_axis;
