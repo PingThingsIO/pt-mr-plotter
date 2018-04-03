@@ -194,11 +194,12 @@ function toggleLegend (self, show, streamdata, update) {
             .html(function (d) { return d.axisname; });
         var selectNode = selectElem.node();
         var initIndex = s3ui.guessYAxis(self, streamdata); // use a heuristic to get the initial selection
-        if (initIndex == undefined) {
+        if (initIndex == undefined) { // when guessYAxis returns undefined no match was found
             initIndex = self.idata.yAxes.length;
             s3ui.addYAxis(self);
         }
-        selectNode.selectedIndex = initIndex;
+        /** Fundamentally this next line is trying to auto choose the select option for the y axis but it's using the actual index among all yaxes when above we filtered out almost all the options to only ones that match. This will almost always be 0 in other words. */
+        // selectNode.selectedIndex = initIndex; // Setting this programmatically to a value that doesn't exist triggers errors. 
         selectNode.setAttribute("data-prevselect", selectNode[selectNode.selectedIndex].value);
         selectNode.onchange = function (event, suppressUpdate) {
                 var newID = this[this.selectedIndex].value;

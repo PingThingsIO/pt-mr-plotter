@@ -274,12 +274,12 @@ function getPSLUnit(stream) {
     if (s3ui.pslunitmap.hasOwnProperty(last)) {
         return s3ui.pslunitmap[last];
     } else {
-        return stream.Properties.UnitofMeasure;
+        return s3ui.getUnit(stream);
     }
 }
 
 function getPSLAxisFilter(stream) {
-    return function (d) { return !d.fixedaxis || d.axisname === s3ui.getPSLUnit(stream); }
+    return function (d) { return !d.fixedaxis || d.axisname.toLowerCase() === s3ui.getPSLUnit(stream).toLowerCase(); }
 }
 
 s3ui.formatPath = formatPath;

@@ -8,5 +8,5 @@ MINOR version when you add functionality in a backwards-compatible manner, and
 PATCH version when you make backwards-compatible bug fixes.
 */
 const Major = 4
-const Minor = 6
-const Patch = 1
+const Minor = 9
+const Patch = 6
