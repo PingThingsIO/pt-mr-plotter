@@ -695,7 +695,7 @@ If you are using QueryType: "windows" you may also increase WindowText to sample
     
 def download_pmu_data(opts_dict, domain=None, filename=None):
   if domain is None:
-    raise ValueError("You must supply a domain to download_pmu_data (e.g. https://viz.predictivegrid.com)")
+    raise ValueError("You must supply a domain to download_pmu_data. This is likely the domain you are accessing the plotter website from (e.g. https://&lt;current-domain&gt;)")
   if filename is None:
     filename = "pmu_data.csv"
   url = domain + "/csv"
