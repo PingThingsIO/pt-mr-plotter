@@ -23,8 +23,8 @@ RUN cd $GOPATH/src/github.com/PingThingsIO && \
     go get -d ./... && \
     go install .
 ADD ./container/entrypoint.sh /
-ADD ./pt-mr-plotter $GOPATH/bin/
-ADD ./tools/hardcodecert/hardcodecert $GOPATH/bin/
-ADD ./tools/setsessionkeys/setsessionkeys $GOPATH/bin/
+ADD ./container/pt-mr-plotter $GOPATH/bin/
+ADD ./container/hardcodecert $GOPATH/bin/
+ADD ./container/setsessionkeys $GOPATH/bin/
 RUN chmod a+x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
