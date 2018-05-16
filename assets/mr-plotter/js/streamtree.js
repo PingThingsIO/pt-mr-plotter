@@ -393,23 +393,49 @@ function pathsToTree(self, pathPrefix, streamList, loadNext) {
 function getContextMenu(self, node, callback) {
     if (node.data.child) {
         return {
+            "copyMetadata": {
+                label: "Show Metadata",
+                action: function() {
+                    var showMetadataModal = function(metadata) {
+                        var metadataModal = $('#metadata-modal');
+                        var preTag = metadataModal.find('pre');
+                        preTag.html(JSON.stringify(metadata, 4, 4));
+                        metadataModal.modal("toggle");
+                    };
+                    if (node.data.streamdata == undefined) {
+                        self.requester.makeMetadataFromLeafRequest(node.data.sourceName + node.data.path, function (data) {
+                                    if (node.data.streamdata == undefined) {
+                                        // Used to be data = JSON.parse(data)[0] but I removed the extra list around it
+                                        node.data.streamdata = data;
+                                    }
+                                    showMetadataModal(node.data.streamdata);
+                                    // alert(s3ui.getInfo(node.data.streamdata, "\n", false));
+                                }, function (jqXHR) {
+                                    handleFailedLoad(jqXHR.responseText);
+                                });
+                    } else {
+                        showMetadataModal(node.data.streamdata);
+                        // alert(s3ui.getInfo(node.data.streamdata, "\n", false));
+                    }
+                }
+            },
             "copyUUID": {
                 label: "Copy UUID",
                 action: function () {
-                        if (node.data.streamdata == undefined) {
-                            self.requester.makeMetadataFromLeafRequest(node.data.sourceName + node.data.path, function (data) {
-                                        if (node.data.streamdata == undefined) {
-                                            // Used to be data = JSON.parse(data)[0] but I removed the extra list around it
-                                            node.data.streamdata = data;
-                                        }
-                                        prompt("Copy to clipboard: Ctrl+C, Enter", node.data.streamdata.uuid);
-                                    }, function (jqXHR) {
-                                        handleFailedLoad(jqXHR.responseText);
-                                    });
-                        } else {
-                            prompt("Copy to clipboard: Ctrl+C, Enter", node.data.streamdata.uuid);
-                        }
+                    if (node.data.streamdata == undefined) {
+                        self.requester.makeMetadataFromLeafRequest(node.data.sourceName + node.data.path, function (data) {
+                                    if (node.data.streamdata == undefined) {
+                                        // Used to be data = JSON.parse(data)[0] but I removed the extra list around it
+                                        node.data.streamdata = data;
+                                    }
+                                    prompt("Copy to clipboard: Ctrl+C, Enter", node.data.streamdata.uuid);
+                                }, function (jqXHR) {
+                                    handleFailedLoad(jqXHR.responseText);
+                                });
+                    } else {
+                        prompt("Copy to clipboard: Ctrl+C, Enter", node.data.streamdata.uuid);
                     }
+                }
             }
     }
     } else {
