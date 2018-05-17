@@ -1,3 +1,31 @@
+#Build stage to compile binaries
+FROM golang:1.9.2 as builder
+
+#Ensure dependencies
+RUN go get -u github.com/golang/dep/...
+RUN go get -u github.com/PingThingsIO/pt-mr-plotter/...
+WORKDIR /go/src/github.com/PingThingsIO/pt-mr-plotter
+RUN dep ensure
+
+#Start building and moving output to ./buildbinaries
+WORKDIR /buildbinaries
+
+#Build pt-mr-plotter and move to ./buildbinaries
+WORKDIR /go/src/github.com/PingThingsIO/pt-mr-plotter
+RUN GOOS=linux GOARCH=amd64 go build -v
+RUN mv pt-mr-plotter /buildbinaries
+
+#Build hardcodecert and move to ./buildbinaries
+WORKDIR /go/src/github.com/PingThingsIO/pt-mr-plotter/tools/hardcodecert
+RUN GOOS=linux GOARCH=amd64 go build -v
+RUN mv hardcodecert /buildbinaries
+
+#Build setsessionkeys and move to ./buildbinaries
+WORKDIR /go/src/github.com/PingThingsIO/pt-mr-plotter/tools/setsessionkeys
+RUN GOOS=linux GOARCH=amd64 go build -v
+RUN mv setsessionkeys /buildbinaries
+
+#Final stage
 FROM ubuntu:xenial
 
 # we install etcdctl so that you can exec etcd commands inside the container
@@ -22,8 +50,7 @@ RUN mkdir -p $GOPATH/src/github.com/PingThingsIO && \
     go get -d ./... && \
     go install .
 ADD entrypoint.sh /
-ADD pt-mr-plotter $GOPATH/bin/
-ADD hardcodecert $GOPATH/bin/
-ADD setsessionkeys $GOPATH/bin/
+# Copy the binaries built from the first stage
+COPY --from=builder /buildbinaries/* $GOPATH/bin/
 RUN chmod a+x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
